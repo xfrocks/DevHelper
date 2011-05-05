@@ -14,11 +14,7 @@ class DevHelper_Generator_File {
 	}
 	
 	public static function getClassName($addOnId, $subClassName = false) {
-		if (strpos($addOnId, '_') !== false) {
-			$className = ucwords(str_replace('_', ' ', $addOnId));
-		} else {
-			$className = $addOnId;
-		}
+		$className = $addOnId;
 		$className = preg_replace('/[^a-zA-Z]/', '', $className);
 		if ($subClassName) {
 			$className .= '_' . $subClassName;
