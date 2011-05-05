@@ -1,5 +1,8 @@
 <?php
 class DevHelper_Generator_File {
+	const COMMENT_AUTO_GENERATED_START = '/* Start auto-generated lines of code. Change made will be overwriten... */';
+	const COMMENT_AUTO_GENERATED_END = '/* End auto-generated lines of code. Feel free to make changes below */';
+	
 	public static function calcHash($path) {
 		if (file_exists($path)) {
 			$contents = file_get_contents($path);
@@ -15,7 +18,7 @@ class DevHelper_Generator_File {
 	
 	public static function getClassName($addOnId, $subClassName = false) {
 		$className = $addOnId;
-		$className = preg_replace('/[^a-zA-Z]/', '', $className);
+		$className = preg_replace('/[^a-zA-Z_]/', '', $className);
 		if ($subClassName) {
 			$className .= '_' . $subClassName;
 		}
@@ -40,89 +43,28 @@ class DevHelper_Generator_File {
 				// do notning
 			} else {
 				// diffrent content
-				$oldBackupClassName = self::_getBackupClassName($className);
-				$oldBackupPath = self::getClassPath($oldBackupClassName);
-				if (file_exists($oldBackupPath) AND false) {
-					// backup found
-					// try to merge
-					$oldBackupContents = self::fileGetContents($oldBackupPath);
-					
-					$lineSeparator = "\n";
-					$oldBackupLines = explode($lineSeparator, $oldBackupContents);
-					$oldLines = explode($lineSeparator, $oldContents);
-					$lines = explode($lineSeparator, $contents);
-					
-					$diffFromOld = self::diff($oldBackupLines, $oldLines);
-					$diffFromNow = self::diff($oldBackupLines, $lines);
-					
-					$merged = array();
-					$keyDiffOldDelta = 0;
-					$keyDiffNewDelta = 0;
-					foreach ($oldBackupLines as $oldBackupKey => $line) {
-						for ($keyDiffOld = $oldBackupKey + $keyDiffOldDelta; $keyDiffOld < count($diffFromOld); $keyDiffOld + 1) {
-							if (is_string($diffFromOld[$keyDiffOld]) AND $diffFromOld[$keyDiffOld] == $line) {
-								$keyDiffOldDelta = $keyDiffOld - $oldBackupKey;
-								break;
-							} elseif (is_array($diffFromOld[$keyDiffOld]) AND (in_array($line, $diffFromOld[$keyDiffOld]['d']) OR (in_array($line, $diffFromOld[$keyDiffOld]['i'])))) {
-								$keyDiffOldDelta = $keyDiffOld - $oldBackupKey;
-								break;
-							}
-						}
-						for ($keyDiffOld = $oldBackupKey + $keyDiffOldDelta; $keyDiffOld < count($diffFromOld); $keyDiffOld + 1) {
-							if (is_string($diffFromOld[$keyDiffOld]) AND $diffFromOld[$keyDiffOld] == $line) {
-								$keyDiffOldDelta = $keyDiffOld - $oldBackupKey;
-								break;
-							} elseif (is_array($diffFromOld[$keyDiffOld]) AND (in_array($line, $diffFromOld[$keyDiffOld]['d']) OR (in_array($line, $diffFromOld[$keyDiffOld]['i'])))) {
-								$keyDiffOldDelta = $keyDiffOld - $oldBackupKey;
-								break;
-							}
-						}
+				// try to replace the auto generated code only
+				$startPosOld = strpos($oldContents, self::COMMENT_AUTO_GENERATED_START);
+				$endPosOld = strpos($oldContents, self::COMMENT_AUTO_GENERATED_END, $startPosOld);
+				
+				if ($startPosOld !== false AND $endPosOld !== false AND $endPosOld > $startPosOld) {
+					// found our comments in old contents
+					$startPos = strpos($contents, self::COMMENT_AUTO_GENERATED_START);
+					$endPos = strpos($contents, self::COMMENT_AUTO_GENERATED_END, $startPos);
+					if ($startPos !== false AND $endPos !== false AND $endPos > $startPos) {
+						// found our comments in new contents
 						
-						if (empty($changedFromOld[$key]) AND empty($changedFromNow[$key])) {
-							$merged[$key] = $line;
-						} else {
-							if (empty($changedFromOld[$key]) OR empty($changedFromNow[$key])) {
-								// no conflict
-								$changed = !empty($changedFromOld[$key]) ? $changedFromOld[$key] : $changedFromNow[$key];
-							} else {
-								echo 'CONFLICT<br/>';
-								echo 'LINE: ' . $key . '<br/>';
-								echo 'OLD:<br/>';
-								echo nl2br(var_export($changedFromOld[$key], true));
-								echo 'NOW:<br/>';
-								echo nl2br(var_export($changedFromNow[$key], true));
-								die('CONFICT');
-							}
-							
-							$merged[$key] = $changed['i'];
-							if (!in_array($line, $changed['d'])) {
-								$merged[$key][] = $line;
-							}
-						}
+						$replacement = substr($contents, $startPos, $endPos - $startPos);
+						$start = $startPosOld;
+						$length = $endPosOld - $startPosOld;
+						
+						$contents = substr_replace($oldContents, $replacement, $start, $length);
 					}
-								
-					$mergedContents = array();
-					foreach ($merged as $line) {
-						if (is_array($line)) {
-							$mergedContents[] = implode($lineSeparator, $line);
-						} else {
-							$mergedContents[] = $line;
-						}
-					}
-					$mergedContents = implode($lineSeparator, $mergedContents);
-					
-					die($mergedContents);
-					
-					self::filePutContents($path, $mergedContents);
-				} else {
-					// no backup found
-					self::filePutContents($path, $contents);
 				}
 			}
-		} else {
-			// no existed file 
-			self::filePutContents($path, $contents);
 		}
+		
+		self::filePutContents($path, $contents);
 		
 		if (strpos($className, 'DevHelper_Generated') === false) {
 			$backupClassName = self::_getBackupClassName($className);
@@ -149,7 +91,18 @@ class DevHelper_Generator_File {
 	public static function filePutContents($path, $contents) {
 		$dir = dirname($path);
 		XenForo_Helper_File::createDirectory($dir, true);
-		file_put_contents($path, $contents);
+		
+		$lines = explode("\n", $contents);
+		$linesTrimmed = array();
+		foreach ($lines as $line) {
+			if (trim($line) == '') {
+				$linesTrimmed[] = '';
+			} else {
+				$linesTrimmed[] = $line;
+			}
+		}
+		file_put_contents($path, implode("\n", $linesTrimmed));
+		
 		XenForo_Helper_File::makeWritableByFtpUser($path);
 	}
 	
@@ -281,26 +234,5 @@ class DevHelper_Generator_File {
 		}
 		
 		return $output;
-	}
-	
-	public static function diff($old, $new){
-		$maxlen = 0;
-		foreach($old as $oindex => $ovalue){
-			$nkeys = array_keys($new, $ovalue);
-			foreach($nkeys as $nindex){
-				$matrix[$oindex][$nindex] = isset($matrix[$oindex - 1][$nindex - 1]) ?
-					$matrix[$oindex - 1][$nindex - 1] + 1 : 1;
-				if($matrix[$oindex][$nindex] > $maxlen){
-					$maxlen = $matrix[$oindex][$nindex];
-					$omax = $oindex + 1 - $maxlen;
-					$nmax = $nindex + 1 - $maxlen;
-				}
-			}	
-		}
-		if($maxlen == 0) return array(array('d' => $old, 'i' => $new));
-		return array_merge(
-			self::diff(array_slice($old, 0, $omax), array_slice($new, 0, $nmax)),
-			array_slice($new, $nmax, $maxlen),
-			self::diff(array_slice($old, $omax + $maxlen), array_slice($new, $nmax + $maxlen)));
 	}
 }
