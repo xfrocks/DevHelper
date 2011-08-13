@@ -88,6 +88,7 @@ EOF;
 		$templateEditFields = '';
 		foreach ($dataClass['fields'] as $field) {
 			if ($field['name'] == $dataClass['id_field']) continue;
+			if (empty($field['required'])) continue; // ignore non-required fields 
 			
 			if ($field['name'] == $dataClass['title_field']) {
 				$fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle($addOn, $config, $dataClass, $field['name']);				
