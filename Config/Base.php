@@ -197,6 +197,7 @@ abstract class DevHelper_Config_Base {
 		} elseif (is_dir($path) AND is_writable($path)) {
 			return $path;
 		} else {
+			var_dump($path, is_dir($path), is_writable($path));
 			die('EXPORT PATH IS NOT WRITABLE');
 		}
 	}

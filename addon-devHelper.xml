@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon addon_id="devHelper" title="DevHelper" version_string="20110814" version_id="2" url="" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
+  <admin_navigation/>
+  <admin_permissions/>
+  <admin_style_properties/>
+  <admin_templates>
+    <template title="devhelper_addon_data_manager"><![CDATA[<xen:title>{$addOn.title} - {xen:phrase devhelper_data_manager}</xen:title>
+
+<xen:navigation>
+	<xen:breadcrumb href="{xen:adminlink 'add-ons'}#{xen:helper listitemid, $addOn.addon_id}">{$addOn.title}</xen:breadcrumb>
+</xen:navigation>
+
+<xen:require css="filter_list.css" />
+<xen:require js="js/xenforo/filter_list.js" />
+<xen:require css="devhelper_admin.css" />
+
+<xen:form action="{xen:adminlink 'add-ons/data-manager', $addOn}" class="section">
+
+	<xen:if is="{$dataClasses}">
+		<h2 class="subHeading">
+			<xen:include template="filter_list_controls" />
+			{xen:phrase devhelper_data_classes}
+		</h2>
+
+		<ol class="FilterList">
+			<xen:foreach loop="$dataClasses" value="$dataClass">
+				<xen:if is="{$dataClass.name} == {$focusedDataClass.name}">
+					<li>
+						<h3 class="textHeading">{$focusedDataClass.name}</h3>
+						<ol>
+							<xen:foreach loop="$focusedDataClass.fields" value="$field">
+								<xen:listitem
+									id="{$focusedDataClass.name}_{$field.name}"
+									label="{$field.name}"
+									snippet="{$field.type}"
+									href="{xen:adminlink 'add-ons/data-manager', $addOn, 'dataClass={$focusedDataClass.name}', 'field={$field.name}'}"
+									>
+								</xen:listitem>
+							</xen:foreach>
+							<xen:foreach loop="$focusedDataClass.files" key="$fileType" value="$file">
+								<li class="DevHelper_DataClassFile">
+									<h3 class="textHeading">{$fileType}</h3>
+									<ol>
+										<xen:if is="{$file}">
+											<xen:listitem
+												id="{$focusedDataClass.name}_{$fileType}_className"
+												label="{xen:phrase devhelper_class_name}: {$file.className}"
+												>
+											</xen:listitem>
+											<xen:if is="{$file.changed}">
+												<xen:listitem
+													id="{$focusedDataClass.name}_{$fileType}_status"
+													label="{xen:phrase status}: {xen:phrase devhelper_changed}"
+													href="{xen:adminlink 'add-ons/generate-file', $addOn, 'dataClass={$focusedDataClass.name}', 'file={$fileType}'}"
+													>
+												</xen:listitem>
+											</xen:if>
+										<xen:else />
+											<xen:listitem
+												id="{$focusedDataClass.name}_{$fileType}_status"
+												label="{xen:phrase status}: {xen:phrase devhelper_not_available}"
+												href="{xen:adminlink 'add-ons/generate-file', $addOn, 'dataClass={$focusedDataClass.name}', 'file={$fileType}'}"
+												>
+											</xen:listitem>
+										</xen:if>
+									</ol>
+								</li>
+							</xen:foreach>
+						</ol>
+					</li>
+				<xen:else />
+					<xen:listitem id="{$dataClass.name}"
+						label="{$dataClass.name}"
+						snippet="{$dataClass.fieldsList}"
+						href="{xen:adminlink 'add-ons/data-manager', $addOn, 'dataClass={$dataClass.name}'}"
+						>
+					</xen:listitem>
+				</xen:if>
+			</xen:foreach>
+		</ol>
+
+		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:count $dataClasses}</span>', 'total={xen:count $dataClasses}'}</p>
+
+	<xen:else />
+		<div class="noResults">{xen:phrase devhelper_no_data_classes_have_been_added_yet}</div>
+	</xen:if>
+
+</xen:form>
+
+<div>
+<a href="{xen:adminlink 'add-ons/generate-installer', $addOn}">{xen:phrase devhelper_generate_installer}</a>
+<a href="{xen:adminlink 'add-ons/generate-installer', $addOn, 'run=1'}">{xen:phrase devhelper_run_installer}</a>
+</div>]]></template>
+    <template title="devhelper_addon_edit"><![CDATA[<xen:hook name="devhelper_search_and_replace"></form></xen:hook>
+
+<div>
+<a href="{xen:adminlink 'add-ons/data-manager', $addOn}">{xen:phrase devhelper_data_manager}</a>
+<a href="{xen:adminlink 'add-ons/file-export', $addOn}">{xen:phrase devhelper_file_export}</a>
+</div>]]></template>
+    <template title="devhelper_addon_generate_controller_admin"><![CDATA[<xen:title>{$addOn.title} - {xen:phrase devhelper_data_manager}</xen:title>
+
+<xen:navigation>
+	<xen:breadcrumb href="{xen:adminlink 'add-ons'}#{xen:helper listitemid, $addOn.addon_id}">{$addOn.title}</xen:breadcrumb>
+</xen:navigation>
+
+<xen:form action="{xen:adminlink 'add-ons/generate-file', $addOn}">
+	<xen:textboxunit label="{xen:phrase route_prefix}:" name="route_prefix" value="{$routePrefix}" />
+	<xen:textboxunit label="{xen:phrase devhelper_controller}:" name="controller" value="{$controller}" />
+
+	<input type="hidden" name="addon_id" value="{$addOn.addon_id}" />
+	<input type="hidden" name="dataClass" value="{$dataClass.name}" />
+	<input type="hidden" name="file" value="controller_admin" />
+	<input type="hidden" name="_xfConfirm" value="1" />
+	
+	<xen:submitunit save="{xen:phrase devhelper_generate_controller}">
+	</xen:submitunit>
+</xen:form>]]></template>
+    <template title="devhelper_addon_generate_route_prefix_admin"><![CDATA[<xen:title>{$addOn.title} - {xen:phrase devhelper_data_manager}</xen:title>
+
+<xen:navigation>
+	<xen:breadcrumb href="{xen:adminlink 'add-ons'}#{xen:helper listitemid, $addOn.addon_id}">{$addOn.title}</xen:breadcrumb>
+</xen:navigation>
+
+<xen:form action="{xen:adminlink 'add-ons/generate-file', $addOn}">
+	<xen:textboxunit label="{xen:phrase route_prefix}:" name="route_prefix" value="{$routePrefix}" />
+	<xen:textboxunit label="{xen:phrase devhelper_controller}:" name="controller" value="{$controller}" />
+	<xen:textboxunit label="{xen:phrase devhelper_major_section}:" name="major_section" value="{$majorSection}" />
+
+	<input type="hidden" name="addon_id" value="{$addOn.addon_id}" />
+	<input type="hidden" name="dataClass" value="{$dataClass.name}" />
+	<input type="hidden" name="file" value="route_prefix_admin" />
+	<input type="hidden" name="_xfConfirm" value="1" />
+	
+	<xen:submitunit save="{xen:phrase devhelper_generate_route_prefix}">
+	</xen:submitunit>
+</xen:form>]]></template>
+    <template title="devhelper_admin.css"><![CDATA[.DevHelper_DataClassFile h3 {
+	padding-left: 20px !important;
+}
+.DevHelper_DataClassFile h4 a {
+	padding-left: 40px !important;
+}]]></template>
+  </admin_templates>
+  <code_events/>
+  <code_event_listeners>
+    <listener event_id="load_class_controller" execute_order="10" callback_class="DevHelper_Listener" callback_method="load_class" active="1" description=""/>
+    <listener event_id="template_create" execute_order="10" callback_class="DevHelper_Listener" callback_method="template_create" active="1" description=""/>
+    <listener event_id="template_hook" execute_order="10" callback_class="DevHelper_Listener" callback_method="template_hook" active="1" description=""/>
+    <listener event_id="template_post_render" execute_order="10" callback_class="DevHelper_Listener" callback_method="template_post_render" active="1" description=""/>
+  </code_event_listeners>
+  <cron/>
+  <email_templates/>
+  <optiongroups/>
+  <permissions>
+    <permission_groups/>
+    <permissions/>
+    <interface_groups/>
+  </permissions>
+  <phrases>
+    <phrase title="devhelper_changed" version_id="1" version_string="0.9"><![CDATA[Changed]]></phrase>
+    <phrase title="devhelper_class_name" version_id="1" version_string="0.9"><![CDATA[Class Name]]></phrase>
+    <phrase title="devhelper_controller" version_id="1" version_string="0.9"><![CDATA[Controller]]></phrase>
+    <phrase title="devhelper_data_classes" version_id="1" version_string="0.9"><![CDATA[Data Classes]]></phrase>
+    <phrase title="devhelper_data_manager" version_id="1" version_string="0.9"><![CDATA[Data Manager]]></phrase>
+    <phrase title="devhelper_file_export" version_id="1" version_string="0.9"><![CDATA[File Export]]></phrase>
+    <phrase title="devhelper_generate_controller" version_id="1" version_string="0.9"><![CDATA[Generate Controller]]></phrase>
+    <phrase title="devhelper_generate_installer" version_id="1" version_string="0.9"><![CDATA[Generate Installer]]></phrase>
+    <phrase title="devhelper_generate_route_prefix" version_id="1" version_string="0.9"><![CDATA[Generate Route Prefix]]></phrase>
+    <phrase title="devhelper_major_section" version_id="1" version_string="0.9"><![CDATA[Major Section]]></phrase>
+    <phrase title="devhelper_not_available" version_id="1" version_string="0.9"><![CDATA[N/A]]></phrase>
+    <phrase title="devhelper_no_data_classes_have_been_added_yet" version_id="1" version_string="0.9"><![CDATA[No data classes have been added yet.]]></phrase>
+    <phrase title="devhelper_run_installer" version_id="1" version_string="0.9"><![CDATA[Run Installer]]></phrase>
+  </phrases>
+  <route_prefixes/>
+  <style_properties/>
+  <templates/>
+</addon>
