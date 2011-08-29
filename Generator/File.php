@@ -46,11 +46,12 @@ class DevHelper_Generator_File {
 				// try to replace the auto generated code only
 				$startPosOld = strpos($oldContents, self::COMMENT_AUTO_GENERATED_START);
 				$endPosOld = strpos($oldContents, self::COMMENT_AUTO_GENERATED_END, $startPosOld);
-				
+
 				if ($startPosOld !== false AND $endPosOld !== false AND $endPosOld > $startPosOld) {
 					// found our comments in old contents
 					$startPos = strpos($contents, self::COMMENT_AUTO_GENERATED_START);
 					$endPos = strpos($contents, self::COMMENT_AUTO_GENERATED_END, $startPos);
+
 					if ($startPos !== false AND $endPos !== false AND $endPos > $startPos) {
 						// found our comments in new contents
 						
