@@ -93,16 +93,19 @@ class DevHelper_Generator_File {
 		$dir = dirname($path);
 		XenForo_Helper_File::createDirectory($dir, true);
 		
+		/*
 		$lines = explode("\n", $contents);
 		$linesTrimmed = array();
 		foreach ($lines as $line) {
 			if (trim($line) == '') {
 				$linesTrimmed[] = '';
 			} else {
-				$linesTrimmed[] = $line;
+				$linesTrimmed[] = rtrim($line);
 			}
 		}
 		file_put_contents($path, implode("\n", $linesTrimmed));
+		*/
+		file_put_contents($path, $contents);
 		
 		XenForo_Helper_File::makeWritableByFtpUser($path);
 	}

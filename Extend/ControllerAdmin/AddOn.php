@@ -150,6 +150,10 @@ class DevHelper_Extend_ControllerAdmin_AddOn extends XFCP_DevHelper_Extend_Contr
 		$dw->set('uninstall_callback_method', 'uninstall');
 		$dw->save();
 		
+		$xmlDirPath = dirname(DevHelper_Generator_File::getClassPath($className));
+		$xmlPath = $xmlDirPath . '/addon-' . $addOn['addon_id'] . '.xml';
+		XenForo_Model::create('XenForo_Model_AddOn')->getAddOnXml($addOn)->save($xmlPath);
+		
 		if ($this->_input->filterSingle('run', XenForo_Input::UINT)) {
 			call_user_func(array($className, 'install'));
 		}
