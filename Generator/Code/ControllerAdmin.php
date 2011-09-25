@@ -240,6 +240,9 @@ class {$info['controller']}_Generated extends XenForo_ControllerAdmin_Abstract {
 			\$dw->setExistingData(\$id);
 		}
 		\$dw->bulkSet(\$dwInput);
+		
+		\$this->_prepareDwBeforeSaving(\$dw);
+		
 		\$dw->save();
 
 		return \$this->responseRedirect(
@@ -287,6 +290,10 @@ class {$info['controller']}_Generated extends XenForo_ControllerAdmin_Abstract {
 	
 	protected function _get{$dataClass['camelCase']}DataWriter() {
 		return XenForo_DataWriter::create('$dataWriterClassName');
+	}
+	
+	protected function _prepareDwBeforeSaving($dataWriterClassName \$dw) {
+		// this method should be overriden if datawriter requires special treatments
 	}
 }
 

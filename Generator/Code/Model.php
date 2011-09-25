@@ -64,7 +64,7 @@ class $className extends XenForo_Model {
 			", \$limitOptions['limit'], \$limitOptions['offset']
 		), '{$dataClass['id_field']}');
 		
-		\$this->prepareReturnData(\$all, \$fetchOptions);
+		\$this->getAll{$dataClass['camelCase']}Customized(\$all, \$fetchOptions);
 		
 		return \$all;
 	}
