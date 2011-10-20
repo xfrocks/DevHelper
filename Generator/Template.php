@@ -24,7 +24,12 @@ class DevHelper_Generator_Template {
 			'template' => $template,
 			'addon_id' => $addOn['addon_id'],
 		));
-		$writer->save();
+		
+		try {
+			$writer->save();
+		} catch (Exception $ex) {
+			throw new XenForo_Exception("Exception creating template $title: " . $ex->getMessage() . '<br/><pre>' . htmlentities($template) . '</pre>');
+		}
 
 		$propertyModel->saveStylePropertiesInStyleFromTemplate(-1, $propertyChanges, $properties);
 

@@ -100,7 +100,7 @@ EOF;
 				$dbType = 'TINYINT(4) UNSIGNED';
 				break;
 			case XenForo_DataWriter::TYPE_STRING:
-				if (empty($field['length']) OR $field['length'] > 255) {
+				if ((empty($field['length']) OR $field['length'] > 255) AND empty($field['allowedValues'])) {
 					$dbType = 'TEXT';
 				} else {
 					if (!empty($field['allowedValues'])) {
