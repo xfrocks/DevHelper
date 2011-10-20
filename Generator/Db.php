@@ -56,7 +56,9 @@ EOF;
 		} else {
 			$configClassName = get_class($config);
 			$parts = explode('_', $configClassName);
-			$prefix = array_shift($parts);
+			array_pop($parts);
+			array_pop($parts);
+			$prefix = implode('_', $parts);
 			
 			return strtolower($prefix . '_' . $name);
 		}
