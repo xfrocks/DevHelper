@@ -91,7 +91,7 @@ class DevHelper_Generator_File {
 	
 	public static function filePutContents($path, $contents) {
 		$dir = dirname($path);
-		XenForo_Helper_File::createDirectory($dir, true);
+		XenForo_Helper_File::createDirectory($dir, strpos($path, 'library') === false ? true : false);
 		
 		/*
 		$lines = explode("\n", $contents);
