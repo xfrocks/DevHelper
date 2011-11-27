@@ -54,11 +54,7 @@ EOF;
 		if (strpos($name, '_') !== false) {
 			return strtolower($name);
 		} else {
-			$configClassName = get_class($config);
-			$parts = explode('_', $configClassName);
-			$prefix = array_shift($parts);
-			
-			return strtolower($prefix . '_' . $name);
+			return strtolower($config->getPrefix() . '_' . $name);
 		}
 	}
 	
@@ -69,14 +65,39 @@ EOF;
 			XenForo_DataWriter::TYPE_UINT,
 			XenForo_DataWriter::TYPE_UINT_FORCED,
 		);
+		$imageFields = self::getImageFields($fields);
 		
 		foreach ($fields as $field) {
-			if (in_array($field['type'], $intTypes)) {
+			if (in_array($field['type'], $intTypes) AND !in_array($field['name'], $imageFields)) {
 				$intFields[] = $field['name'];
 			}
 		}
 		
 		return $intFields;
+	}
+	
+	public static function getImageFields(array $fields) {
+		$imageFields = array();
+		
+		foreach ($fields as $field) {
+			if (substr($field['name'], -10) == 'image_date') {
+				$imageFields[] = $field['name'];
+			}
+		}
+		
+		return $imageFields;
+	}
+	
+	public static function getImageField(array $fields) {
+		$imageFields = self::getImageFields($fields);
+		
+		if (count($imageFields) == 1) {
+			// only return the image field if there is 1 image field
+			// if there is no image fields or more than 1, simply ignore them all
+			return $imageFields[0];
+		} else {
+			return false;
+		}
 	}
 	
 	public static function getDataTypes() {

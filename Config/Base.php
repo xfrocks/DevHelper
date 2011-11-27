@@ -202,6 +202,14 @@ abstract class DevHelper_Config_Base {
 		}
 	}
 	
+	public function getPrefix() {
+		$configClassName = get_class($this);
+		$parts = explode('_', $configClassName);
+		$prefix = array_shift($parts);
+		
+		return $prefix;
+	}
+	
 	public function outputSelf() {
 		$className = get_class($this);
 		
@@ -241,6 +249,7 @@ class $className extends DevHelper_Config_Base {
 					// 'length' => 'length_here',
 					// 'required' => true,
 					// 'allowedValues' => array('value_1', 'value_2'), 
+					// 'default' => 0,
 				),
 				// other fields go here
 			),
