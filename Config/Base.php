@@ -205,7 +205,9 @@ abstract class DevHelper_Config_Base {
 	public function getPrefix() {
 		$configClassName = get_class($this);
 		$parts = explode('_', $configClassName);
-		$prefix = array_shift($parts);
+		array_pop($parts);
+		array_pop($parts);
+		$prefix = implode('_', $parts);
 		
 		return $prefix;
 	}
