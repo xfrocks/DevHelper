@@ -316,10 +316,16 @@ $actionSaveImageCode
 		return \$info;
 	}
 	
+	/**
+	 * @return $modelClassName
+	 */
 	protected function _get{$dataClass['camelCase']}Model() {
 		return \$this->getModelFromCache('$modelClassName');
 	}
 	
+	/**
+	 * @return $dataWriterClassName
+	 */
 	protected function _get{$dataClass['camelCase']}DataWriter() {
 		return XenForo_DataWriter::create('$dataWriterClassName');
 	}

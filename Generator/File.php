@@ -168,7 +168,7 @@ class DevHelper_Generator_File {
 					$entryExportPath = $exportPath . '/' . $relativePath;
 					
 					$entryExportDir = dirname($entryExportPath);
-					XenForo_Helper_File::createDirectory($entryExportDir, true);
+					XenForo_Helper_File::createDirectory($entryExportDir, false);
 					
 					if (@copy($entry, $entryExportPath)) {
 						echo 'OK';

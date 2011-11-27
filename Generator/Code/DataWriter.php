@@ -49,6 +49,9 @@ class $className extends XenForo_DataWriter {
 		return implode(' AND ', \$conditions);
 	}
 	
+	/**
+	 * @return $modelClassName
+	 */
 	protected function _get{$dataClass['camelCase']}Model() {
 		return \$this->getModelFromCache('$modelClassName');
 	}
