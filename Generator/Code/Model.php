@@ -19,6 +19,8 @@ class DevHelper_Generator_Code_Model {
 			}
 		}
 EOF;
+		} else {
+			$getAllImageCode = '';
 		}
 		
 		$contents = <<<EOF
