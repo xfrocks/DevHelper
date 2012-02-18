@@ -117,6 +117,9 @@ class DevHelper_Generator_File {
 			
 			// try to export `js/addOnId` too
 			XenForo_Autoloader::getInstance()->getRootDir() . '/../js/' . self::getClassName($addOn['addon_id']),
+			
+			// try to export `styles/default/addOnId`
+			XenForo_Autoloader::getInstance()->getRootDir() . '/../styles/default/' . self::getClassName($addOn['addon_id']),
 		);
 		
 		$rootPath = realpath(XenForo_Application::getInstance()->getRootDir());
