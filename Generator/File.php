@@ -17,13 +17,33 @@ class DevHelper_Generator_File {
 	}
 	
 	public static function getClassName($addOnId, $subClassName = false) {
-		$className = $addOnId;
-		$className = preg_replace('/[^a-zA-Z_]/', '', $className);
-		if ($subClassName) {
-			$className .= '_' . $subClassName;
+		static $classNames = array();
+		
+		$hash = $addOnId . $subClassName;
+		
+		if (empty($classNames[$hash])) {
+			if ($subClassName) {
+				$className = self::getClassName($addOnId) . '_' . $subClassName;
+			} else {
+				$className = $addOnId;
+				$className = preg_replace('/[^a-zA-Z_]/', '', $className);
+				
+				// read root directory (./library), trying to pickup matched directory name (case insensitive)
+				$classNameLower = strtolower($className);
+				$dh = opendir(XenForo_Autoloader::getInstance()->getRootDir());
+				while ($file = readdir($dh)) {
+					if (strtolower($file) == $classNameLower) {
+						// we found it!
+						$className = $file;
+					}
+				}
+				closedir($dh);
+			}
+			
+			$classNames[$hash] = $className;
 		}
 		
-		return $className;
+		return $classNames[$hash];
 	}
 	
 	public static function getClassPath($className) {
@@ -110,17 +130,36 @@ class DevHelper_Generator_File {
 		XenForo_Helper_File::makeWritableByFtpUser($path);
 	}
 	
+	public static function generateHashesFile(array $addOn, DevHelper_Config_Base $config) {
+		$libraryHashes = XenForo_Helper_Hash::hashDirectory('library/' . self::getClassName($addOn['addon_id']), array('.php'));
+		$jsHashes = XenForo_Helper_Hash::hashDirectory('js/' . self::getClassName($addOn['addon_id']), array('.js'));
+		
+		$fileHashes = array();
+		foreach (array_merge($libraryHashes, $jsHashes) as $filePath => $hash) {
+			if (strpos($filePath, 'DevHelper') === false AND strpos($filePath, 'FileSums') === false) {
+				$fileHashes[$filePath] = $hash;
+			}
+		}
+		
+		$fileSumsClassName = self::getClassName($addOn['addon_id']) . '_FileSums';
+		$fileSumsContents = XenForo_Helper_Hash::getHashClassCode($fileSumsClassName, $fileHashes);
+		self::write($fileSumsClassName, $fileSumsContents);
+	}
+	
 	public static function fileExport(array $addOn, DevHelper_Config_Base $config, $exportPath) {
 		$list = array(
 			// always export `library/addOnId` directory
-			XenForo_Autoloader::getInstance()->getRootDir() . '/' . self::getClassName($addOn['addon_id']),
+			'library' => XenForo_Autoloader::getInstance()->getRootDir() . '/' . self::getClassName($addOn['addon_id']),
 			
 			// try to export `js/addOnId` too
-			XenForo_Autoloader::getInstance()->getRootDir() . '/../js/' . self::getClassName($addOn['addon_id']),
+			'js' => XenForo_Autoloader::getInstance()->getRootDir() . '/../js/' . self::getClassName($addOn['addon_id']),
 			
 			// try to export `styles/default/addOnId`
 			XenForo_Autoloader::getInstance()->getRootDir() . '/../styles/default/' . self::getClassName($addOn['addon_id']),
 		);
+		
+		// generate hashes first
+		self::generateHashesFile($addOn, $config);
 		
 		$rootPath = realpath(XenForo_Application::getInstance()->getRootDir());
 		if (strpos($exportPath, 'upload') === false) {
