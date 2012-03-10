@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="devHelper" title="DevHelper" version_string="20110814" version_id="2" url="" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
+<addon addon_id="devHelper" title="DevHelper" version_string="20120310" version_id="3" url="" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -174,4 +174,5 @@
   <route_prefixes/>
   <style_properties/>
   <templates/>
+  <bb_code_media_sites/>
 </addon>

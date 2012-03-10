@@ -61,9 +61,11 @@ class DevHelper_Generator_File {
 				
 				// read root directory (./library), trying to pickup matched directory name (case insensitive)
 				$classNameLower = strtolower($className);
+				$classNameLower2 = str_replace('_', '', $classNameLower); // also support id likes add_on to map to folder AddOn
 				$dh = opendir(XenForo_Autoloader::getInstance()->getRootDir());
 				while ($file = readdir($dh)) {
-					if (strtolower($file) == $classNameLower) {
+					$fileLower = strtolower($file);
+					if ($fileLower == $classNameLower OR $fileLower == $classNameLower2) {
 						// we found it!
 						$className = $file;
 					}
