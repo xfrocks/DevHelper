@@ -47,14 +47,14 @@ EOF;
 	}
 	
 	public static function getTableName(DevHelper_Config_Base $config, $name) {
-		return 'xf_' . self::getFieldName($config, $name);
+		return 'xf_' . self::getFieldName($config, $name, true);
 	}
 	
-	public static function getFieldName(DevHelper_Config_Base $config, $name) {
-		if (strpos($name, '_') !== false) {
-			return strtolower($name);
-		} else {
+	public static function getFieldName(DevHelper_Config_Base $config, $name, $ignoreDash = false) {
+		if ($ignoreDash OR strpos($name, '_') === false) {
 			return strtolower($config->getPrefix() . '_' . $name);
+		} else {
+			return strtolower($name);
 		}
 	}
 	
