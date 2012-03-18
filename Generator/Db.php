@@ -33,6 +33,14 @@ EOF;
 		return $sql;
 	}
 	
+	public static function dropTable(DevHelper_Config_Base $config, array $dataClass) {
+		$tableName = self::getTableName($config, $dataClass['name']);
+		
+		$sql = "DROP TABLE IF EXISTS `$tableName`";
+
+		return $sql;
+	}
+	
 	public static function showColumns(DevHelper_Config_Base $config, $table, array $field) {
 		$fieldName = $field['name'];
 		
@@ -44,6 +52,12 @@ EOF;
 		$fieldDefinition = self::_getFieldDefinition($field);
 		
 		return "ALTER TABLE `$table` ADD COLUMN `$fieldName` $fieldDefinition";
+	}
+	
+	public static function alterTableDropColumn(DevHelper_Config_Base $config, $table, array $field) {
+		$fieldName = $field['name'];
+
+		return "ALTER TABLE `$table` DROP COLUMN `$fieldName`";
 	}
 	
 	public static function getTableName(DevHelper_Config_Base $config, $name) {

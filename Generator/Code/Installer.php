@@ -8,7 +8,7 @@ class DevHelper_Generator_Code_Installer {
 		foreach ($dataClasses as $dataClass) {
 			$table = array();
 			$table['createQuery'] = DevHelper_Generator_Db::createTable($config, $dataClass);
-			$table['dropQuery'] = false;
+			$table['dropQuery'] = DevHelper_Generator_Db::dropTable($config, $dataClass);
 			
 			$tables[$dataClass['name']] = $table;
 		} 
@@ -23,7 +23,7 @@ class DevHelper_Generator_Code_Installer {
 				$patch['field'] = $dataPatch['name'];
 				$patch['showColumnsQuery'] = DevHelper_Generator_Db::showColumns($config, $table, $dataPatch);
 				$patch['alterTableAddColumnQuery'] = DevHelper_Generator_Db::alterTableAddColumn($config, $table, $dataPatch);
-				$patch['alterTableDropColumnQuery'] = false;
+				$patch['alterTableDropColumnQuery'] = DevHelper_Generator_Db::alterTableDropColumn($config, $table, $dataPatch);;
 				
 				$patches[] = $patch;
 			}
@@ -60,7 +60,18 @@ class $className {
 	}
 	
 	public static function uninstall() {
-		// TODO
+		\$db = XenForo_Application::get('db');
+		
+		foreach (self::\$_tables as \$table) {
+			\$db->query(\$table['dropQuery']);
+		}
+		
+		foreach (self::\$_patches as \$patch) {
+			\$existed = \$db->fetchOne(\$patch['showColumnsQuery']);
+			if (!empty(\$existed)) {
+				\$db->query(\$patch['alterTableDropColumnQuery']);
+			}
+		}
 		
 		self::uninstallCustomized();
 	}
