@@ -9,6 +9,7 @@ class DevHelper_Generator_Code_ControllerAdmin {
 		$dataWriterClassName = DevHelper_Generator_Code_DataWriter::getClassName($addOn, $config, $dataClass);
 		$otherDataClassStuff = '';
 		$dataClassTitleField = empty($dataClass['title_field']) ? $dataClass['id_field'] : $dataClass['title_field'];
+		$imageField = DevHelper_Generator_Db::getImageField($dataClass['fields']);
 		
 		$filterParams = array(); // this will be added later, by edit template generator (below)
 		
@@ -79,10 +80,13 @@ EOF;
 		DevHelper_Generator_Template::generateAdminTemplate($addOn, $templateList, $templateListTemplate);
 		// finished template_list
 		
+		$templateEditFormExtra = 'class="AutoValidator" data-redirect="yes"';
+		
 		$templateEditFields = '';
 		foreach ($dataClass['fields'] as $field) {
 			if ($field['name'] == $dataClass['id_field']) continue;
 			if (empty($field['required'])) continue; // ignore non-required fields 
+			if ($field['name'] == $imageField) continue; // ignore image field
 			
 			// queue this field for validation
 			$filterParams[$field['name']] = $field['type'];
@@ -141,10 +145,27 @@ EOF;
 EOF;
 		}
 		
+		if ($imageField !== false) {
+			$fieldPhraseImage = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle($addOn, $config, $dataClass, 'image');
+			$templateEditFormExtra = 'enctype="multipart/form-data"';
+			
+			$templateEditFields .= <<<EOF
+	<xen:uploadunit label="{xen:phrase $fieldPhraseImage}:" name="image" value="">
+		<div id="imageHtml">
+			<xen:if is="{\${$variableName}.images}">
+				<xen:foreach loop="\${$variableName}.images" key="\$imageSizeCode" value="\$image">
+					<img src="{\$image}" alt="{\$imageSizeCode}" title="{\$imageSizeCode}" />
+				</xen:foreach>
+			</xen:if>
+		</div>
+	</xen:uploadunit>
+EOF;
+		}
+		
 		$templateEditTemplate = <<<EOF
 <xen:title>{xen:if '{\${$variableName}.{$dataClass['id_field']}}', '{xen:phrase $phraseEdit}', '{xen:phrase $phraseAdd}'}</xen:title>
 
-<xen:form action="{xen:adminlink '{$info['routePrefix']}/save'}" class="AutoValidator" data-redirect="yes">
+<xen:form action="{xen:adminlink '{$info['routePrefix']}/save'}" $templateEditFormExtra>
 
 	$templateEditFields
 
@@ -188,6 +209,15 @@ EOF;
 		// finished creating our templates
 		
 		$filterParams = DevHelper_Generator_File::varExport($filterParams, 2); // var export for the filter params
+		$actionSaveImageCode = '';
+		if ($imageField !== false) {
+			$actionSaveImageCode = <<<EOF
+		\$image = XenForo_Upload::getUploadedFile('image');
+		if (!empty(\$image)) {
+			\$dw->setImage(\$image);
+		}
+EOF;
+		}
 		
 		$contents = <<<EOF
 <?php
@@ -241,6 +271,8 @@ class {$info['controller']}_Generated extends XenForo_ControllerAdmin_Abstract {
 		}
 		\$dw->bulkSet(\$dwInput);
 		
+$actionSaveImageCode
+		
 		\$this->_prepareDwBeforeSaving(\$dw);
 		
 		\$dw->save();
@@ -284,10 +316,16 @@ class {$info['controller']}_Generated extends XenForo_ControllerAdmin_Abstract {
 		return \$info;
 	}
 	
+	/**
+	 * @return $modelClassName
+	 */
 	protected function _get{$dataClass['camelCase']}Model() {
 		return \$this->getModelFromCache('$modelClassName');
 	}
 	
+	/**
+	 * @return $dataWriterClassName
+	 */
 	protected function _get{$dataClass['camelCase']}DataWriter() {
 		return XenForo_DataWriter::create('$dataWriterClassName');
 	}

@@ -38,7 +38,7 @@ abstract class DevHelper_Config_Base {
 		return $dataClass;
 	}
 	
-	public function addDataClass($name, $fields = array(), $primaryKey = false, $indeces = array()) {
+	public function addDataClass($name, $fields = array(), $primaryKey = false, $indeces = array(), $extraData = array()) {
 		$name = $this->_normalizeDbName($name);
 		
 		$this->_dataClasses[$name] = array(
@@ -58,6 +58,10 @@ abstract class DevHelper_Config_Base {
 				'controller_admin' => false,
 			),
 		);
+		
+		foreach ($extraData as $key => $value) {
+			$this->_dataClasses[$name][$key] = $value;
+		}
 		
 		foreach ($fields as $fieldName => $fieldInfo) {
 			$fieldInfo = array_merge(array('name' => $fieldName), $fieldInfo);
@@ -202,6 +206,16 @@ abstract class DevHelper_Config_Base {
 		}
 	}
 	
+	public function getPrefix() {
+		$configClassName = get_class($this);
+		$parts = explode('_', $configClassName);
+		array_pop($parts);
+		array_pop($parts);
+		$prefix = implode('_', $parts);
+		
+		return $prefix;
+	}
+	
 	public function outputSelf() {
 		$className = get_class($this);
 		
@@ -241,6 +255,7 @@ class $className extends DevHelper_Config_Base {
 					// 'length' => 'length_here',
 					// 'required' => true,
 					// 'allowedValues' => array('value_1', 'value_2'), 
+					// 'default' => 0,
 				),
 				// other fields go here
 			),

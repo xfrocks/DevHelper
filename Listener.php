@@ -25,6 +25,9 @@ class DevHelper_Listener {
 				$rendered = $ourTemplate->render();
 				self::_injectHtml($content, $rendered);
 				break;
+			case 'PAGE_CONTAINER':
+				DevHelper_Generator_File::minifyJs($template);
+				break;
 		}
 	}
 	
