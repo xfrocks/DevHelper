@@ -23,8 +23,16 @@ class DevHelper_Generator_File {
 				$fullPath = $fullDirName . '/' . $baseName;
 				
 				if (file_exists($fullPath) AND (!file_exists($minPath) OR (filemtime($fullPath) > filemtime($minPath)))) {
-					require_once(dirname(__FILE__) . '/../Lib/jsmin-php/jsmin.php');
-					$minified = JSMin::minify(file_get_contents($fullPath));
+					$fullContents = file_get_contents($fullPath);
+					
+					if (strpos($fullContents, '/* disables jsmin */') === false) {
+						require_once(dirname(__FILE__) . '/../Lib/jsmin-php/jsmin.php');
+						$minified = JSMin::minify($fullContents);
+					} else {
+						// the file requested not to be minify... (debugging?)
+						$minified = $fullContents;
+					}
+					
 					self::filePutContents($minPath, $minified);
 					
 					// it's okie to do this as it's running on development machine...
