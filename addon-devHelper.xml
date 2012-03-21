@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="devHelper" title="DevHelper" version_string="20120310" version_id="3" url="" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
+<addon addon_id="devHelper" title="DevHelper" version_string="20120321" version_id="4" url="" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -140,6 +140,9 @@
 .DevHelper_DataClassFile h4 a {
 	padding-left: 40px !important;
 }]]></template>
+    <template title="devhelper_template_edit"><![CDATA[<xen:require js="js/DevHelper/ace/ace.js" />
+<xen:require js="js/DevHelper/ace/mode-html.js" />
+<xen:require js="js/DevHelper/template_edit.js" />]]></template>
   </admin_templates>
   <code_events/>
   <code_event_listeners>

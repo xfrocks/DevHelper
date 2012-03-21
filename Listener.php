@@ -13,6 +13,7 @@ class DevHelper_Listener {
 	public static function template_create($templateName, array &$params, XenForo_Template_Abstract $template) {
 		switch ($templateName) {
 			case 'addon_edit':
+			case 'template_edit':
 				$template->preloadTemplate('devhelper_' . $templateName);
 				break;
 		}
@@ -21,6 +22,7 @@ class DevHelper_Listener {
 	public static function template_post_render($templateName, &$content, array &$containerData, XenForo_Template_Abstract $template) {
 		switch ($templateName) {
 			case 'addon_edit':
+			case 'template_edit':
 				$ourTemplate = $template->create('devhelper_' . $templateName, $template->getParams());
 				$rendered = $ourTemplate->render();
 				self::_injectHtml($content, $rendered);
