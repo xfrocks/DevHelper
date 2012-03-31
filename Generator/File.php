@@ -25,7 +25,7 @@ class DevHelper_Generator_File {
 				if (file_exists($fullPath) AND (!file_exists($minPath) OR (filemtime($fullPath) > filemtime($minPath)))) {
 					$fullContents = file_get_contents($fullPath);
 					
-					if (strpos($fullContents, '/* disables jsmin */') === false) {
+					if (strpos($fullContents, '/* no minify */') === false) {
 						require_once(dirname(__FILE__) . '/../Lib/jsmin-php/jsmin.php');
 						$minified = JSMin::minify($fullContents);
 					} else {
@@ -97,7 +97,7 @@ class DevHelper_Generator_File {
 		if (file_exists($path)) {
 			// existed file
 			$oldContents = self::fileGetContents($path);
-			copy($path, $path . '.' . XenForo_Application::$time);
+			copy($path, $path . '.' . XenForo_Application::$time . '.devhelper'); // changed it to make it possible to .gitignore the files
 			
 			if ($oldContents == $contents) {
 				// same content
@@ -196,13 +196,14 @@ class DevHelper_Generator_File {
 			'js' => XenForo_Autoloader::getInstance()->getRootDir() . '/../js/' . str_replace('_', '/', self::getClassName($addOn['addon_id'])),
 			
 			// try to export `styles/default/addOnId`
-			XenForo_Autoloader::getInstance()->getRootDir() . '/../styles/default/' . str_replace('_', '/', self::getClassName($addOn['addon_id'])),
+			'styles_default' => XenForo_Autoloader::getInstance()->getRootDir() . '/../styles/default/' . str_replace('_', '/', self::getClassName($addOn['addon_id'])),
 		);
 		
 		// generate hashes first
 		self::generateHashesFile($addOn, $config);
 		
 		$rootPath = realpath(XenForo_Application::getInstance()->getRootDir());
+		
 		if (strpos($exportPath, 'upload') === false) {
 			$exportPath .= '/upload';
 		}
@@ -212,14 +213,21 @@ class DevHelper_Generator_File {
 			'extensions' => array('php', 'htm', 'html', 'js', 'css', 'jpg', 'jpeg', 'png', 'gif'),
 		);
 		
-		foreach ($list as $entry) {
-			self::_fileExport(realpath($entry), $exportPath, $rootPath, $options);
+		foreach ($list as $type => $entry) {
+			self::_fileExport($entry, $exportPath, $rootPath, $options);
 		}
 		
 		$xmlDirPath = dirname($exportPath);
 		$xmlPath = $xmlDirPath . '/addon-' . $addOn['addon_id'] . '.xml';
 		XenForo_Model::create('XenForo_Model_AddOn')->getAddOnXml($addOn)->save($xmlPath);
 		echo "Exported       $xmlPath\n"; 
+		
+		// copy one xml copy to the add-on directory (inside library)
+		if (@copy($xmlPath, $list['library'] . '/addon-' . $addOn['addon_id'] . '.xml')) {
+			echo "Copied         $xmlPath {$list['library']}\n";
+		} else {
+			echo "Can't cp       $xmlPath {$list['library']}\n";
+		}
 	}
 	
 	protected static function _fileExport($entry, &$exportPath, &$rootPath, &$options) {
@@ -240,7 +248,7 @@ class DevHelper_Generator_File {
 			}
 			
 			foreach ($children as $child) {
-				self::_fileExport(realpath($entry . '/' . $child), $exportPath, $rootPath, $options);
+				self::_fileExport($entry . '/' . $child, $exportPath, $rootPath, $options);
 			}
 		} else {
 			echo "Exporting      $relativePath ";
