@@ -97,7 +97,13 @@ class DevHelper_Generator_File {
 		if (file_exists($path)) {
 			// existed file
 			$oldContents = self::fileGetContents($path);
-			copy($path, $path . '.' . XenForo_Application::$time . '.devhelper'); // changed it to make it possible to .gitignore the files
+			if (strpos($path, 'FileSums.php') !== false) {
+				// writing FileSums.php
+				// this file is generated so many times that it's annoying
+				// so we will skip saving a copy of it...
+			} else {
+				copy($path, $path . '.' . XenForo_Application::$time . '.devhelper'); // changed it to make it possible to .gitignore the files
+			}
 			
 			if ($oldContents == $contents) {
 				// same content
