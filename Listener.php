@@ -3,6 +3,7 @@ class DevHelper_Listener {
 	public static function load_class($class, array &$extend) {
 		static $classes = array(
 			'XenForo_ControllerAdmin_AddOn',
+			'XenForo_ControllerAdmin_CodeEventListener',
 		);
 		
 		if (in_array($class, $classes)) {
