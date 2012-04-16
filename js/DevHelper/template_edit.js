@@ -3,32 +3,53 @@
 	
 	var targetPrototype = XenForo.TemplateEditor.prototype;
 	
-	targetPrototype.DevHelper_setupAce = function(editor) {
+	targetPrototype.DevHelper_extraKeysSave = function(cm) {
+		$('#saveReloadButton').trigger('click');
+	};
+	
+	targetPrototype.DevHelper_setupCM = function(editor) {
 		var $textarea = editor.$textarea;
-		console.log($textarea);
-		var uniqueId = XenForo.uniqueId();
-		var $ace = $('<div />')
-					.attr('id', uniqueId)
-					.css('position', 'relative')
-					.css('width', $textarea.width() + 'px')
-					.css('height', $textarea.height() + 'px');
-		this.getTextareaWrapper().append($ace);
+		var $textareaWrapper = this.getTextareaWrapper();
 		
-		$ace.aceEditor = ace.edit(uniqueId);
-		var session = $ace.aceEditor.getSession();
-		session.setValue($textarea.val());
-		session.on('change', function() {
-			$textarea.val(session.getValue());
-		});
+		// default to use the mixed HTML mode
+		var cmMode = 'htmlmixed';
+		if (editor.$title.val().indexOf('.css') != -1) {
+			// we are editing a CSS template
+			// switch to CSS mode
+			cmMode = 'css';
+		}
 		
-		var HtmlMode = require('ace/mode/html').Mode;
-		session.setMode(new HtmlMode());
+		var config = {
+			value: $textarea.val(),
+			mode: cmMode,
+			lineNumbers: 1,
+			indentWithTabs: 1,
+			smartIndent: 1,
+			tabSize: 4,
+			indentUnit: 4,
+			onChange: function(cm, data) {
+				$textarea.val(cm.getValue());
+			},
+			extraKeys: {}
+		};
 		
+		config.extraKeys['Cmd-S'] = $.context(this, 'DevHelper_extraKeysSave');
+		config.extraKeys['Ctrl-S'] = $.context(this, 'DevHelper_extraKeysSave');
+		
+		var theCM = CodeMirror(function() {}, config);
+		var $wrapper = $(theCM.getWrapperElement());
+		$wrapper.width($textareaWrapper.parent().width());
+		
+		// append the CodeMirror editor's wrapper to the page
+		$textareaWrapper.append($wrapper);
+		theCM.refresh();
+
 		// hide the textarea
 		$textarea.xfHide();
 		
 		// save it for later access
-		editor.$ace = $ace;
+		editor.theCM = theCM;
+		editor.$theCMWrapper = $wrapper;
 	};
 	
 	var originalInitializePrimaryEditor = targetPrototype.initializePrimaryEditor;
@@ -38,17 +59,17 @@
 		var templateTitle = this.$titleOriginal.strval();
 		var editor = this.editors[templateTitle];
 		
-		this.DevHelper_setupAce(editor);
+		this.DevHelper_setupCM(editor);
 	};
 	
 	var originalCreateEditor = targetPrototype.createEditor;
 	targetPrototype.createEditor = function(templateTitle, $prevTab) {
 		var editor = originalCreateEditor.call(this, templateTitle, $prevTab);
 		
-		this.DevHelper_setupAce(editor);
+		this.DevHelper_setupCM(editor);
 		
 		// immediately hide the ace
-		editor.$ace.xfHide();
+		editor.$theCMWrapper.xfHide();
 		
 		return editor;
 	};
@@ -62,15 +83,13 @@
 			.addClass('active')
 			.siblings().removeClass('active');
 
-		// switch the active editor
-		$('.ace_editor', this.getTextareaWrapper())
-			.xfHide();
+		// hide all CodeMirror instances
+		$('.CodeMirror', this.getTextareaWrapper()).xfHide();
 
 		editor = this.editors[$target.attr('templateTitle')];
 
-		editor.$ace
-			.xfShow();
-		editor.$ace.aceEditor.env.editor.focus();
+		// display the only needed one
+		editor.$theCMWrapper.xfShow();
 
 		return false;
 	};

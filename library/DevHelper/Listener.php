@@ -15,6 +15,7 @@ class DevHelper_Listener {
 		switch ($templateName) {
 			case 'addon_edit':
 			case 'template_edit':
+			case 'admin_template_edit':
 				$template->preloadTemplate('devhelper_' . $templateName);
 				break;
 		}
@@ -24,12 +25,21 @@ class DevHelper_Listener {
 		switch ($templateName) {
 			case 'addon_edit':
 			case 'template_edit':
+			case 'admin_template_edit':
 				$ourTemplate = $template->create('devhelper_' . $templateName, $template->getParams());
 				$rendered = $ourTemplate->render();
 				self::_injectHtml($content, $rendered);
 				break;
 			case 'PAGE_CONTAINER':
 				DevHelper_Generator_File::minifyJs($template);
+				
+				$params = $template->getParams();
+				if (!empty($params['DevHelper_requiresCodeMirrorCSS'])) {
+					$search = '</head>';
+					$insert = '<link rel="stylesheet" href="js/DevHelper/CodeMirror/lib/codemirror.css" />';
+					$content = str_replace($search, $insert . $search, $content);
+				}
+				
 				break;
 		}
 	}
