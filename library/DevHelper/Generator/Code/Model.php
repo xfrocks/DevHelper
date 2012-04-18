@@ -109,7 +109,10 @@ $getAllImageCode
 			if (!isset(\$conditions[\$intField])) continue;
 			
 			if (is_array(\$conditions[\$intField])) {
-				\$sqlConditions[] = "{$dataClass['name']}.\$intField IN (" . \$db->quote(\$conditions[\$intField]) . ")";
+				if (!empty(\$conditions[\$intField])) {
+					// only use IN condition if the array is not empty (nasty!)
+					\$sqlConditions[] = "{$dataClass['name']}.\$intField IN (" . \$db->quote(\$conditions[\$intField]) . ")";
+				}
 			} else {
 				\$sqlConditions[] = "{$dataClass['name']}.\$intField = " . \$db->quote(\$conditions[\$intField]);
 			}
