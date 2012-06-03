@@ -62,15 +62,15 @@ class $className {
 	public static function uninstall() {
 		\$db = XenForo_Application::get('db');
 		
-		foreach (self::\$_tables as \$table) {
-			\$db->query(\$table['dropQuery']);
-		}
-		
 		foreach (self::\$_patches as \$patch) {
 			\$existed = \$db->fetchOne(\$patch['showColumnsQuery']);
 			if (!empty(\$existed)) {
 				\$db->query(\$patch['alterTableDropColumnQuery']);
 			}
+		}
+		
+		foreach (self::\$_tables as \$table) {
+			\$db->query(\$table['dropQuery']);
 		}
 		
 		self::uninstallCustomized();
