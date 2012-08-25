@@ -9,6 +9,11 @@ class DevHelper_Generator_Code_Model {
 		$getFunctionName = self::generateGetDataFunctionName($addOn, $config, $dataClass);
 		$countFunctionName = self::generateCountDataFunctionName($addOn, $config, $dataClass);
 		
+		$tableAlias = $dataClass['name'];
+		if (in_array($tableAlias, array('group'))) {
+			$tableAlias = '_' . $tableAlias;
+		}
+		
 		$intFields = DevHelper_Generator_File::varExport(DevHelper_Generator_Db::getIntFields($dataClass['fields']), 2);
 		$imageCode = self::generateImageCode($addOn, $config, $dataClass);
 		if (!empty($imageCode)) {
@@ -31,7 +36,7 @@ EOF;
 class $className extends XenForo_Model {
 
 	protected function _{$getFunctionName}Customized(array &\$data, array \$fetchOptions) {
-		// customized processing for getAll{$dataClass['camelCase']}() should go here
+		// customized processing for {$getFunctionName}() should go here
 	}
 	
 	protected function _prepare{$dataClass['camelCase']}ConditionsCustomized(array &\$sqlConditions, array \$conditions, array &\$fetchOptions) {
@@ -73,9 +78,9 @@ class $className extends XenForo_Model {
 		\$limitOptions = \$this->prepareLimitFetchOptions(\$fetchOptions);
 
 		\$all = \$this->fetchAllKeyed(\$this->limitQueryResults("
-				SELECT {$dataClass['name']}.*
+				SELECT {$tableAlias}.*
 					\$joinOptions[selectFields]
-				FROM `$tableName` AS {$dataClass['name']}
+				FROM `$tableName` AS {$tableAlias}
 					\$joinOptions[joinTables]
 				WHERE \$whereConditions
 					\$orderClause
@@ -98,7 +103,7 @@ $getAllImageCode
 
 		return \$this->_getDb()->fetchOne("
 			SELECT COUNT(*)
-			FROM `$tableName` AS {$dataClass['name']}
+			FROM `$tableName` AS {$tableAlias}
 				\$joinOptions[joinTables]
 			WHERE \$whereConditions
 		");
@@ -114,10 +119,10 @@ $getAllImageCode
 			if (is_array(\$conditions[\$intField])) {
 				if (!empty(\$conditions[\$intField])) {
 					// only use IN condition if the array is not empty (nasty!)
-					\$sqlConditions[] = "{$dataClass['name']}.\$intField IN (" . \$db->quote(\$conditions[\$intField]) . ")";
+					\$sqlConditions[] = "{$tableAlias}.\$intField IN (" . \$db->quote(\$conditions[\$intField]) . ")";
 				}
 			} else {
-				\$sqlConditions[] = "{$dataClass['name']}.\$intField = " . \$db->quote(\$conditions[\$intField]);
+				\$sqlConditions[] = "{$tableAlias}.\$intField = " . \$db->quote(\$conditions[\$intField]);
 			}
 		}
 		
@@ -170,9 +175,11 @@ EOF;
 		}
 		
 		$configPrefix = $config->getPrefix();
+		$imagePath = "{$configPrefix}/{$dataClass['camelCase']}";
+		$imagePath = strtolower($imagePath);
 
 		$contents = <<<EOF
-public static function getImageFilePath(array \$record, \$size = 'l') {
+	public static function getImageFilePath(array \$record, \$size = 'l') {
 		\$internal = self::_getImageInternal(\$record, \$size);
 		
 		if (!empty(\$internal)) {
@@ -195,7 +202,7 @@ public static function getImageFilePath(array \$record, \$size = 'l') {
 	protected static function _getImageInternal(array \$record, \$size) {
 		if (empty(\$record['{$dataClass['id_field']}']) OR empty(\$record['{$imageField}'])) return '';
 
-		return '/{$configPrefix}/{$dataClass['camelCase']}/' . \$record['{$dataClass['id_field']}']  . '_' . \$record['{$imageField}'] . strtolower(\$size) . '.jpg';
+		return '/{$imagePath}/' . \$record['{$dataClass['id_field']}']  . '_' . \$record['{$imageField}'] . strtolower(\$size) . '.jpg';
 	}
 EOF;
 
