@@ -4,10 +4,12 @@ class DevHelper_Listener {
 		static $classes = array(
 			'XenForo_ControllerAdmin_AddOn',
 			'XenForo_ControllerAdmin_CodeEventListener',
+		
+			'XenForo_Model_AddOn',
 		);
 		
 		if (in_array($class, $classes)) {
-			$extend[] = str_replace('XenForo_', 'DevHelper_Extend_', $class);
+			$extend[] = 'DevHelper_' . $class;
 		}
 	}
 	

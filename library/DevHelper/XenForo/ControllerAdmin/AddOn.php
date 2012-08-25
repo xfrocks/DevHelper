@@ -1,5 +1,5 @@
 <?php
-class DevHelper_Extend_ControllerAdmin_AddOn extends XFCP_DevHelper_Extend_ControllerAdmin_AddOn {
+class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_ControllerAdmin_AddOn {
 	public function actionDataManager() {
 		$addOnId = $this->_input->filterSingle('addon_id', XenForo_Input::STRING);
 		$addOn = $this->_getAddOnOrError($addOnId);

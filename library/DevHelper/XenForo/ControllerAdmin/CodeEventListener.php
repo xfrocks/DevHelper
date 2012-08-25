@@ -1,6 +1,6 @@
 <?php
 
-class DevHelper_Extend_ControllerAdmin_CodeEventListener extends XFCP_DevHelper_Extend_ControllerAdmin_CodeEventListener {
+class DevHelper_XenForo_ControllerAdmin_CodeEventListener extends XFCP_DevHelper_XenForo_ControllerAdmin_CodeEventListener {
 	
 	public function actionIndex() {
 		$response = parent::actionIndex();
