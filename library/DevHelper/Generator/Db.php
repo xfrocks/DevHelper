@@ -135,6 +135,7 @@ EOF;
 			case XenForo_DataWriter::TYPE_STRING:
 				if ((empty($field['length']) OR $field['length'] > 255) AND empty($field['allowedValues'])) {
 					$dbType = 'TEXT';
+					if (isset($field['default'])) unset($field['default']); // BLOB/TEXT column can't have a default value
 				} else {
 					if (!empty($field['allowedValues'])) {
 						// ENUM 
@@ -150,6 +151,7 @@ EOF;
 				} else {
 					$dbType = 'VARBINARY(' . $field['length'] . ')';
 				}
+				if (isset($field['default'])) unset($field['default']); // BLOB/TEXT column can't have a default value
 				break;
 			case XenForo_DataWriter::TYPE_INT:
 				$dbType = 'INT(11)';
@@ -163,6 +165,7 @@ EOF;
 				break;
 			case XenForo_DataWriter::TYPE_SERIALIZED:
 				$dbType = 'MEDIUMBLOB';
+				if (isset($field['default'])) unset($field['default']); // BLOB/TEXT column can't have a default value
 				break;
 		}
 		
