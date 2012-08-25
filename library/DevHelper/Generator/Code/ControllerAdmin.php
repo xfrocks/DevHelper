@@ -64,7 +64,7 @@ class DevHelper_Generator_Code_ControllerAdmin {
 <xen:form action="{xen:adminlink '{$info['routePrefix']}'}" class="section">
 	<xen:if is="{\${$variableNamePlural}}">
 		<h2 class="subHeading">
-			<link rel="xenforo_template" type="text/html" href="filter_list_controls.html" />
+			<xen:include template="filter_list_controls" />
 			{xen:phrase $phraseClassName}
 		</h2>
 	
@@ -78,7 +78,7 @@ class DevHelper_Generator_Code_ControllerAdmin {
 			</xen:foreach>
 		</ol>
 	
-		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:count \$all{$dataClass['camelCase']}}</span>', 'total={xen:count \$all{$dataClass['camelCase']}}'}</p>
+		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:count \${$variableNamePlural}}</span>', 'total={xen:count \${$variableNamePlural}}'}</p>
 	<xen:else />
 		<div class="noResults">{xen:phrase $phraseNoResults}</div>
 	</xen:if>
