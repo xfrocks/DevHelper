@@ -35,6 +35,8 @@
 		
 		config.extraKeys['Cmd-S'] = $.context(this, 'DevHelper_extraKeysSave');
 		config.extraKeys['Ctrl-S'] = $.context(this, 'DevHelper_extraKeysSave');
+		config.extraKeys['Tab'] = 'indentMore';
+		config.extraKeys['Shift-Tab'] = 'indentLess';
 		
 		var theCM = CodeMirror(function() {}, config);
 		var $wrapper = $(theCM.getWrapperElement());
