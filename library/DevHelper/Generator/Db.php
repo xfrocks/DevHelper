@@ -72,8 +72,9 @@ EOF;
 		}
 	}
 	
-	public static function getIntFields(array $fields) {
-		$intFields = array();
+	public static function getConditionFields(array $fields) {
+		$conditionsFields = array();
+		
 		$intTypes = array(
 			XenForo_DataWriter::TYPE_INT,
 			XenForo_DataWriter::TYPE_UINT,
@@ -82,12 +83,23 @@ EOF;
 		$imageFields = self::getImageFields($fields);
 		
 		foreach ($fields as $field) {
-			if (in_array($field['type'], $intTypes) AND !in_array($field['name'], $imageFields)) {
-				$intFields[] = $field['name'];
+			if (in_array($field['name'], $imageFields)) {
+				continue;
+			}
+			
+			if (in_array($field['type'], $intTypes)) {
+				$conditionsFields[] = $field['name'];
+				continue;
+			}
+			
+			if ($field['type'] == 'string' AND isset($field['length']) AND $field['length'] <= 255) {
+				// this is a VARCHAR one
+				$conditionsFields[] = $field['name'];
+				continue;
 			}
 		}
 		
-		return $intFields;
+		return $conditionsFields;
 	}
 	
 	public static function getImageFields(array $fields) {

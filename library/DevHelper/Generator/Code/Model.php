@@ -14,7 +14,7 @@ class DevHelper_Generator_Code_Model {
 			$tableAlias = '_' . $tableAlias;
 		}
 		
-		$intFields = DevHelper_Generator_File::varExport(DevHelper_Generator_Db::getIntFields($dataClass['fields']), 2);
+		$conditionsFields = DevHelper_Generator_File::varExport(DevHelper_Generator_Db::getConditionFields($dataClass['fields']), 2);
 		$imageCode = self::generateImageCode($addOn, $config, $dataClass);
 		if (!empty($imageCode)) {
 			$dwClassName = DevHelper_Generator_Code_DataWriter::getClassName($addOn, $config, $dataClass);
@@ -113,16 +113,16 @@ $getAllImageCode
 		\$sqlConditions = array();
 		\$db = \$this->_getDb();
 		
-		foreach ($intFields as \$intField) {
-			if (!isset(\$conditions[\$intField])) continue;
+		foreach ($conditionsFields as \$dbColumn) {
+			if (!isset(\$conditions[\$dbColumn])) continue;
 			
-			if (is_array(\$conditions[\$intField])) {
-				if (!empty(\$conditions[\$intField])) {
+			if (is_array(\$conditions[\$dbColumn])) {
+				if (!empty(\$conditions[\$dbColumn])) {
 					// only use IN condition if the array is not empty (nasty!)
-					\$sqlConditions[] = "{$tableAlias}.\$intField IN (" . \$db->quote(\$conditions[\$intField]) . ")";
+					\$sqlConditions[] = "{$tableAlias}.\$dbColumn IN (" . \$db->quote(\$conditions[\$dbColumn]) . ")";
 				}
 			} else {
-				\$sqlConditions[] = "{$tableAlias}.\$intField = " . \$db->quote(\$conditions[\$intField]);
+				\$sqlConditions[] = "{$tableAlias}.\$dbColumn = " . \$db->quote(\$conditions[\$dbColumn]);
 			}
 		}
 		
