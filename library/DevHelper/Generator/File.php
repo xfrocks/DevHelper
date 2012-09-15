@@ -217,6 +217,7 @@ class DevHelper_Generator_File {
 		$exportPath = realpath($exportPath);
 		$options = array(
 			'extensions' => array('php', 'htm', 'html', 'js', 'css', 'jpg', 'jpeg', 'png', 'gif'),
+			'filenames_lowercase' => array('license', 'readme', 'copyright'),
 		);
 		
 		foreach ($list as $type => $entry) {
@@ -260,7 +261,7 @@ class DevHelper_Generator_File {
 			echo "Exporting      $relativePath ";
 			
 			$ext = XenForo_Helper_File::getFileExtension($entry);
-			if (in_array($ext, $options['extensions'])) {
+			if (in_array($ext, $options['extensions']) OR in_array(strtolower(basename($entry)), $options['filenames_lowercase'])) {
 				if (strpos($entry, 'DevHelper') === false) {
 					$entryExportPath = $exportPath . '/' . $relativePath;
 					
