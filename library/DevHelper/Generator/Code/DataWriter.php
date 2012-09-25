@@ -110,7 +110,7 @@ EOF;
 		\$width = \$upload->getImageInfoField('width');
 		\$height = \$upload->getImageInfoField('height');
 
-		\$imageSizes = self::getImageSizes();
+		\$imageSizes = \$this->getImageSizes();
 		reset(\$imageSizes);
 
 		while (list(\$sizeCode, \$maxDimensions) = each(\$imageSizes)) {
