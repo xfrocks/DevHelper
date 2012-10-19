@@ -240,7 +240,7 @@ class DevHelper_Generator_File {
 	protected static function _fileExport($entry, &$exportPath, &$rootPath, &$options) {
 		if (empty($entry)) return;
 				
-		$relativePath = str_replace($rootPath, '', $entry);
+		$relativePath = trim(str_replace($rootPath, '', $entry), '/');
 		
 		if (is_dir($entry)) {
 			echo "Browsing       $relativePath\n";
@@ -269,6 +269,7 @@ class DevHelper_Generator_File {
 					XenForo_Helper_File::createDirectory($entryExportDir, false);
 					
 					if (@copy($entry, $entryExportPath)) {
+						XenForo_Helper_File::makeWritableByFtpUser($entryExportPath);
 						echo 'OK';
 					}
 				}				
