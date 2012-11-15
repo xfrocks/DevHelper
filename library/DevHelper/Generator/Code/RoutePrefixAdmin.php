@@ -1,13 +1,26 @@
 <?php
-class DevHelper_Generator_Code_RoutePrefixAdmin {
-	public static function generate(array $addOn, DevHelper_Config_Base $config, array $dataClass, array $info) {
-		$className = self::getClassName($addOn, $config, $dataClass);
+class DevHelper_Generator_Code_RoutePrefixAdmin extends DevHelper_Generator_Code_Common {
+	
+	protected $_addOn = null;
+	protected $_config = null;
+	protected $_dataClass = null;
+	protected $_info = null;
+	
+	protected function __construct(array $addOn, DevHelper_Config_Base $config, array $dataClass, array $info) {
+		$this->_addOn = $addOn;
+		$this->_config = $config;
+		$this->_dataClass = $dataClass;
+		$this->_info = $info;
+	}
+	
+	protected function _generate() {
+		$className = $this->_getClassName();
 		
 		// create the route prefix first
 		$routePrefixModel = XenForo_Model::create('XenForo_Model_RoutePrefix');
 		$existed = $routePrefixModel->getPrefixesByRouteType('admin');
 		foreach ($existed as $routePrefix) {
-			if ($routePrefix['original_prefix'] == $info['routePrefix'] OR $routePrefix['route_class'] == $className) {
+			if ($routePrefix['original_prefix'] == $this->_info['routePrefix'] OR $routePrefix['route_class'] == $className) {
 				// delete duplicated route prefix
 				$dw = XenForo_DataWriter::create('XenForo_DataWriter_RoutePrefix');
 				$dw->setExistingData($routePrefix);
@@ -17,39 +30,61 @@ class DevHelper_Generator_Code_RoutePrefixAdmin {
 
 		$dw = XenForo_DataWriter::create('XenForo_DataWriter_RoutePrefix');
 		$dw->bulkSet(array(
-			'original_prefix' => $info['routePrefix'],
+			'original_prefix' => $this->_info['routePrefix'],
 			'route_type' => 'admin',
 			'route_class' => $className,
 			'build_link' => 'data_only',
-			'addon_id' => $addOn['addon_id'],
+			'addon_id' => $this->_addOn['addon_id'],
 		));
 		$dw->save();
 		// finished creating our route prefix
 		
+		$this->_setClassName($className);
+		$this->_addInterface('XenForo_Route_Interface');
 		
-		$contents = <<<EOF
-<?php
-class $className implements XenForo_Route_Interface {
-	public function match(\$routePath, Zend_Controller_Request_Http \$request, XenForo_Router \$router) {
-		if (in_array(\$routePath, array('add', 'save'))) {
-			\$action = \$routePath;			
-		} else {
-			\$action = \$router->resolveActionWithIntegerParam(\$routePath, \$request, '{$dataClass['id_field']}');
-		}
-		return \$router->getRouteMatch('{$info['controller']}', \$action, '{$info['majorSection']}');
-	}
+		$this->_addMethod('match', 'public', array(
+			'$routePath',
+			'$request' => 'Zend_Controller_Request_Http $request',
+			'$router' => 'XenForo_Router $router',
+		), "
 
-	public function buildLink(\$originalPrefix, \$outputPrefix, \$action, \$extension, \$data, array &\$extraParams) {
-		if (is_array(\$data)) {
-			return XenForo_Link::buildBasicLinkWithIntegerParam(\$outputPrefix, \$action, \$extension, \$data, '{$dataClass['id_field']}');
-		} else {
-			return XenForo_Link::buildBasicLink(\$outputPrefix, \$action, \$extension);
-		}
-	}
+if (in_array(\$routePath, array('add', 'save'))) {
+	\$action = \$routePath;			
+} else {
+	\$action = \$router->resolveActionWithIntegerParam(\$routePath, \$request, '{$this->_dataClass['id_field']}');
 }
-EOF;
+return \$router->getRouteMatch('{$this->_info['controller']}', \$action, '{$this->_info['majorSection']}');
 
-		return array($className, $contents);
+		");
+		
+		$this->_addMethod('buildLink', 'public', array(
+			'$originalPrefix',
+			'$outputPrefix',
+			'$action',
+			'$extension',
+			'$data',
+			'$extraParams' => 'array &$extraParams',
+		), "
+
+if (is_array(\$data)) {
+	return XenForo_Link::buildBasicLinkWithIntegerParam(\$outputPrefix, \$action, \$extension, \$data, '{$this->_dataClass['id_field']}');
+} else {
+	return XenForo_Link::buildBasicLink(\$outputPrefix, \$action, \$extension);
+}
+
+		");
+		
+		return parent::_generate();
+	}
+	
+	protected function _getClassName() {
+		return self::getClassName($this->_addOn, $this->_config, $this->_dataClass);
+	}
+	
+	public static function generate(array $addOn, DevHelper_Config_Base $config, array $dataClass, array $info) {
+		$g = new self($addOn, $config, $dataClass, $info);
+		
+		return array($g->_getClassName(), $g->_generate());
 	}
 	
 	public static function getClassName(array $addOn, DevHelper_Config_Base $config, array $dataClass) {
