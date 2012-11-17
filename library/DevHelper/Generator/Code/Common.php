@@ -41,7 +41,7 @@ class DevHelper_Generator_Code_Common
 		if (!empty($this->_contants)) {
 			$output .= "\n";
 			foreach ($this->_contants as $constantName => $constantValue) {
-				$output .= "\tconst {$constantName} = {$constantValue}";
+				$output .= "\tconst {$constantName} = {$constantValue};\n";
 			}
 		}
 		

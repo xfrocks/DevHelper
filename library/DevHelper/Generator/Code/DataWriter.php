@@ -66,6 +66,7 @@ return \$this->getModelFromCache('$modelClassName');
 		");
 		
 		$this->_generateImageCode();
+		$this->_generatePhrasesCode();
 		
 		return parent::_generate();
 	}
@@ -77,9 +78,9 @@ return \$this->getModelFromCache('$modelClassName');
 			return false;
 		}
 		
-		$modelClassName = DevHelper_Generator_Code_Model::getClassName($this->addOn, $this->config, $this->dataClass);
+		$modelClassName = DevHelper_Generator_Code_Model::getClassName($this->_addOn, $this->_config, $this->_dataClass);
 		
-		$this->_addConstant('IMAGE_PREPARED', '\'imagePrepared\'');
+		$this->_addConstant('DATA_IMAGE_PREPARED', '\'imagePrepared\'');
 		$this->_addConstant('IMAGE_SIZE_ORIGINAL', '-1');
 		$this->_addProperty('$imageQuality', 'public static $imageQuality = 85');
 		
@@ -98,7 +99,7 @@ if (!in_array(\$imageType, array(IMAGETYPE_GIF, IMAGETYPE_JPEG, IMAGETYPE_PNG)))
 	throw new XenForo_Exception(new XenForo_Phrase('uploaded_file_is_not_valid_image'), true);
 }
 
-\$this->setExtraData(self::IMAGE_PREPARED, \$this->_prepareImage(\$upload));
+\$this->setExtraData(self::DATA_IMAGE_PREPARED, \$this->_prepareImage(\$upload));
 \$this->set('{$imageField}', XenForo_Application::\$time);
 		
 		");
@@ -174,7 +175,7 @@ if (is_array(\$uploaded)) {
 		
 		$this->_addMethod('_postSave', 'protected', array(), "
 		
-\$uploaded = \$this->getExtraData(self::IMAGE_PREPARED);
+\$uploaded = \$this->getExtraData(self::DATA_IMAGE_PREPARED);
 if (\$uploaded) {
 	\$this->_moveImages(\$uploaded);
 
@@ -214,6 +215,33 @@ return array(
 		return true;
 	}
 	
+	protected function _generatePhrasesCode() {
+		if (!empty($this->_dataClass['phrases'])) {
+			foreach ($this->_dataClass['phrases'] as $phraseType) {
+				$camelCase = ucwords(str_replace('_', ' ', $phraseType));
+				$constantName = self::generateDataPhraseConstant($this->_addOn, $this->_config, $this->_dataClass, $phraseType);
+				$getPhraseTitleFunction = DevHelper_Generator_Code_Model::generateGetPhraseTitleFunctionName($this->_addOn, $this->_config, $this->_dataClass, $phraseType);
+				
+				$this->_addConstant($constantName, "'phrase{$camelCase}'");
+				
+				$this->_addMethod('_postSave', 'protected', array(), "
+		
+\$phrase{$camelCase} = \$this->getExtraData(self::{$constantName});
+if (\$phrase{$camelCase} !== null) {
+	\$this->_insertOrUpdateMasterPhrase(\$this->_get{$this->_dataClass['camelCase']}Model()->{$getPhraseTitleFunction}(\$this->get('{$this->_dataClass['id_field']}')), \$phrase{$camelCase});
+}
+		
+				");
+				
+				$this->_addMethod('_postDelete', 'protected', array(), "
+
+\$this->_deleteMasterPhrase(\$this->_get{$this->_dataClass['camelCase']}Model()->{$getPhraseTitleFunction}(\$this->get('{$this->_dataClass['id_field']}')));
+		
+				");
+			}
+		}
+	}
+	
 	protected function _getClassName() {
 		return self::getClassName($this->_addOn, $this->_config, $this->_dataClass);
 	}
@@ -226,5 +254,10 @@ return array(
 	
 	public static function getClassName(array $addOn, DevHelper_Config_Base $config, array $dataClass) {
 		return DevHelper_Generator_File::getClassName($addOn['addon_id'], 'DataWriter_' . $dataClass['camelCase']);
+	}
+	
+	public static function generateDataPhraseConstant(array $addOn, DevHelper_Config_Base $config, array $dataClass, $phraseType) {
+		$camelCase = ucwords(str_replace('_', ' ', $phraseType));
+		return 'DATA_PHRASE_' . strtoupper($phraseType);
 	}
 }

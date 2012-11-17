@@ -244,6 +244,17 @@ EOF;
 		$templateEditFields = '';
 		$filterParams = array();
 		
+		if (!empty($this->_dataClass['phrases'])) {
+			foreach ($this->_dataClass['phrases'] as $phraseType) {
+				$fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle($this->_addOn, $this->_config, $this->_dataClass, $this->_dataClass['name'] . '_' . $phraseType);
+
+				$templateEditFields .= <<<EOF
+
+	<xen:textboxunit label="{xen:phrase $fieldPhraseName}:" name="_phrases[{$phraseType}]" value="{\${$variableName}.phrases.{$phraseType}}" />
+EOF;
+			}
+		}
+		
 		foreach ($this->_dataClass['fields'] as $field) {
 			if ($field['name'] == $this->_dataClass['id_field']) continue;
 			if (empty($field['required'])) continue; // ignore non-required fields 
@@ -345,26 +356,48 @@ EOF;
 		$this->_generateAdminTemplate($templateEdit, $templateEditTemplate);
 		
 		// add input fields to action save
-		$filterParamsExported = DevHelper_Generator_File::varExport($filterParams, 1);
-		$this->_addMethod('actionSave', 'public', array(), "
+		if (!empty($this->_dataClass['phrases'])) {
+			$phraseCode = "\$phrases = \$this->_input->filterSingle('_phrases', XenForo_Input::ARRAY_SIMPLE);\n";
+			foreach ($this->_dataClass['phrases'] as $phraseType) {
+				$dataWriterClassName = DevHelper_Generator_Code_DataWriter::getClassName($this->_addOn, $this->_config, $this->_dataClass);
+				$dataPhraseConstantName = DevHelper_Generator_Code_DataWriter::generateDataPhraseConstant($this->_addOn, $this->_config, $this->_dataClass, $phraseType);
+				
+				$phraseCode .= "if (isset(\$phrases['{$phraseType}'])) {\n";
+				$phraseCode .= "\t\$dw->setExtraData({$dataWriterClassName}::{$dataPhraseConstantName}, \$phrases['{$phraseType}']);\n";
+				$phraseCode .= "}\n";
+			}
+			
+			$this->_addMethod('actionSave', 'public', array(), "
 
+// get phrases from input data
+{$phraseCode}
+
+		", '100');
+		}
+		
+		if (!empty($filterparams)) {
+			$filterParamsExported = DevHelper_Generator_File::varExport($filterParams, 1);
+			$this->_addMethod('actionSave', 'public', array(), "
+
+// get regular fields from input data
 \$dwInput = \$this->_input->filter($filterParamsExported);
 \$dw->bulkSet(\$dwInput);
 
-		", '500');
+			", '200');
+		}
 		
 		if ($imageField !== false) {
 			// add image to action save
 			$this->_addMethod('actionSave', 'public', array(), "
 
+// try to save the uploaded image if any
 \$image = XenForo_Upload::getUploadedFile('image');
 if (!empty(\$image)) {
 	\$dw->setImage(\$image);
 }
 
-			", '501');
+			", '300');
 		}
-		
 		// finished template_edit
 		
 		$templateDeleteTemplate = <<<EOF

@@ -44,8 +44,10 @@ abstract class DevHelper_Config_Base {
 		$this->_dataClasses[$name] = array(
 			'name' => $name,
 			'camelCase' => DevHelper_Generator_File::getCamelCase($name),
+			'camelCasePlural' => false,
 			'camelCaseWSpace' => ucwords(str_replace('_', ' ', $name)),
 			'fields' => array(),
+			'phrases' => array(),
 			'id_field' => false,
 			'title_field' => false,
 			'primaryKey' => false,
@@ -256,6 +258,7 @@ class $className extends DevHelper_Config_Base {
 					// 'required' => true,
 					// 'allowedValues' => array('value_1', 'value_2'), 
 					// 'default' => 0,
+					// 'autoIncrement' => true,
 				),
 				// other fields go here
 			),

@@ -178,12 +178,15 @@ return array(
 return \$this->getOrderByClause(\$choices, \$fetchOptions, \$defaultOrderSql);
 
 		");
+		
+		$this->_generateImageCode();
+		$this->_generatePhrasesCode();
 
 		return parent::_generate();
 	}
 	
 	protected function _generateImageCode() {
-		$imageField = DevHelper_Generator_Db::getImageField($dataClass['fields']);
+		$imageField = DevHelper_Generator_Db::getImageField($this->_dataClass['fields']);
 		if ($imageField === false) {
 			// no image field...
 			return '';
@@ -200,8 +203,10 @@ return \$this->getOrderByClause(\$choices, \$fetchOptions, \$defaultOrderSql);
 \$imageSizes = XenForo_DataWriter::create('{$dwClassName}')->getImageSizes();
 foreach (\$all as &\$record) {
 	\$record['images'] = array();
-	foreach (\$imageSizes as \$imageSizeCode => \$imageSize) {
-		\$record['images'][\$imageSizeCode] = \$this->getImageUrl(\$record, \$imageSizeCode);
+	if (!empty(\$record['{$imageField}'])) {
+		foreach (\$imageSizes as \$imageSizeCode => \$imageSize) {
+			\$record['images'][\$imageSizeCode] = \$this->getImageUrl(\$record, \$imageSizeCode);
+		}
 	}
 }
 
@@ -251,6 +256,37 @@ return '/{$imagePath}/' . \$record['{$this->_dataClass['id_field']}']  . '_' . \
 		return true;
 	}
 	
+	protected function _generatePhrasesCode() {
+		if (!empty($this->_dataClass['phrases'])) {
+			$statements = '';
+			
+			foreach ($this->_dataClass['phrases'] as $phraseType) {
+				$getPhraseTitleFunction = self::generateGetPhraseTitleFunctionName($this->_addOn, $this->_config, $this->_dataClass, $phraseType);
+				$phraseTitlePrefix = DevHelper_Generator_Phrase::getPhraseName($this->_addOn, $this->_config, $this->_dataClass, $this->_dataClass['name']) . '_';
+				
+				$this->_addMethod($getPhraseTitleFunction, 'public', array('$id'), "
+		
+return \"{$phraseTitlePrefix}{\$id}_{$phraseType}\";
+		
+				");
+				
+				$statements .= "\t\t'{$phraseType}' => new XenForo_Phrase(\$this->{$getPhraseTitleFunction}(\$record['{$this->_dataClass['id_field']}'])),\n";
+			}
+			
+			$getFunctionName = self::generateGetDataFunctionName($this->_addOn, $this->_config, $this->_dataClass);
+
+			$this->_addMethod($getFunctionName, '', array(), "
+
+foreach (\$all as &\$record) {
+	\$record['phrases'] = array(
+{$statements}	);
+}
+
+
+			", '300');
+		}
+	}
+	
 	protected function _getClassName() {
 		return self::getClassName($this->_addOn, $this->_config, $this->_dataClass);
 	}
@@ -271,5 +307,10 @@ return '/{$imagePath}/' . \$record['{$this->_dataClass['id_field']}']  . '_' . \
 	
 	public static function generateCountDataFunctionName(array $addOn, DevHelper_Config_Base $config, array $dataClass) {
 		return 'count' . (empty($dataClass['camelCasePlural']) ? ('All' . $dataClass['camelCase']) : $dataClass['camelCasePlural']);
+	}
+	
+	public static function generateGetPhraseTitleFunctionName(array $addOn, DevHelper_Config_Base $config, array $dataClass, $phraseType) {
+		$camelCase = ucwords(str_replace('_', ' ', $phraseType));
+		return '_getPhraseTitleFor' . $camelCase;
 	}
 }
