@@ -242,6 +242,7 @@ EOF;
 		
 		$templateEditFormExtra = 'class="AutoValidator" data-redirect="yes"';
 		$templateEditFields = '';
+		$extraViewParamsForTemplateEdit = array();
 		$filterParams = array();
 		
 		if (!empty($this->_dataClass['phrases'])) {
@@ -285,25 +286,47 @@ EOF;
 
 	<xen:selectunit label="{xen:phrase $fieldPhraseName}:" name="{$field['name']}" value="{\${$variableName}.{$field['name']}}">
 		<xen:option value="">&nbsp;</xen:option>
-		<xen:options source="\$all{$otherDataClass['camelCase']}" />
+		<xen:options source="\$list{$otherDataClass['camelCase']}" />
 	</xen:selectunit>
 EOF;
-					$otherDataClassModelClassName = DevHelper_Generator_Code_Model::getClassName($addOn, $config, $otherDataClass);
-					$otherDataClassStuff .= <<<EOF
-'all{$otherDataClass['camelCase']}' => \$this->getModelFromCache('$otherDataClassModelClassName')->getList(),
-EOF;
+					$otherDataClassModelClassName = DevHelper_Generator_Code_Model::getClassName($this->_addOn, $this->_config, $otherDataClass);
+					$extraViewParamsForTemplateEdit["list{$otherDataClass['camelCase']}"] = "\$viewParams['list{$otherDataClass['camelCase']}'] = \$this->getModelFromCache('$otherDataClassModelClassName')->getList();";
 					continue;
 				}
 			}
 			
-			// special case with display_order
 			if ($field['name'] == 'display_order') {
-				$fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle($this->_addOn, $this->_config, $this->_dataClass, $field['name']);
+				// special case with display_order
 				$templateEditFields .= <<<EOF
 
-	<xen:spinboxunit label="{xen:phrase $fieldPhraseName}:" name="{$field['name']}" value="{\${$variableName}.{$field['name']}}" />
+	<xen:spinboxunit label="{xen:phrase display_order}:" name="{$field['name']}" value="{\${$variableName}.{$field['name']}}" />
 EOF;
 				continue;
+			}
+			
+			if ($field['type'] == 'string' && !empty($field['allowedValues'])) {
+				// render field with enum type as a list of selections
+				$fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle($this->_addOn, $this->_config, $this->_dataClass, $field['name']);
+				
+				$templateEditFields .= <<<EOF
+
+	<xen:selectunit label="{xen:phrase $fieldPhraseName}:" name="{$field['name']}" value="{\${$variableName}.{$field['name']}}">
+		<xen:option value="">&nbsp;</xen:option>
+EOF;
+
+				foreach ($field['allowedValues'] as $allowedValue) {
+					$allowedValuePhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle($this->_addOn, $this->_config, $this->_dataClass, $field['name'] . '_' . $allowedValue);
+					
+					$templateEditFields .= <<<EOF
+		<xen:option value="{$allowedValue}">{xen:phrase $allowedValuePhraseName}</xen:option>
+EOF;
+				}
+
+				$templateEditFields .= <<<EOF
+	</xen:selectunit>
+EOF;
+				
+				continue;	
 			}
 			
 			$fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle($this->_addOn, $this->_config, $this->_dataClass, $field['name']);
@@ -355,6 +378,12 @@ EOF;
 
 		$this->_generateAdminTemplate($templateEdit, $templateEditTemplate);
 		
+		// add extra code for add, edit actions
+		if (!empty($extraViewParamsForTemplateEdit)) {
+			$this->_addMethod('actionAdd', 'public', array(), implode("\n", $extraViewParamsForTemplateEdit), '100');
+			$this->_addMethod('actionEdit', 'public', array(), implode("\n", $extraViewParamsForTemplateEdit), '100');
+		}
+		
 		// add input fields to action save
 		if (!empty($this->_dataClass['phrases'])) {
 			$phraseCode = "\$phrases = \$this->_input->filterSingle('_phrases', XenForo_Input::ARRAY_SIMPLE);\n";
@@ -375,7 +404,7 @@ EOF;
 		", '100');
 		}
 		
-		if (!empty($filterparams)) {
+		if (!empty($filterParams)) {
 			$filterParamsExported = DevHelper_Generator_File::varExport($filterParams, 1);
 			$this->_addMethod('actionSave', 'public', array(), "
 
