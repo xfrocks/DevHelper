@@ -181,6 +181,7 @@ return \$this->getOrderByClause(\$choices, \$fetchOptions, \$defaultOrderSql);
 		
 		$this->_generateImageCode();
 		$this->_generatePhrasesCode();
+		$this->_generateOptionsCode();
 
 		return parent::_generate();
 	}
@@ -200,6 +201,7 @@ return \$this->getOrderByClause(\$choices, \$fetchOptions, \$defaultOrderSql);
 		
 		$this->_addMethod($getFunctionName, '', array(), "
 
+// build image urls and make them ready for all the records
 \$imageSizes = XenForo_DataWriter::create('{$dwClassName}')->getImageSizes();
 foreach (\$all as &\$record) {
 	\$record['images'] = array();
@@ -277,6 +279,7 @@ return \"{$phraseTitlePrefix}{\$id}_{$phraseType}\";
 
 			$this->_addMethod($getFunctionName, '', array(), "
 
+// prepare the phrases
 foreach (\$all as &\$record) {
 	\$record['phrases'] = array(
 {$statements}	);
@@ -284,6 +287,28 @@ foreach (\$all as &\$record) {
 
 
 			", '300');
+		}
+	}
+	
+	protected function _generateOptionsCode() {
+		$optionsFields = DevHelper_Generator_Db::getOptionsFields($this->_dataClass['fields']);
+		if (!empty($optionsFields)) {
+			$statements = '';
+			
+			foreach ($optionsFields as $optionsField) {
+				$statements .= "\t\$record['{$optionsField}'] = @unserialize(\$record['{$optionsField}']);\n";
+				$statements .= "\tif (empty(\$record['{$optionsField}'])) \$record['{$optionsField}'] = array();\n";
+			}
+			
+			$getFunctionName = self::generateGetDataFunctionName($this->_addOn, $this->_config, $this->_dataClass);
+			
+			$this->_addMethod($getFunctionName, '', array(), "
+
+// parse all the options fields
+foreach (\$all as &\$record) {
+{$statements}}
+
+			", '400');
 		}
 	}
 	

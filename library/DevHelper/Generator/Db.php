@@ -126,6 +126,18 @@ EOF;
 		}
 	}
 	
+	public static function getOptionsFields(array $fields) {
+		$optionsFields = array();
+		
+		foreach ($fields as $field) {
+			if (substr($field['name'], -8) == '_options' AND $field['type'] == XenForo_DataWriter::TYPE_SERIALIZED) {
+				$optionsFields[] = $field['name'];
+			}
+		}
+		
+		return $optionsFields;
+	}
+	
 	public static function getDataTypes() {
 		return $types = array(
 			XenForo_DataWriter::TYPE_BOOLEAN,
