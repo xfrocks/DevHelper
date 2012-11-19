@@ -3,6 +3,7 @@ abstract class DevHelper_Config_Base {
 	protected $_dataClasses = array();
 	protected $_dataPatches = array();
 	protected $_exportPath = false;
+	protected $_exportIncludes = array();
 	
 	protected function _upgrade() {
 		return true;
@@ -208,6 +209,10 @@ abstract class DevHelper_Config_Base {
 		}
 	}
 	
+	public function getExportIncludes() {
+		return $this->_exportIncludes;
+	}
+	
 	public function getPrefix() {
 		$configClassName = get_class($this);
 		$parts = explode('_', $configClassName);
@@ -230,6 +235,7 @@ abstract class DevHelper_Config_Base {
 		$dataClasses = DevHelper_Generator_File::varExport($this->_dataClasses);
 		$dataPatches = DevHelper_Generator_File::varExport($this->_dataPatches);
 		$exportPath = DevHelper_Generator_File::varExport($this->_exportPath);
+		$exportIncludes = DevHelper_Generator_File::varExport($this->_exportIncludes);
 		
 		$contents = <<<EOF
 <?php
@@ -237,6 +243,7 @@ class $className extends DevHelper_Config_Base {
 	protected \$_dataClasses = $dataClasses;
 	protected \$_dataPatches = $dataPatches;
 	protected \$_exportPath = $exportPath;
+	protected \$_exportIncludes = $exportIncludes;
 	
 	/**
 	 * Return false to trigger the upgrade!

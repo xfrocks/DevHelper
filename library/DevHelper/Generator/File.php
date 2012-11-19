@@ -188,6 +188,15 @@ class DevHelper_Generator_File {
 			}
 		}
 		
+		$exportIncludes = $config->getExportIncludes();
+		foreach ($exportIncludes as $exportInclude) {
+			$exportIncludePath = XenForo_Autoloader::getInstance()->getRootDir() . '/../' . $exportInclude;
+
+			if (is_dir($exportIncludePath)) {
+				$fileHashes = array_merge($fileHashes, XenForo_Helper_Hash::hashDirectory($exportInclude, array('.php')));
+			}
+		}
+		
 		$fileSumsClassName = self::getClassName($addOn['addon_id']) . '_FileSums';
 		$fileSumsContents = XenForo_Helper_Hash::getHashClassCode($fileSumsClassName, $fileHashes);
 		self::write($fileSumsClassName, $fileSumsContents);
@@ -205,6 +214,15 @@ class DevHelper_Generator_File {
 			'styles_default' => XenForo_Autoloader::getInstance()->getRootDir() . '/../styles/default/' . str_replace('_', '/', self::getClassName($addOn['addon_id'])),
 		);
 		
+		$exportIncludes = $config->getExportIncludes();
+		foreach ($exportIncludes as $exportInclude) {
+			$exportIncludePath = XenForo_Autoloader::getInstance()->getRootDir() . '/../' . $exportInclude;
+
+			if (file_exists($exportIncludePath) OR is_dir($exportIncludePath)) {
+				$list[$exportInclude] = $exportIncludePath;
+			}
+		}
+		
 		// generate hashes first
 		self::generateHashesFile($addOn, $config);
 		
@@ -217,7 +235,7 @@ class DevHelper_Generator_File {
 		$exportPath = realpath($exportPath);
 		$options = array(
 			'extensions' => array('php', 'htm', 'html', 'js', 'css', 'jpg', 'jpeg', 'png', 'gif'),
-			'filenames_lowercase' => array('license', 'readme', 'copyright'),
+			'filenames_lowercase' => array('license', 'readme', 'copyright', '.htaccess'),
 		);
 		
 		foreach ($list as $type => $entry) {
