@@ -266,13 +266,13 @@ return '/{$imagePath}/' . \$record['{$this->_dataClass['id_field']}']  . '_' . \
 				$getPhraseTitleFunction = self::generateGetPhraseTitleFunctionName($this->_addOn, $this->_config, $this->_dataClass, $phraseType);
 				$phraseTitlePrefix = DevHelper_Generator_Phrase::getPhraseName($this->_addOn, $this->_config, $this->_dataClass, $this->_dataClass['name']) . '_';
 				
-				$this->_addMethod($getPhraseTitleFunction, 'public', array('$id'), "
+				$this->_addMethod($getPhraseTitleFunction, 'public static', array('$id'), "
 		
 return \"{$phraseTitlePrefix}{\$id}_{$phraseType}\";
 		
 				");
 				
-				$statements .= "\t\t'{$phraseType}' => new XenForo_Phrase(\$this->{$getPhraseTitleFunction}(\$record['{$this->_dataClass['id_field']}'])),\n";
+				$statements .= "\t\t'{$phraseType}' => new XenForo_Phrase(self::{$getPhraseTitleFunction}(\$record['{$this->_dataClass['id_field']}'])),\n";
 			}
 			
 			$getFunctionName = self::generateGetDataFunctionName($this->_addOn, $this->_config, $this->_dataClass);
@@ -336,6 +336,6 @@ foreach (\$all as &\$record) {
 	
 	public static function generateGetPhraseTitleFunctionName(array $addOn, DevHelper_Config_Base $config, array $dataClass, $phraseType) {
 		$camelCase = ucwords(str_replace('_', ' ', $phraseType));
-		return '_getPhraseTitleFor' . $camelCase;
+		return 'getPhraseTitleFor' . $camelCase;
 	}
 }

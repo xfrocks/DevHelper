@@ -220,6 +220,7 @@ return array(
 			foreach ($this->_dataClass['phrases'] as $phraseType) {
 				$camelCase = ucwords(str_replace('_', ' ', $phraseType));
 				$constantName = self::generateDataPhraseConstant($this->_addOn, $this->_config, $this->_dataClass, $phraseType);
+				$modelClassName = DevHelper_Generator_Code_Model::getClassName($this->_addOn, $this->_config, $this->_dataClass);
 				$getPhraseTitleFunction = DevHelper_Generator_Code_Model::generateGetPhraseTitleFunctionName($this->_addOn, $this->_config, $this->_dataClass, $phraseType);
 				
 				$this->_addConstant($constantName, "'phrase{$camelCase}'");
@@ -228,14 +229,14 @@ return array(
 		
 \$phrase{$camelCase} = \$this->getExtraData(self::{$constantName});
 if (\$phrase{$camelCase} !== null) {
-	\$this->_insertOrUpdateMasterPhrase(\$this->_get{$this->_dataClass['camelCase']}Model()->{$getPhraseTitleFunction}(\$this->get('{$this->_dataClass['id_field']}')), \$phrase{$camelCase});
+	\$this->_insertOrUpdateMasterPhrase({$modelClassName}::{$getPhraseTitleFunction}(\$this->get('{$this->_dataClass['id_field']}')), \$phrase{$camelCase});
 }
 		
 				");
 				
 				$this->_addMethod('_postDelete', 'protected', array(), "
 
-\$this->_deleteMasterPhrase(\$this->_get{$this->_dataClass['camelCase']}Model()->{$getPhraseTitleFunction}(\$this->get('{$this->_dataClass['id_field']}')));
+\$this->_deleteMasterPhrase({$modelClassName}::{$getPhraseTitleFunction}(\$this->get('{$this->_dataClass['id_field']}')));
 		
 				");
 			}
