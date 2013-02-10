@@ -234,7 +234,13 @@ class DevHelper_Generator_File {
 		XenForo_Helper_File::createDirectory($exportPath /*, true */ );
 		$exportPath = realpath($exportPath);
 		$options = array(
-			'extensions' => array('php', 'htm', 'html', 'js', 'css', 'jpg', 'jpeg', 'png', 'gif'),
+			'extensions' => array(
+				'php',
+				'txt', 'xml',
+				'htm', 'html', 'js', 'css',
+				'jpg', 'jpeg', 'png', 'gif',
+				'swf',
+			),
 			'filenames_lowercase' => array('license', 'readme', 'copyright', '.htaccess'),
 		);
 		
