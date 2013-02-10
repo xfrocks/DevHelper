@@ -329,6 +329,19 @@ EOF;
 				continue;	
 			}
 			
+			if ($field['type'] == 'uint' AND substr($field['name'], 0, 3) === 'is_') {
+				// special case with boolean fields
+				$fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle($this->_addOn, $this->_config, $this->_dataClass, $field['name']);
+				
+				$templateEditFields .= <<<EOF
+	<xen:checkboxunit label="">
+		<xen:option name="{$field['name']}" value="1" label="{xen:phrase $fieldPhraseName}" selected="{\${$variableName}.{$field['name']}}" />
+	</xen:checkboxunit>
+EOF;
+
+				continue;
+			}
+			
 			$fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle($this->_addOn, $this->_config, $this->_dataClass, $field['name']);
 			$extra = '';
 			if ($field['type'] == XenForo_DataWriter::TYPE_STRING AND (empty($field['length']) OR $field['length'] > 255)) {
