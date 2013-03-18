@@ -235,7 +235,7 @@ class DevHelper_Generator_File {
 		$exportPath = realpath($exportPath);
 		$options = array(
 			'extensions' => array(
-				'php',
+				'php', 'inc',
 				'txt', 'xml',
 				'htm', 'html', 'js', 'css',
 				'jpg', 'jpeg', 'png', 'gif',
