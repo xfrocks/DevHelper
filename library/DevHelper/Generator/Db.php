@@ -41,6 +41,10 @@ EOF;
 		return $sql;
 	}
 	
+	public static function showTables(DevHelper_Config_Base $config, $table) {
+		return "SHOW TABLES LIKE '$table'";
+	}
+	
 	public static function showColumns(DevHelper_Config_Base $config, $table, array $field) {
 		$fieldName = $field['name'];
 		

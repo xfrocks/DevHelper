@@ -21,9 +21,10 @@ class DevHelper_Generator_Code_Installer {
 				$patch = array();
 				$patch['table'] = $table;
 				$patch['field'] = $dataPatch['name'];
+				$patch['showTablesQuery'] = DevHelper_Generator_Db::showTables($config, $table);
 				$patch['showColumnsQuery'] = DevHelper_Generator_Db::showColumns($config, $table, $dataPatch);
 				$patch['alterTableAddColumnQuery'] = DevHelper_Generator_Db::alterTableAddColumn($config, $table, $dataPatch);
-				$patch['alterTableDropColumnQuery'] = DevHelper_Generator_Db::alterTableDropColumn($config, $table, $dataPatch);;
+				$patch['alterTableDropColumnQuery'] = DevHelper_Generator_Db::alterTableDropColumn($config, $table, $dataPatch);
 				
 				$patches[] = $patch;
 			}
@@ -50,6 +51,11 @@ class $className {
 		}
 		
 		foreach (self::\$_patches as \$patch) {
+			\$tableExisted = \$db->fetchOne(\$patch['showTablesQuery']);
+			if (empty(\$tableExisted)) {
+				continue;
+			}
+			
 			\$existed = \$db->fetchOne(\$patch['showColumnsQuery']);
 			if (empty(\$existed)) {
 				\$db->query(\$patch['alterTableAddColumnQuery']);
@@ -63,6 +69,11 @@ class $className {
 		\$db = XenForo_Application::get('db');
 		
 		foreach (self::\$_patches as \$patch) {
+			\$tableExisted = \$db->fetchOne(\$patch['showTablesQuery']);
+			if (empty(\$tableExisted)) {
+				continue;
+			}
+			
 			\$existed = \$db->fetchOne(\$patch['showColumnsQuery']);
 			if (!empty(\$existed)) {
 				\$db->query(\$patch['alterTableDropColumnQuery']);
