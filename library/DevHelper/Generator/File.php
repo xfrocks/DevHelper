@@ -223,7 +223,12 @@ class DevHelper_Generator_File {
 			}
 		}
 		
-		// generate hashes first
+		// save add-on XML
+		$xmlPath = $list['library'] . '/addon-' . $addOn['addon_id'] . '.xml';
+		XenForo_Model::create('XenForo_Model_AddOn')->getAddOnXml($addOn)->save($xmlPath);
+		echo "Exported       $xmlPath ($addOn[version_string]/$addOn[version_id])\n";
+
+		// generate hashes
 		self::generateHashesFile($addOn, $config);
 		
 		$rootPath = realpath(XenForo_Application::getInstance()->getRootDir());
@@ -247,17 +252,13 @@ class DevHelper_Generator_File {
 		foreach ($list as $type => $entry) {
 			self::_fileExport($entry, $exportPath, $rootPath, $options);
 		}
-		
-		$xmlDirPath = dirname($exportPath);
-		$xmlPath = $xmlDirPath . '/addon-' . $addOn['addon_id'] . '.xml';
-		XenForo_Model::create('XenForo_Model_AddOn')->getAddOnXml($addOn)->save($xmlPath);
-		echo "Exported       $xmlPath\n"; 
-		
-		// copy one xml copy to the add-on directory (inside library)
-		if (@copy($xmlPath, $list['library'] . '/addon-' . $addOn['addon_id'] . '.xml')) {
-			echo "Copied         $xmlPath {$list['library']}\n";
+
+		// copy one xml copy to the export directory directory
+		$xmlCopyPath = dirname($exportPath) . '/addon-' . $addOn['addon_id'] . '.xml';
+		if (@copy($xmlPath, $xmlCopyPath)) {
+			echo "Copied         $xmlPath -> $xmlCopyPath\n";
 		} else {
-			echo "Can't cp       $xmlPath {$list['library']}\n";
+			echo "Can't cp       $xmlPath -> $xmlCopyPath\n";
 		}
 	}
 	
