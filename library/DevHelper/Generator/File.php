@@ -152,7 +152,7 @@ class DevHelper_Generator_File {
 	
 	public static function fileGetContents($path) {
 		$contents = file_get_contents($path);
-		$contents = preg_replace("/(\r|\n)+/", "\n", $contents);
+		// $contents = preg_replace("/(\r|\n)+/", "\n", $contents);
 		return $contents;
 	}
 	
