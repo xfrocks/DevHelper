@@ -65,7 +65,11 @@ EOF;
 	}
 	
 	public static function getTableName(DevHelper_Config_Base $config, $name) {
-		return 'xf_' . self::getFieldName($config, $name, true);
+		if (substr($name, 0, 3) === 'xf_') {
+			return $name;
+		} else {
+			return 'xf_' . self::getFieldName($config, $name, true);
+		}
 	}
 	
 	public static function getFieldName(DevHelper_Config_Base $config, $name, $ignoreDash = false) {
