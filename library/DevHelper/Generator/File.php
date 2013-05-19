@@ -338,16 +338,17 @@ class DevHelper_Generator_File {
 			}
 			
 			$output .= 'array(';
-			$first = true;
 			foreach ($arrayVars as $key => $str) {
 				if ($multiLine) {
-					if ($first) $first = false; else $output .= ',';
 					$output .= "\n" . str_repeat($linePrefix, $level + 1);
-				} else {
-					if ($first) $first = false; else $output .= ', ';
 				}
 				if (empty($noKey)) $output .= var_export($key, true) . ' => '; 
 				$output .= $str;
+				if ($multiLine) {
+					$output .= ',';
+				} else {
+					$output .= ', ';
+				}
 			}
 			
 			if ($multiLine) $output .= "\n" . str_repeat($linePrefix, $level);
