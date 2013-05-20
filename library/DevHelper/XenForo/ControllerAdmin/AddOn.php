@@ -166,7 +166,7 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
 		XenForo_Model::create('XenForo_Model_AddOn')->getAddOnXml($addOn)->save($xmlPath);
 		
 		if ($this->_input->filterSingle('run', XenForo_Input::UINT)) {
-			call_user_func(array($className, 'install'));
+			call_user_func(array($className, 'install'), $dw->getMergedData(), $dw->getMergedData());
 		}
 		
 		return $this->responseRedirect(
