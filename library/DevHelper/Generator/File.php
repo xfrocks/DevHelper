@@ -247,6 +247,7 @@ class DevHelper_Generator_File {
 				'swf',
 			),
 			'filenames_lowercase' => array('license', 'readme', 'copyright', '.htaccess'),
+			'force' => true, // always force add top level export entries
 		);
 		
 		foreach ($list as $type => $entry) {
@@ -262,7 +263,7 @@ class DevHelper_Generator_File {
 		}
 	}
 	
-	protected static function _fileExport($entry, &$exportPath, &$rootPath, &$options) {
+	protected static function _fileExport($entry, &$exportPath, &$rootPath, $options) {
 		if (empty($entry)) return;
 				
 		$relativePath = trim(str_replace($rootPath, '', $entry), '/');
@@ -280,13 +281,17 @@ class DevHelper_Generator_File {
 			}
 			
 			foreach ($children as $child) {
+				if (!empty($options['force'])) $options['force'] = false; // reset `force` option for children
 				self::_fileExport($entry . '/' . $child, $exportPath, $rootPath, $options);
 			}
-		} else {
+		} elseif (is_file($entry)) {
 			echo "Exporting      $relativePath ";
 			
 			$ext = XenForo_Helper_File::getFileExtension($entry);
-			if (in_array($ext, $options['extensions']) OR in_array(strtolower(basename($entry)), $options['filenames_lowercase'])) {
+			if (!empty($options['force'])
+				OR in_array($ext, $options['extensions'])
+				OR in_array(strtolower(basename($entry)), $options['filenames_lowercase'])
+			) {
 				if (strpos($entry, 'DevHelper') === false) {
 					$entryExportPath = $exportPath . '/' . $relativePath;
 					
