@@ -535,7 +535,15 @@ return \$grouped;
 	
 	public static function getVariableName(array $addOn, DevHelper_Config_Base $config, array $dataClass)
 	{
-		return strtolower(substr($dataClass['camelCase'], 0, 1)) . substr($dataClass['camelCase'], 1);
+		$variableName = strtolower(substr($dataClass['camelCase'], 0, 1)) . substr($dataClass['camelCase'], 1);
+		$variableNamePlural = self::getVariableNamePlural($addOn, $config, $dataClass);
+		
+		if ($variableName === $variableNamePlural)
+		{
+			$variableName = '_' . $variableName;
+		}
+		
+		return $variableName;
 	}
 	
 	public static function getVariableNamePlural(array $addOn, DevHelper_Config_Base $config, array $dataClass)
