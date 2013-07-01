@@ -146,6 +146,37 @@ EOF;
 		return $optionsFields;
 	}
 	
+	public static function getParentField($className, array $fields) {
+		$parentFieldNames = array(
+				sprintf('%s_parent_id', $className),
+				sprintf('parent_%s_id', $className),
+				'parent_id',
+		);
+
+		foreach ($fields as $field) {
+			if (in_array($field['name'], $parentFieldNames)) {
+				return $field['name'];
+			}
+		}
+		
+		return false;
+	}
+	
+	public static function getBreadcrumbField($className, array $fields) {
+		$breadcrumbFieldNames = array(
+				sprintf('%s_breadcrumb', $className),
+				'breadcrumb',
+		);
+
+		foreach ($fields as $field) {
+			if (in_array($field['name'], $breadcrumbFieldNames)) {
+				return $field['name'];
+			}
+		}
+		
+		return false;
+	}
+	
 	public static function getDataTypes() {
 		return $types = array(
 			XenForo_DataWriter::TYPE_BOOLEAN,
