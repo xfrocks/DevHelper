@@ -1,7 +1,7 @@
 <?php
 
 class DevHelper_Generator_Code_Model extends DevHelper_Generator_Code_Common
-{	
+{
 	protected $_addOn = null;
 	protected $_config = null;
 	protected $_dataClass = null;
@@ -21,7 +21,7 @@ class DevHelper_Generator_Code_Model extends DevHelper_Generator_Code_Common
 		$countFunctionName = self::generateCountDataFunctionName($this->_addOn, $this->_config, $this->_dataClass);
 
 		$tableAlias = $this->_dataClass['name'];
-		if (in_array($tableAlias, array('group')))
+		if (in_array($tableAlias, array('group', 'order')))
 		{
 			$tableAlias = '_' . $tableAlias;
 		}
@@ -120,7 +120,7 @@ return \$this->_getDb()->fetchOne(\"
 \");
 
 		");
-		
+
 		$this->_addMethod("prepare{$this->_dataClass['camelCase']}Conditions", 'public', array(
 				'$conditions' => 'array $conditions = array()',
 				'$fetchOptions' => 'array $fetchOptions = array()'
@@ -130,7 +130,7 @@ return \$this->_getDb()->fetchOne(\"
 \$db = \$this->_getDb();
 
 		");
-		
+
 		foreach ($conditionFields as $conditionField)
 		{
 			$this->_addMethod("prepare{$this->_dataClass['camelCase']}Conditions", '', array(), "
@@ -191,7 +191,7 @@ return array(
 			}
 		}
 		$orderChoices = DevHelper_Generator_File::varExport($orderChoices);
-		
+
 		$this->_addMethod("prepare{$this->_dataClass['camelCase']}OrderOptions", 'public', array(
 				'$fetchOptions' => 'array $fetchOptions = array()',
 				'$defaultOrderSql' => '$defaultOrderSql = \'\'',
@@ -254,7 +254,7 @@ foreach (\${$variableNamePlural} as &\${$variableName})
 		), "
 
 \$internal = self::_getImageInternal(\${$variableName}, \$size);
-		
+
 if (!empty(\$internal))
 {
 	return XenForo_Helper_File::getExternalDataPath() . \$internal;
@@ -306,12 +306,12 @@ return '/{$imagePath}/' . \${$variableName}['{$this->_dataClass['id_field']}']  
 		if (!empty($this->_dataClass['phrases']))
 		{
 			$statements = '';
-			
+
 			foreach ($this->_dataClass['phrases'] as $phraseType)
 			{
 				$getPhraseTitleFunction = self::generateGetPhraseTitleFunctionName($this->_addOn, $this->_config, $this->_dataClass, $phraseType);
 				$phraseTitlePrefix = DevHelper_Generator_Phrase::getPhraseName($this->_addOn, $this->_config, $this->_dataClass, $this->_dataClass['name']) . '_';
-				
+
 				$this->_addMethod($getPhraseTitleFunction, 'public static', array('$id'), "
 
 return \"{$phraseTitlePrefix}{\$id}_{$phraseType}\";
@@ -412,7 +412,7 @@ foreach (\${$variableNamePlural} as &\${$variableName})
 		$rebuildStructureFunctionName = self::generateRebuildStructureFunctionName($this->_addOn, $this->_config, $this->_dataClass);
 		$getStructureChangesFunctionName = '_getStructureChanges';
 		$groupByParentsFunctionName = self::generateGroupByParentsFunctionName($this->_addOn, $this->_config, $this->_dataClass);
-		
+
 		$this->_addMethod($rebuildStructureFunctionName, '', array(), "
 
 \$grouped = \$this->{$groupByParentsFunctionName}(\$this->{$getFunctionName}(array(), array('order' => '{$displayOrderField}')));
@@ -452,7 +452,7 @@ return \$changes;
 		), "
 
 \$nextPosition = \$startPosition;
-	
+
 if (!isset(\$grouped[\$parentId]))
 {
 	return array();
@@ -502,7 +502,7 @@ foreach (\$grouped[\$parentId] AS \$id => \${$variableName})
 return \$changes;
 
 		");
-		
+
 		$this->_addMethod($groupByParentsFunctionName, '', array(sprintf('$%s', $variableNamePlural) => sprintf('array $%s', $variableNamePlural)), "
 
 \$grouped = array();
@@ -532,20 +532,20 @@ return \$grouped;
 	{
 		return DevHelper_Generator_File::getClassName($addOn['addon_id'], 'Model_' . $dataClass['camelCase']);
 	}
-	
+
 	public static function getVariableName(array $addOn, DevHelper_Config_Base $config, array $dataClass)
 	{
 		$variableName = strtolower(substr($dataClass['camelCase'], 0, 1)) . substr($dataClass['camelCase'], 1);
 		$variableNamePlural = self::getVariableNamePlural($addOn, $config, $dataClass);
-		
+
 		if ($variableName === $variableNamePlural)
 		{
 			$variableName = '_' . $variableName;
 		}
-		
+
 		return $variableName;
 	}
-	
+
 	public static function getVariableNamePlural(array $addOn, DevHelper_Config_Base $config, array $dataClass)
 	{
 		$variableNamePlural = (empty($dataClass['camelCasePlural'])
@@ -564,12 +564,12 @@ return \$grouped;
 	{
 		return 'count' . (empty($dataClass['camelCasePlural']) ? ('All' . $dataClass['camelCase']) : $dataClass['camelCasePlural']);
 	}
-	
+
 	public static function generateRebuildStructureFunctionName(array $addOn, DevHelper_Config_Base $config, array $dataClass)
 	{
 		return 'rebuild' . $dataClass['camelCase'] . 'Structure';
 	}
-	
+
 	public static function generateGroupByParentsFunctionName(array $addOn, DevHelper_Config_Base $config, array $dataClass)
 	{
 		return 'group' . (empty($dataClass['camelCasePlural']) ? ('All' . $dataClass['camelCase']) : $dataClass['camelCasePlural']) . 'ByParents';
