@@ -286,10 +286,10 @@ class DevHelper_Generator_File {
 			}
 		} elseif (is_file($entry)) {
 			echo "Exporting      $relativePath ";
-			
+
 			$ext = XenForo_Helper_File::getFileExtension($entry);
 			if (!empty($options['force'])
-				OR in_array($ext, $options['extensions'])
+				OR (in_array($ext, $options['extensions']) AND strpos(basename($entry), '.') !== 0)
 				OR in_array(strtolower(basename($entry)), $options['filenames_lowercase'])
 			) {
 				if (strpos($entry, 'DevHelper') === false) {
