@@ -68,23 +68,59 @@ class DevHelper_Generator_File {
 				$className = preg_replace('/[^a-zA-Z_]/', '', $className);
 				
 				// read root directory (./library), trying to pickup matched directory name (case insensitive)
-				$classNameLower = strtolower($className);
-				$classNameLower2 = str_replace('_', '', $classNameLower); // also support id likes add_on to map to folder AddOn
-				$dh = opendir(XenForo_Autoloader::getInstance()->getRootDir());
-				while ($file = readdir($dh)) {
-					$fileLower = strtolower($file);
-					if ($fileLower == $classNameLower OR $fileLower == $classNameLower2) {
-						// we found it!
-						$className = $file;
+				$found = self::getClassNameInDirectory(XenForo_Autoloader::getInstance()->getRootDir(), $className);
+				if ($found !== false) {
+					$className = $found;
+				}
+				
+				if (empty($found)) {
+					// try harder, support addon_id to be mapped to xenforo/library/Addon/Id (case insensitive)
+					if (strpos($className, '_') !== false) {
+						$parts = explode('_', $className);
+						$partsCount = count($parts);
+						$partsFound = array();
+						while(!empty($parts)) {
+							$part = array_shift($parts);
+							$partDir = realpath(XenForo_Autoloader::getInstance()->getRootDir() . '/' . implode('/', $partsFound));
+							$partFound = self::getClassNameInDirectory($partDir, $part);
+							if ($partFound === false) {
+								// failed...
+								break;
+							}
+							
+							$partsFound[$part] = $partFound;
+						}
+						
+						if (count($partsFound) === $partsCount) {
+							$found = $className = implode('_', $partsFound); 
+						}
 					}
 				}
-				closedir($dh);
 			}
 			
 			$classNames[$hash] = $className;
 		}
 		
 		return $classNames[$hash];
+	}
+
+	public static function getClassNameInDirectory($dir, $className) {
+		$found = false;
+
+		$classNameLower = strtolower($className);
+		$classNameLower2 = str_replace('_', '', $classNameLower); // also support id likes add_on to map to folder AddOn
+		$dh = opendir($dir);
+		while ($file = readdir($dh)) {
+			$fileLower = strtolower($file);
+			if ($fileLower == $classNameLower OR $fileLower == $classNameLower2) {
+				// we found it!
+				$found = $file;
+				break;
+			}
+		}
+		closedir($dh);
+		
+		return $found;
 	}
 	
 	public static function getClassPath($className) {
