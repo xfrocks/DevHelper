@@ -91,12 +91,6 @@
 <a href="{xen:adminlink 'add-ons/generate-installer', $addOn}">{xen:phrase devhelper_generate_installer}</a>
 <a href="{xen:adminlink 'add-ons/generate-installer', $addOn, 'run=1'}">{xen:phrase devhelper_run_installer}</a>
 </div>]]></template>
-    <template title="devhelper_addon_edit"><![CDATA[<xen:hook name="devhelper_search_and_replace"></form></xen:hook>
-
-<div>
-<a href="{xen:adminlink 'add-ons/data-manager', $addOn}">{xen:phrase devhelper_data_manager}</a>
-<a href="{xen:adminlink 'add-ons/file-export', $addOn}">{xen:phrase devhelper_file_export}</a>
-</div>]]></template>
     <template title="devhelper_addon_generate_controller_admin"><![CDATA[<xen:title>{$addOn.title} - {xen:phrase devhelper_data_manager}</xen:title>
 
 <xen:navigation>
@@ -139,27 +133,68 @@
 }
 .DevHelper_DataClassFile h4 a {
 	padding-left: 40px !important;
-}]]></template>
-    <template title="devhelper_admin_template_edit"><![CDATA[<xen:include template="devhelper_template_edit" />]]></template>
-    <template title="devhelper_template_edit"><![CDATA[<xen:require js="js/DevHelper/CodeMirror/lib/codemirror.js" />
+}
+
+.CodeMirror.DevHelper_CodeMirror_TextArea {
+	height: auto;
+}
+	.CodeMirror.DevHelper_CodeMirror_TextArea .CodeMirror-scroll {
+		overflow-y: hidden;
+		overflow-x: auto;
+	}]]></template>
+    <template title="devhelper_code_mirror"><![CDATA[<xen:require js="js/DevHelper/CodeMirror/lib/codemirror.js" />
 <xen:require js="js/DevHelper/CodeMirror/mode/xml/xml.js" />
 <xen:require js="js/DevHelper/CodeMirror/mode/javascript/javascript.js" />
 <xen:require js="js/DevHelper/CodeMirror/mode/htmlmixed/htmlmixed.js" />
 <xen:require js="js/DevHelper/CodeMirror/mode/css/css.js" />
 <xen:require js="js/DevHelper/template_edit.js" />
 
-<xen:container var="$DevHelper_requiresCodeMirrorCSS">1</xen:container>]]></template>
+<xen:require css="devhelper_admin.css" />
+<xen:container var="$head.DevHelper_CodeMirrorCSS">
+	<link rel="stylesheet" href="js/DevHelper/CodeMirror/lib/codemirror.css" />
+</xen:container>]]></template>
   </admin_templates>
   <admin_template_modifications>
-    <modification template="helper_addon_unit" modification_key="devhelper_helper_addon_unit" description="Hide disabled add-ons from add-on list." execution_order="10" enabled="1" action="preg_replace">
+    <modification template="addon_edit" modification_key="devhelper_addon_edit_topctrl" description="Insert top control buttons." execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[</xen:topctrl>]]></find>
+      <replace><![CDATA[<a href="{xen:adminlink 'add-ons/data-manager', $addOn}" class="button">{xen:phrase devhelper_data_manager}</a>
+<a href="{xen:adminlink 'add-ons/file-export', $addOn}" class="button">{xen:phrase devhelper_file_export}</a>
+
+$0]]></replace>
+    </modification>
+    <modification template="addon_list" modification_key="devhelper_addon_list_popup" description="Insert popup control buttons." execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[</xen:popup>]]></find>
+      <replace><![CDATA[<xen:link href="{xen:adminlink 'add-ons/data-manager', $addOn}" displayif="{$canAccessDevelopment}">{xen:phrase devhelper_data_manager}</xen:link>
+<xen:link href="{xen:adminlink 'add-ons/file-export', $addOn}" displayif="{$canAccessDevelopment}">{xen:phrase devhelper_file_export}</xen:link>
+
+$0]]></replace>
+    </modification>
+    <modification template="admin_template_edit" modification_key="devhelper_admin_template_edit_code_mirror" description="CodeMirror integration." execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[<xen:require js="js/xenforo/template_edit.js" />]]></find>
+      <replace><![CDATA[$0
+
+<xen:include template="devhelper_code_mirror" />]]></replace>
+    </modification>
+    <modification template="base_template_modification_edit" modification_key="devhelper_base_template_modification_edit_cm" description="CodeMirror integration." execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[<xen:require css="base_template_modification.css" />]]></find>
+      <replace><![CDATA[$0
+
+<xen:include template="devhelper_code_mirror" />]]></replace>
+    </modification>
+    <modification template="helper_addon_unit" modification_key="devhelper_helper_addon_unit_auto_hide" description="Hide disabled add-ons from add-on list." execution_order="10" enabled="1" action="preg_replace">
       <find><![CDATA[#<xen:selectunit(.|\r|\n)+</xen:selectunit>#]]></find>
       <replace><![CDATA[<xen:hook name="devhelper_devhelper_helper_addon_unit" params="{xen:array 'addOnOptions=$addOnOptions'}">$0</xen:hook>]]></replace>
+    </modification>
+    <modification template="template_edit" modification_key="devhelper_template_edit_code_mirror" description="CodeMirror integration." execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[<xen:require js="js/xenforo/template_edit.js" />]]></find>
+      <replace><![CDATA[$0
+
+<xen:include template="devhelper_code_mirror" />]]></replace>
     </modification>
   </admin_template_modifications>
   <code_events/>
   <code_event_listeners>
     <listener event_id="load_class" execute_order="10" callback_class="DevHelper_Listener" callback_method="load_class" active="1" hint="" description=""/>
-    <listener event_id="template_create" execute_order="10" callback_class="DevHelper_Listener" callback_method="template_create" active="1" hint="" description=""/>
     <listener event_id="template_hook" execute_order="10" callback_class="DevHelper_Listener" callback_method="template_hook" active="1" hint="" description=""/>
     <listener event_id="template_post_render" execute_order="9999" callback_class="DevHelper_Listener" callback_method="template_post_render" active="1" hint="" description=""/>
   </code_event_listeners>
