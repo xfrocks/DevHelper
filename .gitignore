@@ -1,5 +1,4 @@
 .DS_Store
-library/DevHelper/addon-devHelper.xml
 *.devhelper
 library/DevHelper/DevHelper
 FileSums.php
