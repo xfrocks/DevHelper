@@ -284,6 +284,7 @@ class DevHelper_Generator_File {
 			),
 			'filenames_lowercase' => array('license', 'readme', 'copyright', '.htaccess'),
 			'force' => true, // always force add top level export entries
+			'addon_id' => $addOn['addon_id'],
 		);
 		
 		foreach ($list as $type => $entry) {
@@ -328,7 +329,15 @@ class DevHelper_Generator_File {
 				OR (in_array($ext, $options['extensions']) AND strpos(basename($entry), '.') !== 0)
 				OR in_array(strtolower(basename($entry)), $options['filenames_lowercase'])
 			) {
-				if (strpos($entry, 'DevHelper') === false) {
+				$isDevHelper = false;
+				
+				if ($options['addon_id'] == 'devHelper') {
+					$isDevHelper = (strpos($entry, 'DevHelper/DevHelper') !== false);
+				} else {
+					$isDevHelper = (strpos($entry, 'DevHelper') !== false);
+				}
+				
+				if (!$isDevHelper) {
 					$entryExportPath = $exportPath . '/' . $relativePath;
 					
 					$entryExportDir = dirname($entryExportPath);
