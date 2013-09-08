@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="devHelper" title="DevHelper" version_string="20130905" version_id="8" url="" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
+<addon addon_id="devHelper" title="DevHelper" version_string="20130908" version_id="9" url="" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -150,7 +150,12 @@
 
 <xen:container var="$DevHelper_requiresCodeMirrorCSS">1</xen:container>]]></template>
   </admin_templates>
-  <admin_template_modifications/>
+  <admin_template_modifications>
+    <modification template="helper_addon_unit" modification_key="devhelper_helper_addon_unit" description="Hide disabled add-ons from add-on list." execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#<xen:selectunit(.|\r|\n)+</xen:selectunit>#]]></find>
+      <replace><![CDATA[<xen:hook name="devhelper_devhelper_helper_addon_unit" params="{xen:array 'addOnOptions=$addOnOptions'}">$0</xen:hook>]]></replace>
+    </modification>
+  </admin_template_modifications>
   <code_events/>
   <code_event_listeners>
     <listener event_id="load_class" execute_order="10" callback_class="DevHelper_Listener" callback_method="load_class" active="1" hint="" description=""/>
