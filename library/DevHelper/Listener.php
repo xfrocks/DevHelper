@@ -16,40 +16,12 @@ class DevHelper_Listener
 		}
 	}
 
-	public static function template_create($templateName, array &$params, XenForo_Template_Abstract $template)
-	{
-		switch ($templateName)
-		{
-			case 'addon_edit':
-			case 'template_edit':
-			case 'admin_template_edit':
-				$template->preloadTemplate('devhelper_' . $templateName);
-				break;
-		}
-	}
-
 	public static function template_post_render($templateName, &$content, array &$containerData, XenForo_Template_Abstract $template)
 	{
 		switch ($templateName)
 		{
-			case 'addon_edit':
-			case 'template_edit':
-			case 'admin_template_edit':
-				$ourTemplate = $template->create('devhelper_' . $templateName, $template->getParams());
-				$rendered = $ourTemplate->render();
-				self::_injectHtml($content, $rendered);
-				break;
 			case 'PAGE_CONTAINER':
 				DevHelper_Generator_File::minifyJs($template);
-
-				$params = $template->getParams();
-				if (!empty($params['DevHelper_requiresCodeMirrorCSS']))
-				{
-					$search = '</head>';
-					$insert = '<link rel="stylesheet" href="js/DevHelper/CodeMirror/lib/codemirror.css" />';
-					$content = str_replace($search, $insert . $search, $content);
-				}
-
 				break;
 		}
 	}
@@ -58,10 +30,6 @@ class DevHelper_Listener
 	{
 		switch ($hookName)
 		{
-			case 'devhelper_search_and_replace':
-				$markup = '<!-- search and replace -->';
-				$contents = $markup . $contents . $markup;
-				break;
 			case 'devhelper_devhelper_helper_addon_unit':
 				self::_filterDisabledAddOnOptions($contents);
 				break;
