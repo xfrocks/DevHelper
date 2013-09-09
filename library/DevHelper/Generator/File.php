@@ -65,7 +65,7 @@ class DevHelper_Generator_File {
 				$className = self::getClassName($addOnId) . '_' . $subClassName;
 			} else {
 				$className = $addOnId;
-				$className = preg_replace('/[^a-zA-Z_]/', '', $className);
+				$className = preg_replace('/[^a-zA-Z_0-9]/', '', $className);
 				
 				// read root directory (./library), trying to pickup matched directory name (case insensitive)
 				$found = self::getClassNameInDirectory(XenForo_Autoloader::getInstance()->getRootDir(), $className);
