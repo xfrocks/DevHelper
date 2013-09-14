@@ -21,7 +21,10 @@ class DevHelper_Generator_Code_Model extends DevHelper_Generator_Code_Common
 		$countFunctionName = self::generateCountDataFunctionName($this->_addOn, $this->_config, $this->_dataClass);
 
 		$tableAlias = $this->_dataClass['name'];
-		if (in_array($tableAlias, array('group', 'order')))
+		if (in_array($tableAlias, array(
+			'group',
+			'order'
+		)))
 		{
 			$tableAlias = '_' . $tableAlias;
 		}
@@ -33,14 +36,28 @@ class DevHelper_Generator_Code_Model extends DevHelper_Generator_Code_Common
 		$this->_setClassName($className);
 		$this->_setBaseClass('XenForo_Model');
 
-		$this->_addCustomizableMethod("_{$getFunctionName}Customized", 'protected', array('array &$data', 'array $fetchOptions'));
-		$this->_addCustomizableMethod("_prepare{$this->_dataClass['camelCase']}ConditionsCustomized", 'protected', array('array &$sqlConditions', 'array $conditions', 'array $fetchOptions'));
-		$this->_addCustomizableMethod("_prepare{$this->_dataClass['camelCase']}FetchOptionsCustomized", 'protected', array('&$selectFields', '&$joinTables', 'array $fetchOptions'));
-		$this->_addCustomizableMethod("_prepare{$this->_dataClass['camelCase']}OrderOptionsCustomized", 'protected', array('array &$choices', 'array &$fetchOptions'));
+		$this->_addCustomizableMethod("_{$getFunctionName}Customized", 'protected', array(
+			'array &$data',
+			'array $fetchOptions',
+		));
+		$this->_addCustomizableMethod("_prepare{$this->_dataClass['camelCase']}ConditionsCustomized", 'protected', array(
+			'array &$sqlConditions',
+			'array $conditions',
+			'array $fetchOptions',
+		));
+		$this->_addCustomizableMethod("_prepare{$this->_dataClass['camelCase']}FetchOptionsCustomized", 'protected', array(
+			'&$selectFields',
+			'&$joinTables',
+			'array $fetchOptions',
+		));
+		$this->_addCustomizableMethod("_prepare{$this->_dataClass['camelCase']}OrderOptionsCustomized", 'protected', array(
+			'array &$choices',
+			'array &$fetchOptions',
+		));
 
 		$this->_addMethod('getList', 'public', array(
-				'$conditions' => 'array $conditions = array()',
-				'$fetchOptions' => 'array $fetchOptions = array()'
+			'$conditions' => 'array $conditions = array()',
+			'$fetchOptions' => 'array $fetchOptions = array()',
 		), "
 
 \${$variableNamePlural} = \$this->{$getFunctionName}(\$conditions, \$fetchOptions);
@@ -48,18 +65,17 @@ class DevHelper_Generator_Code_Model extends DevHelper_Generator_Code_Common
 
 foreach (\${$variableNamePlural} as \$id => \${$variableName})
 {
-	\$list[\$id] = \${$variableName}" . (empty($this->_dataClass['title_field'])
-		?("['{$this->_dataClass['id_field']}']")
-		:((is_array($this->_dataClass['title_field'])
-		? ("['{$this->_dataClass['title_field'][0]}']['{$this->_dataClass['title_field'][1]}']")
-		: ("['{$this->_dataClass['title_field']}']")))) . ";
+	\$list[\$id] = \${$variableName}" . (empty($this->_dataClass['title_field']) ? ("['{$this->_dataClass['id_field']}']") : ((is_array($this->_dataClass['title_field']) ? ("['{$this->_dataClass['title_field'][0]}']['{$this->_dataClass['title_field'][1]}']") : ("['{$this->_dataClass['title_field']}']")))) . ";
 }
 
 return \$list;
 
 		");
 
-		$this->_addMethod("get{$this->_dataClass['camelCase']}ById", 'public', array('$id', '$fetchOptions' => 'array $fetchOptions = array()'), "
+		$this->_addMethod("get{$this->_dataClass['camelCase']}ById", 'public', array(
+			'$id',
+			'$fetchOptions' => 'array $fetchOptions = array()',
+		), "
 
 \${$variableNamePlural} = \$this->{$getFunctionName}(array ('{$this->_dataClass['id_field']}' => \$id), \$fetchOptions);
 
@@ -68,8 +84,8 @@ return reset(\${$variableNamePlural});
 		");
 
 		$this->_addMethod($getFunctionName, 'public', array(
-				'$conditions' => 'array $conditions = array()',
-				'$fetchOptions' => 'array $fetchOptions = array()'
+			'$conditions' => 'array $conditions = array()',
+			'$fetchOptions' => 'array $fetchOptions = array()',
 		), "
 
 \$whereConditions = \$this->prepare{$this->_dataClass['camelCase']}Conditions(\$conditions, \$fetchOptions);
@@ -91,8 +107,8 @@ return reset(\${$variableNamePlural});
 		", '001');
 
 		$this->_addMethod($getFunctionName, 'public', array(
-				'$conditions' => 'array $conditions = array()',
-				'$fetchOptions' => 'array $fetchOptions = array()'
+			'$conditions' => 'array $conditions = array()',
+			'$fetchOptions' => 'array $fetchOptions = array()',
 		), "
 
 \$this->_{$getFunctionName}Customized(\${$variableNamePlural}, \$fetchOptions);
@@ -102,8 +118,8 @@ return \${$variableNamePlural};
 		", '999');
 
 		$this->_addMethod($countFunctionName, 'public', array(
-				'$conditions' => 'array $conditions = array()',
-				'$fetchOptions' => 'array $fetchOptions = array()'
+			'$conditions' => 'array $conditions = array()',
+			'$fetchOptions' => 'array $fetchOptions = array()',
 		), "
 
 \$whereConditions = \$this->prepare{$this->_dataClass['camelCase']}Conditions(\$conditions, \$fetchOptions);
@@ -122,8 +138,8 @@ return \$this->_getDb()->fetchOne(\"
 		");
 
 		$this->_addMethod("prepare{$this->_dataClass['camelCase']}Conditions", 'public', array(
-				'$conditions' => 'array $conditions = array()',
-				'$fetchOptions' => 'array $fetchOptions = array()'
+			'$conditions' => 'array $conditions = array()',
+			'$fetchOptions' => 'array $fetchOptions = array()',
 		), "
 
 \$sqlConditions = array();
@@ -162,9 +178,7 @@ return \$this->getConditionsForClause(\$sqlConditions);
 
 		");
 
-		$this->_addMethod("prepare{$this->_dataClass['camelCase']}FetchOptions", 'public', array(
-				'$fetchOptions' => 'array $fetchOptions = array()'
-		), "
+		$this->_addMethod("prepare{$this->_dataClass['camelCase']}FetchOptions", 'public', array('$fetchOptions' => 'array $fetchOptions = array()'), "
 
 \$selectFields = '';
 \$joinTables = '';
@@ -193,8 +207,8 @@ return array(
 		$orderChoices = DevHelper_Generator_File::varExport($orderChoices);
 
 		$this->_addMethod("prepare{$this->_dataClass['camelCase']}OrderOptions", 'public', array(
-				'$fetchOptions' => 'array $fetchOptions = array()',
-				'$defaultOrderSql' => '$defaultOrderSql = \'\'',
+			'$fetchOptions' => 'array $fetchOptions = array()',
+			'$defaultOrderSql' => '$defaultOrderSql = \'\'',
 		), "
 
 \$choices = {$orderChoices};
@@ -249,8 +263,8 @@ foreach (\${$variableNamePlural} as &\${$variableName})
 		", '100');
 
 		$this->_addMethod('getImageFilePath', 'public static', array(
-				sprintf('$%s', $variableName) => sprintf('array $%s', $variableName),
-				'$size' => '$size = \'l\''
+			sprintf('$%s', $variableName) => sprintf('array $%s', $variableName),
+			'$size' => '$size = \'l\'',
 		), "
 
 \$internal = self::_getImageInternal(\${$variableName}, \$size);
@@ -267,8 +281,8 @@ else
 		");
 
 		$this->_addMethod('getImageUrl', 'public static', array(
-				sprintf('$%s', $variableName) => sprintf('array $%s', $variableName),
-				'$size' => '$size = \'l\''
+			sprintf('$%s', $variableName) => sprintf('array $%s', $variableName),
+			'$size' => '$size = \'l\'',
 		), "
 
 \$internal = self::_getImageInternal(\${$variableName}, \$size);
@@ -285,8 +299,8 @@ else
 		");
 
 		$this->_addMethod('_getImageInternal', 'protected static', array(
-				sprintf('$%s', $variableName) => sprintf('array $%s', $variableName),
-				'$size'
+			sprintf('$%s', $variableName) => sprintf('array $%s', $variableName),
+			'$size',
 		), "
 
 if (empty(\${$variableName}['{$this->_dataClass['id_field']}']) OR empty(\${$variableName}['{$imageField}'])) return '';
@@ -378,7 +392,8 @@ foreach (\${$variableNamePlural} as &\${$variableName})
 		$depthField = false;
 		$lftField = false;
 		$rgtField = false;
-		$breadcrumbField = DevHelper_Generator_Db::getBreadcrumbField($this->_dataClass['name'], $this->_dataClass['fields']);;
+		$breadcrumbField = DevHelper_Generator_Db::getBreadcrumbField($this->_dataClass['name'], $this->_dataClass['fields']);
+		;
 		foreach ($this->_dataClass['fields'] as $field)
 		{
 			if ($field['name'] == 'display_order')
@@ -433,22 +448,24 @@ return \$changes;
 		");
 
 		$titleFieldBreadcrumb = '';
-		if (!empty($this->_dataClass['title_field'])) {
+		if (!empty($this->_dataClass['title_field']))
+		{
 			$titleFieldBreadcrumb = "\n\t\t\t\t\t'{$this->_dataClass['title_field']}' => \${$variableName}['{$this->_dataClass['title_field']}'],";
 		}
 
 		$breadcrumbStatements = '';
-		if (!empty($breadcrumbField)) {
+		if (!empty($breadcrumbField))
+		{
 			$breadcrumbStatements = "\n\tif (\${$variableName}['category_breadcrumb'] != \$serializedBreadcrumb)\n\t{\n\t\t\$thisChanges['category_breadcrumb'] = \$serializedBreadcrumb;\n\t}";
 		}
 
 		$this->_addMethod($getStructureChangesFunctionName, 'protected', array(
-				'$grouped' => 'array $grouped',
-				'$parentId' => '$parentId = 0',
-				'$depth' => '$depth = 0',
-				'$startPosition' => '$startPosition = 1',
-				'nextPosition' => '&$nextPosition = 0',
-				'$breadcrumb' => 'array $breadcrumb = array()',
+			'$grouped' => 'array $grouped',
+			'$parentId' => '$parentId = 0',
+			'$depth' => '$depth = 0',
+			'$startPosition' => '$startPosition = 1',
+			'nextPosition' => '&$nextPosition = 0',
+			'$breadcrumb' => 'array $breadcrumb = array()',
 		), "
 
 \$nextPosition = \$startPosition;
@@ -525,7 +542,10 @@ return \$grouped;
 	{
 		$g = new self($addOn, $config, $dataClass);
 
-		return array($g->_getClassName(), $g->_generate());
+		return array(
+			$g->_getClassName(),
+			$g->_generate()
+		);
 	}
 
 	public static function getClassName(array $addOn, DevHelper_Config_Base $config, array $dataClass)
@@ -548,9 +568,7 @@ return \$grouped;
 
 	public static function getVariableNamePlural(array $addOn, DevHelper_Config_Base $config, array $dataClass)
 	{
-		$variableNamePlural = (empty($dataClass['camelCasePlural'])
-			? ('All' . $dataClass['camelCase'])
-			: ($dataClass['camelCasePlural']));
+		$variableNamePlural = (empty($dataClass['camelCasePlural']) ? ('All' . $dataClass['camelCase']) : ($dataClass['camelCasePlural']));
 
 		return strtolower(substr($variableNamePlural, 0, 1)) . substr($variableNamePlural, 1);
 	}
@@ -580,4 +598,5 @@ return \$grouped;
 		$camelCase = ucwords(str_replace('_', ' ', $phraseType));
 		return 'getPhraseTitleFor' . $camelCase;
 	}
+
 }

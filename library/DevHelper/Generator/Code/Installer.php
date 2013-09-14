@@ -15,7 +15,7 @@ class DevHelper_Generator_Code_Installer
 			$table['dropQuery'] = DevHelper_Generator_Db::dropTable($config, $dataClass);
 
 			$tables[$dataClass['name']] = $table;
-		} 
+		}
 		$tables = DevHelper_Generator_File::varExport($tables);
 
 		$patches = array();
@@ -119,11 +119,15 @@ class $className
 }
 EOF;
 
-		return array($className, $contents);
+		return array(
+			$className,
+			$contents
+		);
 	}
 
 	public static function getClassName(array $addOn, DevHelper_Config_Base $config)
 	{
 		return DevHelper_Generator_File::getClassName($addOn['addon_id'], 'Installer');
 	}
+
 }

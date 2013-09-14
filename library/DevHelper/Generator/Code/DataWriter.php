@@ -1,7 +1,7 @@
 <?php
 
 class DevHelper_Generator_Code_DataWriter extends DevHelper_Generator_Code_Common
-{	
+{
 	protected $_addOn = null;
 	protected $_config = null;
 	protected $_dataClass = null;
@@ -41,7 +41,7 @@ return array(
 );
 
 		");
-		
+
 		$this->_addMethod('_getExistingData', 'protected', array('$data'), "
 
 if (!\$id = \$this->_getExistingPrimaryKey(\$data, '{$this->_dataClass['id_field']}'))
@@ -52,7 +52,7 @@ if (!\$id = \$this->_getExistingPrimaryKey(\$data, '{$this->_dataClass['id_field
 return array('$tableName' => \$this->_get{$this->_dataClass['camelCase']}Model()->get{$this->_dataClass['camelCase']}ById(\$id));
 
 		");
-		
+
 		$this->_addMethod('_getUpdateCondition', 'protected', array('$tableName'), "
 
 \$conditions = array();
@@ -65,20 +65,20 @@ foreach ($primaryKey as \$field)
 return implode(' AND ', \$conditions);
 
 		");
-		
+
 		$this->_addMethod("_get{$this->_dataClass['camelCase']}Model", 'protected', array(), "
 
 return \$this->getModelFromCache('$modelClassName');
 
 		");
-		
+
 		$this->_generateImageCode();
 		$this->_generatePhrasesCode();
 		$this->_generateParentCode();
-		
+
 		return parent::_generate();
 	}
-	
+
 	protected function _generateImageCode()
 	{
 		$imageField = DevHelper_Generator_Db::getImageField($this->_dataClass['fields']);
@@ -174,7 +174,7 @@ if (count(\$outputFiles) != count(\$imageSizes))
 return \$outputFiles;
 
 		");
-		
+
 		$this->_addMethod('_moveImages', 'protected', array('$uploaded'), "
 
 if (is_array(\$uploaded))
@@ -202,7 +202,7 @@ if (is_array(\$uploaded))
 }
 
 		");
-		
+
 		$this->_addMethod('_postSave', 'protected', array(), "
 
 \$uploaded = \$this->getExtraData(self::DATA_IMAGE_PREPARED);
@@ -223,7 +223,7 @@ if (\$uploaded)
 }
 
 		");
-		
+
 		$this->_addMethod('_postDelete', 'protected', array(), "
 
 \$existingData = \$this->getMergedExistingData();
@@ -234,7 +234,7 @@ foreach (array_keys(\$this->getImageSizes()) as \$sizeCode)
 }
 
 		");
-		
+
 		$this->_addMethod('getImageSizes', 'public', array(), "
 
 return array(
@@ -245,7 +245,7 @@ return array(
 );
 
 		");
-		
+
 		return true;
 	}
 
@@ -271,7 +271,7 @@ if (\$phrase{$camelCase} !== null)
 }
 
 				");
-				
+
 				$this->_addMethod('_postDelete', 'protected', array(), "
 
 \$this->_deleteMasterPhrase({$modelClassName}::{$getPhraseTitleFunction}(\$this->get('{$this->_dataClass['id_field']}')));
@@ -289,12 +289,13 @@ if (\$phrase{$camelCase} !== null)
 			// no parent field...
 			return '';
 		}
-		
+
 		$displayOrderField = false;
 		$depthField = false;
 		$lftField = false;
 		$rgtField = false;
-		$breadcrumbField = DevHelper_Generator_Db::getBreadcrumbField($this->_dataClass['name'], $this->_dataClass['fields']);;
+		$breadcrumbField = DevHelper_Generator_Db::getBreadcrumbField($this->_dataClass['name'], $this->_dataClass['fields']);
+		;
 		foreach ($this->_dataClass['fields'] as $field)
 		{
 			if ($field['name'] == 'display_order')
@@ -328,7 +329,7 @@ if (\$phrase{$camelCase} !== null)
 		{
 			$titleFieldPostSaveConditions = "\n\tOR \$this->isChanged('{$this->_dataClass['title_field']}')";
 		}
-		
+
 		$this->_addMethod('_postSave', 'protected', array(), "
 
 if (\$this->isInsert()
@@ -340,7 +341,7 @@ if (\$this->isInsert()
 }
 
 		");
-		
+
 		$this->_addMethod('_postDelete', 'protected', array(), "
 
 \$this->_db->update('{$tableName}',
@@ -352,27 +353,31 @@ if (\$this->isInsert()
 
 		");
 	}
-	
+
 	protected function _getClassName()
 	{
 		return self::getClassName($this->_addOn, $this->_config, $this->_dataClass);
 	}
-	
+
 	public static function generate(array $addOn, DevHelper_Config_Base $config, array $dataClass)
 	{
 		$g = new self($addOn, $config, $dataClass);
-		
-		return array($g->_getClassName(), $g->_generate());
+
+		return array(
+			$g->_getClassName(),
+			$g->_generate()
+		);
 	}
-	
+
 	public static function getClassName(array $addOn, DevHelper_Config_Base $config, array $dataClass)
 	{
 		return DevHelper_Generator_File::getClassName($addOn['addon_id'], 'DataWriter_' . $dataClass['camelCase']);
 	}
-	
+
 	public static function generateDataPhraseConstant(array $addOn, DevHelper_Config_Base $config, array $dataClass, $phraseType)
 	{
 		$camelCase = ucwords(str_replace('_', ' ', $phraseType));
 		return 'DATA_PHRASE_' . strtoupper($phraseType);
 	}
+
 }

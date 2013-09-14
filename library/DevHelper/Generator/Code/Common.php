@@ -93,7 +93,10 @@ class DevHelper_Generator_Code_Common
 		}
 
 		$output .= "\n";
-		$output .= "}"; // class ClassName {
+
+		// class ClassName {
+		$output .= "}";
+
 		return $output;
 	}
 
@@ -161,7 +164,9 @@ class DevHelper_Generator_Code_Common
 				}
 			}
 
-			$codeBlockOutput = rtrim($codeBlockOutput); // remove the last empty lines
+			// remove the last empty lines
+			$codeBlockOutput = rtrim($codeBlockOutput);
+
 			if ($isFirstCodeBlock)
 			{
 				$isFirstCodeBlock = false;
@@ -225,9 +230,7 @@ class DevHelper_Generator_Code_Common
 	{
 		$this->_addMethodCommon($this->_customizableMethods, $name, $visibility, $params);
 
-		$this->_customizableMethods[$name]['code'] = array(
-				'// customized code goes here',
-		);
+		$this->_customizableMethods[$name]['code'] = array('// customized code goes here');
 	}
 
 	protected function _addMethodCommon(array &$methods, $name, $visibility, $params)
@@ -235,20 +238,30 @@ class DevHelper_Generator_Code_Common
 		if (!isset($methods[$name]))
 		{
 			$methods[$name] = array(
-					'name' => $name,
-					'visibility' => '',
-					'params' => array(),
-					'code' => array(),
+				'name' => $name,
+				'visibility' => '',
+				'params' => array(),
+				'code' => array(),
 			);
 		}
 
 		// we have to use the broader visibility between
-		static $visibilities = array('', 'private', 'protected', 'public', 'protected static', 'public static');
+		static $visibilities = array(
+			'',
+			'private',
+			'protected',
+			'public',
+			'protected static',
+			'public static'
+		);
 		$oldVisibilityLevel = array_search($methods[$name]['visibility'], $visibilities);
 		$newVisibilityLevel = array_search($visibility, $visibilities);
-		$max = max(array($oldVisibilityLevel, $newVisibilityLevel));
+		$max = max(array(
+			$oldVisibilityLevel,
+			$newVisibilityLevel
+		));
 		$methods[$name]['visibility'] = $visibilities[$max];
-			
+
 		foreach ($params as $paramName => $paramDeclare)
 		{
 			if (is_numeric($paramName))
@@ -259,4 +272,5 @@ class DevHelper_Generator_Code_Common
 			$methods[$name]['params'][$paramName] = $paramDeclare;
 		}
 	}
+
 }

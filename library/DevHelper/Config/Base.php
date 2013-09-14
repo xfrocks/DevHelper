@@ -28,7 +28,8 @@ abstract class DevHelper_Config_Base
 	{
 		$name = $this->_normalizeDbName($name);
 
-		if (!$this->checkDataClassExists($name)) return array();
+		if (!$this->checkDataClassExists($name))
+			return array();
 
 		$dataClass = $this->_dataClasses[$name];
 
@@ -53,24 +54,24 @@ abstract class DevHelper_Config_Base
 		$name = $this->_normalizeDbName($name);
 
 		$this->_dataClasses[$name] = array(
-				'name' => $name,
-				'camelCase' => DevHelper_Generator_File::getCamelCase($name),
-				'camelCasePlural' => false,
-				'camelCaseWSpace' => ucwords(str_replace('_', ' ', $name)),
-				'camelCasePluralWSpace' => false,
-				'fields' => array(),
-				'phrases' => array(),
-				'id_field' => false,
-				'title_field' => false,
-				'primaryKey' => false,
-				'indeces' => array(),
+			'name' => $name,
+			'camelCase' => DevHelper_Generator_File::getCamelCase($name),
+			'camelCasePlural' => false,
+			'camelCaseWSpace' => ucwords(str_replace('_', ' ', $name)),
+			'camelCasePluralWSpace' => false,
+			'fields' => array(),
+			'phrases' => array(),
+			'id_field' => false,
+			'title_field' => false,
+			'primaryKey' => false,
+			'indeces' => array(),
 
-				'files' => array(
-						'data_writer' => false,
-						'model' => false,
-						'route_prefix_admin' => false,
-						'controller_admin' => false,
-				),
+			'files' => array(
+				'data_writer' => false,
+				'model' => false,
+				'route_prefix_admin' => false,
+				'controller_admin' => false,
+			),
 		);
 
 		foreach ($extraData as $key => $value)
@@ -97,7 +98,8 @@ abstract class DevHelper_Config_Base
 		$name = $this->_normalizeDbName($name);
 		$field['name'] = $this->_normalizeDbName($field['name']);
 		$field['type'] = strtolower($field['type']);
-		if (!in_array($field['type'], DevHelper_Generator_Db::getDataTypes())) $field['type'] = XenForo_DataWriter::TYPE_SERIALIZED;
+		if (!in_array($field['type'], DevHelper_Generator_Db::getDataTypes()))
+			$field['type'] = XenForo_DataWriter::TYPE_SERIALIZED;
 
 		if (empty($this->_dataClasses[$name]['title_field']) AND in_array($field['type'], array(XenForo_DataWriter::TYPE_STRING)))
 		{
@@ -152,7 +154,8 @@ abstract class DevHelper_Config_Base
 		$name = $this->_normalizeDbName($name);
 		$fields = array();
 
-		if (!is_array($index['fields'])) $index['fields'] = array($index['fields']);
+		if (!is_array($index['fields']))
+			$index['fields'] = array($index['fields']);
 		foreach ($index['fields'] as $field)
 		{
 			$field = $this->_normalizeDbName($field);
@@ -165,16 +168,23 @@ abstract class DevHelper_Config_Base
 				return false;
 			}
 		}
-		if (empty($fields)) return false;
+		if (empty($fields))
+			return false;
 
 		$indexName = implode('_', $fields);
 		$type = !empty($index['type']) ? $index['type'] : 'NORMAL';
-		if (!in_array(strtoupper($type), array('NORMAL', 'UNIQUE', 'FULLTEXT', 'SPATIAL'))) $type = 'NORMAL';
+		if (!in_array(strtoupper($type), array(
+				'NORMAL',
+				'UNIQUE',
+				'FULLTEXT',
+				'SPATIAL'
+			)))
+			$type = 'NORMAL';
 
 		$this->_dataClasses[$name]['indeces'][$indexName] = array(
-				'name' => $indexName,
-				'fields' => $fields,
-				'type' => strtoupper($type),
+			'name' => $indexName,
+			'fields' => $fields,
+			'type' => strtoupper($type),
 		);
 
 		return true;
@@ -185,8 +195,8 @@ abstract class DevHelper_Config_Base
 		$name = $this->_normalizeDbName($name);
 
 		$this->_dataClasses[$name]['files'][$fileType] = array(
-				'className' => $className,
-				'hash' => DevHelper_Generator_File::calcHash($path),
+			'className' => $className,
+			'hash' => DevHelper_Generator_File::calcHash($path),
 		);
 	}
 
@@ -214,7 +224,8 @@ abstract class DevHelper_Config_Base
 	{
 		$field['name'] = DevHelper_Generator_Db::getFieldName($this, $this->_normalizeDbName($field['name']));
 		$field['type'] = strtolower($field['type']);
-		if (!in_array($field['type'], DevHelper_Generator_Db::getDataTypes())) $field['type'] = XenForo_DataWriter::TYPE_SERIALIZED;
+		if (!in_array($field['type'], DevHelper_Generator_Db::getDataTypes()))
+			$field['type'] = XenForo_DataWriter::TYPE_SERIALIZED;
 
 		$this->_dataPatches[$table][$field['name']] = $field;
 
@@ -349,4 +360,5 @@ EOF;
 	{
 		return $this->getModelFromCache('DevHelper_Model_Config');
 	}
+
 }
