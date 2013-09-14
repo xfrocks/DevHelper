@@ -10,6 +10,7 @@ class DevHelper_Listener
 			'XenForo_ControllerAdmin_AddOn',
 			'XenForo_ControllerAdmin_AdminTemplateModification',
 			'XenForo_ControllerAdmin_CodeEventListener',
+			'XenForo_ControllerAdmin_Permission',
 			'XenForo_ControllerAdmin_TemplateModification',
 
 			'XenForo_DataWriter_AddOn',
