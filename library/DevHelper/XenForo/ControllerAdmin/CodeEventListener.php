@@ -12,15 +12,7 @@ class DevHelper_XenForo_ControllerAdmin_CodeEventListener extends XFCP_DevHelper
 			$addOns = &$response->params['addOns'];
 			$listeners = &$response->params['listeners'];
 
-			foreach ($addOns as $addOn)
-			{
-				if (empty($addOn['active']))
-				{
-					// remove listeners from inactive add-ons
-					if (!empty($listeners[$addOn['addon_id']]))
-						unset($listeners[$addOn['addon_id']]);
-				}
-			}
+			$this->getHelper('DevHelper_ControllerHelper_AddOn')->filterKeepActiveAddOns($listeners, $addOns);
 		}
 
 		return $response;

@@ -8,7 +8,9 @@ class DevHelper_Listener
 	{
 		static $classes = array(
 			'XenForo_ControllerAdmin_AddOn',
+			'XenForo_ControllerAdmin_AdminTemplateModification',
 			'XenForo_ControllerAdmin_CodeEventListener',
+			'XenForo_ControllerAdmin_TemplateModification',
 
 			'XenForo_DataWriter_AddOn',
 
