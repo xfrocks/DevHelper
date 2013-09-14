@@ -139,6 +139,7 @@
 
 .CodeMirror.DevHelper_CodeMirror_TextArea {
 	height: auto;
+	min-height: 50px;
 }
 	.CodeMirror.DevHelper_CodeMirror_TextArea .CodeMirror-scroll {
 		overflow-y: hidden;
