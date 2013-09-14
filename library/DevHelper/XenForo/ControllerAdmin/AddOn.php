@@ -207,6 +207,31 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
 		die('done');
 	}
 
+	public function actionAllOff()
+	{
+		$addOns = $this->_getAddOnModel()->getAllAddOns();
+
+		foreach ($addOns as $addOn)
+		{
+			if (empty($addOn['active']))
+			{
+				continue;
+			}
+
+			if ($addOn['addon_id'] == 'devHelper')
+			{
+				continue;
+			}
+
+			$addOnDw = XenForo_DataWriter::create('XenForo_DataWriter_AddOn');
+			$addOnDw->setExistingData($addOn, true);
+			$addOnDw->set('active', 0);
+			$addOnDw->save();
+		}
+
+		return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, XenForo_Link::buildAdminLink('add-ons'));
+	}
+
 	protected function _getConfigModel()
 	{
 		return $this->getModelFromCache('DevHelper_Model_Config');

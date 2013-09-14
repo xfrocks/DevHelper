@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="devHelper" title="DevHelper" version_string="20130908" version_id="9" url="" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
-  <admin_navigation/>
+<addon addon_id="devHelper" title="DevHelper" version_string="20130914" version_id="10" url="" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
+  <admin_navigation>
+    <navigation navigation_id="DevHelper_addOnsAllOff" parent_navigation_id="addOns" display_order="9999" link="add-ons/all-off" admin_permission_id="addOn" debug_only="0" hide_no_children="0"/>
+  </admin_navigation>
   <admin_permissions/>
   <admin_style_properties/>
   <admin_templates>
@@ -208,6 +210,7 @@ $0]]></replace>
     <interface_groups/>
   </permissions>
   <phrases>
+    <phrase title="admin_navigation_DevHelper_addOnsAllOff" version_id="9" version_string="20130908"><![CDATA[All Off]]></phrase>
     <phrase title="devhelper_changed" version_id="1" version_string="0.9"><![CDATA[Changed]]></phrase>
     <phrase title="devhelper_class_name" version_id="1" version_string="0.9"><![CDATA[Class Name]]></phrase>
     <phrase title="devhelper_controller" version_id="1" version_string="0.9"><![CDATA[Controller]]></phrase>
