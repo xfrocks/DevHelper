@@ -1,6 +1,8 @@
 <?php
+
 class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_ControllerAdmin_AddOn
 {
+	protected $_DevHelper_actionSave_addOnIdChanged = false;
 
 	public function actionIndex()
 	{
@@ -12,6 +14,31 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
 		}
 
 		return $response;
+	}
+
+	public function actionSave()
+	{
+		$GLOBALS[DevHelper_Listener::XENFORO_CONTROLLERADMIN_ADDON_SAVE] = $this;
+
+		$response = parent::actionSave();
+
+		if ($response instanceof XenForo_ControllerResponse_Redirect)
+		{
+			if (!empty($this->_DevHelper_actionSave_addOnIdChanged))
+			{
+				return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, XenForo_Link::buildAdminLink('add-ons/file-export', $this->_DevHelper_actionSave_addOnIdChanged));
+			}
+		}
+
+		return $response;
+	}
+
+	public function DevHelper_actionSave(XenForo_DataWriter_AddOn $addOnDw)
+	{
+		if ($addOnDw->isUpdate() AND $addOnDw->isChanged('version_id'))
+		{
+			$this->_DevHelper_actionSave_addOnIdChanged = $addOnDw->getMergedData();
+		}
 	}
 
 	public function actionDataManager()

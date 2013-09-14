@@ -1,11 +1,16 @@
 <?php
+
 class DevHelper_Listener
 {
+	const XENFORO_CONTROLLERADMIN_ADDON_SAVE = 'DevHelper_XenForo_ControllerAdmin_AddOn';
+	
 	public static function load_class($class, array &$extend)
 	{
 		static $classes = array(
 			'XenForo_ControllerAdmin_AddOn',
 			'XenForo_ControllerAdmin_CodeEventListener',
+
+			'XenForo_DataWriter_AddOn',
 
 			'XenForo_Model_AddOn',
 		);
