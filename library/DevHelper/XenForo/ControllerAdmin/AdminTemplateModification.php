@@ -10,8 +10,9 @@ class DevHelper_XenForo_ControllerAdmin_AdminTemplateModification extends XFCP_D
 		{
 			$addOns = &$response->params['addOns'];
 			$groupedModifications = &$response->params['groupedModifications'];
+			$modificationCount = &$response->params['modificationCount'];
 
-			$this->getHelper('DevHelper_ControllerHelper_AddOn')->filterKeepActiveAddOns($groupedModifications, $addOns);
+			$modificationCount -= $this->getHelper('DevHelper_ControllerHelper_AddOn')->filterKeepActiveAddOns($groupedModifications, $addOns);
 		}
 
 		return $response;

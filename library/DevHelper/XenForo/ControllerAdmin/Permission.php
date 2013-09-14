@@ -17,80 +17,25 @@ class DevHelper_XenForo_ControllerAdmin_Permission extends XFCP_DevHelper_XenFor
 			$addOns = $this->getModelFromCache('XenForo_Model_AddOn')->getAllAddOns();
 			$removedCount = 0;
 
-			foreach (array_keys($permissionGroups) as $permissionGroupId)
+			$this->getHelper('DevHelper_ControllerHelper_AddOn')->filterKeepActiveAddOnsDirect($permissionGroups, $addOns);
+
+			$this->getHelper('DevHelper_ControllerHelper_AddOn')->filterKeepActiveAddOnsDirect($interfaceGroups, $addOns);
+
+			foreach (array_keys($permissionsGrouped) as $interfaceGroupId)
 			{
-				$permissionGroupRef = &$permissionGroups[$permissionGroupId];
-
-				if (empty($addOns[$permissionGroupRef['addon_id']]))
+				if (empty($interfaceGroups[$interfaceGroupId]))
 				{
-					continue;
-				}
-				$addOnRef = &$addOns[$permissionGroupRef['addon_id']];
-
-				if (empty($addOnRef['active']))
-				{
-					unset($permissionGroups[$permissionGroupId]);
-				}
-			}
-
-			foreach (array_keys($interfaceGroups) as $interfaceGroupId)
-			{
-				$interfaceGroupRef = &$interfaceGroups[$interfaceGroupId];
-
-				if (empty($addOns[$interfaceGroupRef['addon_id']]))
-				{
-					continue;
-				}
-				$addOnRef = &$addOns[$interfaceGroupRef['addon_id']];
-
-				if (empty($addOnRef['active']))
-				{
-					unset($interfaceGroups[$interfaceGroupId]);
-
-					if (!empty($permissionsGrouped[$interfaceGroupId]))
-					{
-						$removedCount += count($permissionsGrouped[$interfaceGroupId]);
-						unset($permissionsGrouped[$interfaceGroupId]);
-					}
+					$removedCount += count($permissionsGrouped[$interfaceGroupId]);
+					unset($permissionsGrouped[$interfaceGroupId]);
 				}
 			}
 
 			foreach ($permissionsGrouped as &$groupPermissions)
 			{
-				foreach (array_keys($groupPermissions) as $permissionId)
-				{
-					$permissionRef = &$groupPermissions[$permissionId];
-
-					if (empty($addOns[$permissionRef['addon_id']]))
-					{
-						continue;
-					}
-					$addOnRef = &$addOns[$permissionRef['addon_id']];
-
-					if (empty($addOnRef['active']))
-					{
-						$removedCount++;
-						unset($groupPermissions[$permissionId]);
-					}
-				}
+				$removedCount += $this->getHelper('DevHelper_ControllerHelper_AddOn')->filterKeepActiveAddOnsDirect($groupPermissions, $addOns);
 			}
 
-			foreach (array_keys($permissionsUngrouped) as $permissionId)
-			{
-				$permissionRef = &$permissionsUngrouped[$permissionId];
-
-				if (empty($addOns[$permissionRef['addon_id']]))
-				{
-					continue;
-				}
-				$addOnRef = &$addOns[$permissionRef['addon_id']];
-
-				if (empty($addOnRef['active']))
-				{
-					$removedCount++;
-					unset($permissionsUngrouped[$permissionId]);
-				}
-			}
+			$removedCount += $this->getHelper('DevHelper_ControllerHelper_AddOn')->filterKeepActiveAddOnsDirect($permissionsUngrouped, $addOns);
 
 			$totalPermissions -= $removedCount;
 		}
