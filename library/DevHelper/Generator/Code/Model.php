@@ -448,7 +448,7 @@ return \$changes;
 		");
 
 		$titleFieldBreadcrumb = '';
-		if (!empty($this->_dataClass['title_field']))
+		if (!empty($this->_dataClass['title_field']) AND !is_array($this->_dataClass['title_field']))
 		{
 			$titleFieldBreadcrumb = "\n\t\t\t\t\t'{$this->_dataClass['title_field']}' => \${$variableName}['{$this->_dataClass['title_field']}'],";
 		}

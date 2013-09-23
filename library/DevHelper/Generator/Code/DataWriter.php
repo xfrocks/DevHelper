@@ -325,7 +325,7 @@ if (\$phrase{$camelCase} !== null)
 		$rebuildStructureFunctionName = DevHelper_Generator_Code_Model::generateRebuildStructureFunctionName($this->_addOn, $this->_config, $this->_dataClass);
 
 		$titleFieldPostSaveConditions = '';
-		if (!empty($this->_dataClass['title_field']))
+		if (!empty($this->_dataClass['title_field']) AND !is_array($this->_dataClass['title_field']))
 		{
 			$titleFieldPostSaveConditions = "\n\tOR \$this->isChanged('{$this->_dataClass['title_field']}')";
 		}
