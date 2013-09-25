@@ -46,9 +46,6 @@ class DevHelper_Generator_File
 					}
 
 					self::filePutContents($minPath, $minified);
-
-					// it's okie to do this as it's running on development machine...
-					die('Generated ' . $minPath . ' from ' . $fullPath);
 				}
 			}
 		}
