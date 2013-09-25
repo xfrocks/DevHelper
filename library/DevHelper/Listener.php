@@ -3,7 +3,7 @@
 class DevHelper_Listener
 {
 	const XENFORO_CONTROLLERADMIN_ADDON_SAVE = 'DevHelper_XenForo_ControllerAdmin_AddOn';
-	
+
 	public static function load_class($class, array &$extend)
 	{
 		static $classes = array(
@@ -15,6 +15,7 @@ class DevHelper_Listener
 			'XenForo_ControllerAdmin_TemplateModification',
 
 			'XenForo_DataWriter_AddOn',
+			'XenForo_DataWriter_Template',
 
 			'XenForo_Model_AddOn',
 		);
@@ -22,6 +23,58 @@ class DevHelper_Listener
 		if (in_array($class, $classes))
 		{
 			$extend[] = 'DevHelper_' . $class;
+		}
+	}
+
+	public static function front_controller_pre_view(XenForo_FrontController $fc, XenForo_ControllerResponse_Abstract &$controllerResponse, XenForo_ViewRenderer_Abstract &$viewRenderer, array &$containerParams)
+	{
+		if (XenForo_Application::isRegistered('styles'))
+		{
+			$styles = XenForo_Application::get('styles');
+			$style = reset($styles);
+			$styleDate = $style['last_modified_date'];
+
+			$templateFiles = glob(DevHelper_Helper_Template::getTemplateDirPath() . '/*');
+			$templatesUpdated = array();
+			$maxTemplateDate = 0;
+
+			foreach ($templateFiles as $templateFile)
+			{
+				$templateDate = filemtime($templateFile);
+
+				if ($templateDate - 3 > $styleDate)
+				{
+					// consider this is a change, start updating the template
+					$maxTemplateDate = max($maxTemplateDate, $templateDate);
+
+					$templateId = DevHelper_Helper_Template::getTemplateIdFromFilePath($templateFile);
+					if (empty($templateId))
+					{
+						continue;
+					}
+
+					$dw = XenForo_DataWriter::create('XenForo_DataWriter_Template');
+					$dw->setExistingData($templateId);
+					$dw->set('template', file_get_contents($templateFile));
+
+					if ($dw->hasErrors())
+					{
+						throw new XenForo_Exception(implode(', ', $dw->getErrors()));
+					}
+
+					if ($dw->hasChanges())
+					{
+						$dw->save();
+
+						$templatesUpdated[] = $dw->get('title');
+					}
+				}
+			}
+
+			if (!empty($maxTemplateDate))
+			{
+				XenForo_Model::create('XenForo_Model_Style')->updateAllStylesLastModifiedDate($maxTemplateDate);
+			}
 		}
 	}
 
