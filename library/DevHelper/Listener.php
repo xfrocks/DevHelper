@@ -38,6 +38,8 @@ class DevHelper_Listener
 			$templatesUpdated = array();
 			$maxTemplateDate = 0;
 
+			$propertyModel = XenForo_Model::create('XenForo_Model_StyleProperty');
+
 			foreach ($templateFiles as $templateFile)
 			{
 				$templateDate = filemtime($templateFile);
@@ -53,9 +55,14 @@ class DevHelper_Listener
 						continue;
 					}
 
+					$templateText = file_get_contents($templateFile);
+
+					$properties = $propertyModel->keyPropertiesByName($propertyModel->getEffectiveStylePropertiesInStyle(0));
+					$propertyChanges = $propertyModel->translateEditorPropertiesToArray($templateText, $templateText, $properties);
+
 					$dw = XenForo_DataWriter::create('XenForo_DataWriter_Template');
 					$dw->setExistingData($templateId);
-					$dw->set('template', file_get_contents($templateFile));
+					$dw->set('template', $templateText);
 
 					if ($dw->hasErrors())
 					{
@@ -64,7 +71,11 @@ class DevHelper_Listener
 
 					if ($dw->hasChanges())
 					{
+						$dw->reparseTemplate();
+
 						$dw->save();
+
+						$propertyModel->saveStylePropertiesInStyleFromTemplate(0, $propertyChanges, $properties);
 
 						$templatesUpdated[] = $dw->get('title');
 					}
