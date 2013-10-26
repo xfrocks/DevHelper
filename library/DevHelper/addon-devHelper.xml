@@ -197,9 +197,11 @@ $0]]></replace>
   </admin_template_modifications>
   <code_events/>
   <code_event_listeners>
-    <listener event_id="load_class" execute_order="10" callback_class="DevHelper_Listener" callback_method="load_class" active="1" hint="" description=""/>
     <listener event_id="template_hook" execute_order="10" callback_class="DevHelper_Listener" callback_method="template_hook" active="1" hint="" description=""/>
     <listener event_id="template_post_render" execute_order="9999" callback_class="DevHelper_Listener" callback_method="template_post_render" active="1" hint="" description=""/>
+    <listener event_id="load_class_controller" execute_order="10" callback_class="DevHelper_Listener" callback_method="load_class" active="1" description=""/>
+    <listener event_id="load_class_datawriter" execute_order="10" callback_class="DevHelper_Listener" callback_method="load_class" active="1" description=""/>
+    <listener event_id="load_class_model" execute_order="10" callback_class="DevHelper_Listener" callback_method="load_class" active="1" description=""/>
   </code_event_listeners>
   <cron/>
   <email_templates/>
