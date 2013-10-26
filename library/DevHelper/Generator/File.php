@@ -250,8 +250,27 @@ class DevHelper_Generator_File
 
 	public static function generateHashesFile(array $addOn, DevHelper_Config_Base $config)
 	{
-		$libraryHashes = XenForo_Helper_Hash::hashDirectory('library/' . str_replace('_', '/', self::getClassName($addOn['addon_id'])), array('.php'));
-		$jsHashes = XenForo_Helper_Hash::hashDirectory('js/' . str_replace('_', '/', self::getClassName($addOn['addon_id'])), array('.js'));
+		$libraryHashes = array();
+		$libraryPathBasename = self::getClassNameInDirectory(XenForo_Autoloader::getInstance()->getRootDir(), self::getClassName($addOn['addon_id']));
+		if (!empty($libraryPathBasename))
+		{
+			$libraryPath = 'library/' . $libraryPathBasename;
+			if (is_dir($libraryPath))
+			{
+				$libraryHashes = XenForo_Helper_Hash::hashDirectory($libraryPath, array('.php'));
+			}
+		}
+
+		$jsHashes = array();
+		$jsPathBasename = self::getClassNameInDirectory(realpath(XenForo_Autoloader::getInstance()->getRootDir() . '/../js'), self::getClassName($addOn['addon_id']));
+		if (!empty($jsPathBasename))
+		{
+			$jsPath = 'js/' . $jsPathBasename;
+			if (is_dir($jsPath))
+			{
+				$jsHashes = XenForo_Helper_Hash::hashDirectory($jsPath, array('.js'));
+			}
+		}
 
 		$fileHashes = array();
 		foreach (array_merge($libraryHashes, $jsHashes) as $filePath => $hash)
@@ -280,16 +299,37 @@ class DevHelper_Generator_File
 
 	public static function fileExport(array $addOn, DevHelper_Config_Base $config, $exportPath)
 	{
-		$list = array(
-			// always export `library/addOnId` directory
-			'library' => XenForo_Autoloader::getInstance()->getRootDir() . '/' . str_replace('_', '/', self::getClassName($addOn['addon_id'])),
+		$list = array();
 
-			// try to export `js/addOnId` too
-			'js' => XenForo_Autoloader::getInstance()->getRootDir() . '/../js/' . str_replace('_', '/', self::getClassName($addOn['addon_id'])),
+		$libraryPathBasename = self::getClassNameInDirectory(XenForo_Autoloader::getInstance()->getRootDir(), self::getClassName($addOn['addon_id']));
+		if (!empty($libraryPathBasename))
+		{
+			$libraryPath = 'library/' . $libraryPathBasename;
+			if (is_dir($libraryPath))
+			{
+				$list['library'] = $libraryPath;
+			}
+		}
 
-			// try to export `styles/default/addOnId`
-			'styles_default' => XenForo_Autoloader::getInstance()->getRootDir() . '/../styles/default/' . str_replace('_', '/', self::getClassName($addOn['addon_id'])),
-		);
+		$jsPathBasename = self::getClassNameInDirectory(realpath(XenForo_Autoloader::getInstance()->getRootDir() . '/../js'), self::getClassName($addOn['addon_id']));
+		if (!empty($jsPathBasename))
+		{
+			$jsPath = 'js/' . $jsPathBasename;
+			if (is_dir($jsPath))
+			{
+				$list['js'] = $jsPath;
+			}
+		}
+
+		$stylesDefaultPathBasename = self::getClassNameInDirectory(realpath(XenForo_Autoloader::getInstance()->getRootDir() . '/../styles/default'), self::getClassName($addOn['addon_id']));
+		if (!empty($stylesDefaultPathBasename))
+		{
+			$stylesDefaultPath = 'styles/default/' . $stylesDefaultPathBasename;
+			if (is_dir($stylesDefaultPath))
+			{
+				$list['styles_default'] = $stylesDefaultPath;
+			}
+		}
 
 		$exportIncludes = $config->getExportIncludes();
 		foreach ($exportIncludes as $exportInclude)
@@ -364,7 +404,9 @@ class DevHelper_Generator_File
 	protected static function _fileExport($entry, &$exportPath, &$rootPath, $options)
 	{
 		if (empty($entry))
+		{
 			return;
+		}
 
 		$relativePath = trim(str_replace($rootPath, '', $entry), '/');
 
