@@ -40,7 +40,7 @@ class DevHelper_Model_Config extends XenForo_Model
 	public function saveAddOnConfig($addOn, DevHelper_Config_Base $config)
 	{
 		$className = DevHelper_Generator_File::getClassName($addOn['addon_id'], 'DevHelper_Config');
-		DevHelper_Generator_File::write($className, $config->outputSelf());
+		DevHelper_Generator_File::writeClass($className, $config->outputSelf());
 	}
 
 }

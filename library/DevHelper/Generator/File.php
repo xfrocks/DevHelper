@@ -45,7 +45,7 @@ class DevHelper_Generator_File
 						$minified = $fullContents;
 					}
 
-					self::filePutContents($minPath, $minified);
+					self::writeFile($minPath, $minified, false);
 				}
 			}
 		}
@@ -172,65 +172,84 @@ class DevHelper_Generator_File
 		return XenForo_Autoloader::getInstance()->autoloaderClassToFile($className);
 	}
 
-	public static function write($className, $contents)
+	public static function writeFile($path, $contents, $backUp = true)
 	{
-		$path = self::getClassPath($className);
+		$skip = false;
 
 		if (file_exists($path))
 		{
 			// existed file
 			$oldContents = self::fileGetContents($path);
-			if (strpos($path, 'FileSums.php') !== false)
-			{
-				// writing FileSums.php
-				// this file is generated so many times that it's annoying
-				// so we will skip saving a copy of it...
-			}
-			else
-			{
-				copy($path, $path . '.' . XenForo_Application::$time . '.devhelper');
-				// changed it to make it possible to .gitignore the files
-			}
 
 			if ($oldContents == $contents)
 			{
 				// same content
-				// do notning
+				$skip = true;
 			}
 			else
 			{
-				// diffrent content
-				// try to replace the auto generated code only
-				$startPosOld = strpos($oldContents, self::COMMENT_AUTO_GENERATED_START);
-				$endPosOld = strpos($oldContents, self::COMMENT_AUTO_GENERATED_END, $startPosOld);
-
-				if ($startPosOld !== false AND $endPosOld !== false AND $endPosOld > $startPosOld)
+				if ($backUp)
 				{
-					// found our comments in old contents
-					$startPos = strpos($contents, self::COMMENT_AUTO_GENERATED_START);
-					$endPos = strpos($contents, self::COMMENT_AUTO_GENERATED_END, $startPos);
-
-					if ($startPos !== false AND $endPos !== false AND $endPos > $startPos)
+					if (strpos($path, 'FileSums.php') !== false)
 					{
-						// found our comments in new contents
+						// writing FileSums.php
+						// this file is generated so many times that it's annoying
+						// so we will skip saving a copy of it...
+					}
+					else
+					{
+						copy($path, $path . '.' . XenForo_Application::$time . '.devhelper');
+					}
+				}
 
-						$replacement = substr($contents, $startPos, $endPos - $startPos);
-						$start = $startPosOld;
-						$length = $endPosOld - $startPosOld;
+				if (XenForo_Helper_File::getFileExtension($path) === 'php')
+				{
+					// different php content
+					// try to replace the auto generated code only
+					$startPosOld = strpos($oldContents, self::COMMENT_AUTO_GENERATED_START);
+					$endPosOld = strpos($oldContents, self::COMMENT_AUTO_GENERATED_END, $startPosOld);
 
-						$contents = substr_replace($oldContents, $replacement, $start, $length);
+					if ($startPosOld !== false AND $endPosOld !== false AND $endPosOld > $startPosOld)
+					{
+						// found our comments in old contents
+						$startPos = strpos($contents, self::COMMENT_AUTO_GENERATED_START);
+						$endPos = strpos($contents, self::COMMENT_AUTO_GENERATED_END, $startPos);
+
+						if ($startPos !== false AND $endPos !== false AND $endPos > $startPos)
+						{
+							// found our comments in new contents
+							$replacement = substr($contents, $startPos, $endPos - $startPos);
+							$start = $startPosOld;
+							$length = $endPosOld - $startPosOld;
+
+							$contents = substr_replace($oldContents, $replacement, $start, $length);
+						}
 					}
 				}
 			}
 		}
 
-		self::filePutContents($path, $contents);
+		if (!$skip)
+		{
+			return self::filePutContents($path, $contents);
+		}
+		else
+		{
+			return true;
+		}
+	}
+
+	public static function writeClass($className, $contents)
+	{
+		$path = self::getClassPath($className);
+		
+		self::writeFile($path, $contents);
 
 		if (strpos($className, 'DevHelper_Generated') === false)
 		{
 			$backupClassName = self::_getBackupClassName($className);
 			$backupPath = self::getClassPath($backupClassName);
-			self::filePutContents($backupPath, $contents);
+			self::writeFile($backupPath, $contents, false);
 		}
 
 		return $path;
@@ -246,68 +265,63 @@ class DevHelper_Generator_File
 
 	public static function fileGetContents($path)
 	{
-		$contents = file_get_contents($path);
-		// $contents = preg_replace("/(\r|\n)+/", "\n", $contents);
-		return $contents;
+		if (is_readable($path))
+		{
+			$contents = file_get_contents($path);
+
+			return $contents;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	public static function filePutContents($path, $contents)
 	{
 		$dir = dirname($path);
-		XenForo_Helper_File::createDirectory($dir, strpos($path, 'library') === false ? true : false);
+		XenForo_Helper_File::createDirectory($dir);
+		if (!is_dir($dir) OR !is_writable($dir))
+		{
+			return false;
+		}
 
-		file_put_contents($path, $contents);
+		if (file_put_contents($path, $contents) > 0)
+		{
+			XenForo_Helper_File::makeWritableByFtpUser($path);
+			return true;
+		}
 
-		XenForo_Helper_File::makeWritableByFtpUser($path);
+		return false;
 	}
 
-	public static function generateHashesFile(array $addOn, DevHelper_Config_Base $config)
+	public static function generateHashesFile(array $addOn, DevHelper_Config_Base $config, array $directories)
 	{
-		$libraryHashes = array();
-		$libraryPathBasename = self::getClassNameInDirectory(XenForo_Autoloader::getInstance()->getRootDir(), self::getClassName($addOn['addon_id']));
-		if (!empty($libraryPathBasename))
-		{
-			$libraryPath = 'library/' . $libraryPathBasename;
-			if (is_dir($libraryPath))
-			{
-				$libraryHashes = XenForo_Helper_Hash::hashDirectory($libraryPath, array('.php'));
-			}
-		}
+		$hashes = array();
 
-		$jsHashes = array();
-		$jsPathBasename = self::getClassNameInDirectory(realpath(XenForo_Autoloader::getInstance()->getRootDir() . '/../js'), self::getClassName($addOn['addon_id']));
-		if (!empty($jsPathBasename))
-		{
-			$jsPath = 'js/' . $jsPathBasename;
-			if (is_dir($jsPath))
-			{
-				$jsHashes = XenForo_Helper_Hash::hashDirectory($jsPath, array('.js'));
-			}
-		}
+		$root = rtrim(realpath(XenForo_Application::getInstance()->getRootDir()), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
-		$fileHashes = array();
-		foreach (array_merge($libraryHashes, $jsHashes) as $filePath => $hash)
+		foreach ($directories as $key => $directory)
 		{
-			if (strpos($filePath, 'DevHelper') === false AND strpos($filePath, 'FileSums') === false)
-			{
-				$fileHashes[$filePath] = $hash;
-			}
-		}
+			$directoryHashes = XenForo_Helper_Hash::hashDirectory($directory, array(
+				'.php',
+				'.js'
+			));
 
-		$exportIncludes = $config->getExportIncludes();
-		foreach ($exportIncludes as $exportInclude)
-		{
-			$exportIncludePath = XenForo_Autoloader::getInstance()->getRootDir() . '/../' . $exportInclude;
-
-			if (is_dir($exportIncludePath))
+			foreach ($directoryHashes as $filePath => $hash)
 			{
-				$fileHashes = array_merge($fileHashes, XenForo_Helper_Hash::hashDirectory($exportInclude, array('.php')));
+				if (strpos($filePath, 'DevHelper') === false AND strpos($filePath, 'FileSums') === false)
+				{
+					$relative = str_replace($root, '', $filePath);
+
+					$hashes[$relative] = $hash;
+				}
 			}
 		}
 
 		$fileSumsClassName = self::getClassName($addOn['addon_id']) . '_FileSums';
-		$fileSumsContents = XenForo_Helper_Hash::getHashClassCode($fileSumsClassName, $fileHashes);
-		self::write($fileSumsClassName, $fileSumsContents);
+		$fileSumsContents = XenForo_Helper_Hash::getHashClassCode($fileSumsClassName, $hashes);
+		self::writeClass($fileSumsClassName, $fileSumsContents);
 	}
 
 	public static function fileExport(array $addOn, DevHelper_Config_Base $config, $exportPath)
@@ -355,7 +369,7 @@ class DevHelper_Generator_File
 		echo "Exported       $xmlPath ($addOn[version_string]/$addOn[version_id])\n";
 
 		// generate hashes
-		self::generateHashesFile($addOn, $config);
+		self::generateHashesFile($addOn, $config, $list);
 
 		$rootPath = realpath(XenForo_Application::getInstance()->getRootDir());
 
@@ -467,12 +481,10 @@ class DevHelper_Generator_File
 				{
 					$entryExportPath = $exportPath . '/' . $relativePath;
 
-					$entryExportDir = dirname($entryExportPath);
-					XenForo_Helper_File::createDirectory($entryExportDir, false);
+					$contents = self::fileGetContents($entry);
 
-					if (@copy($entry, $entryExportPath))
+					if (!empty($contents) AND self::writeFile($entryExportPath, $contents, false))
 					{
-						XenForo_Helper_File::makeWritableByFtpUser($entryExportPath);
 						echo 'OK';
 					}
 				}
