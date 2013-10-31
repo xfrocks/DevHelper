@@ -419,10 +419,15 @@ class DevHelper_Generator_File
 			$dh = opendir($entry);
 			while ($child = readdir($dh))
 			{
-				if ($child != '.' AND $child != '..')
+				if (substr($child, 0, 1) === '.')
 				{
-					$children[] = $child;
+					// ignore . (current directory)
+					// ignore .. (parent directory)
+					// ignore hidden files (dot files/directories)
+					continue;
 				}
+
+				$children[] = $child;
 			}
 
 			foreach ($children as $child)
