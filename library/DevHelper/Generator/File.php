@@ -86,43 +86,8 @@ class DevHelper_Generator_File
 				$className = $addOnId;
 				$className = preg_replace('/[^a-zA-Z_0-9]/', '', $className);
 
-				// read root directory (./library), trying to pickup matched directory name (case
-				// insensitive)
-				$found = self::getClassNameInDirectory(XenForo_Autoloader::getInstance()->getRootDir(), $className);
-				if ($found !== false)
-				{
-					$className = $found;
-				}
-
-				if (empty($found))
-				{
-					// try harder, support addon_id to be mapped to xenforo/library/Addon/Id (case
-					// insensitive)
-					if (strpos($className, '_') !== false)
-					{
-						$parts = explode('_', $className);
-						$partsCount = count($parts);
-						$partsFound = array();
-						while (!empty($parts))
-						{
-							$part = array_shift($parts);
-							$partDir = realpath(XenForo_Autoloader::getInstance()->getRootDir() . '/' . implode('/', $partsFound));
-							$partFound = self::getClassNameInDirectory($partDir, $part);
-							if ($partFound === false)
-							{
-								// failed...
-								break;
-							}
-
-							$partsFound[$part] = $partFound;
-						}
-
-						if (count($partsFound) === $partsCount)
-						{
-							$found = $className = implode('_', $partsFound);
-						}
-					}
-				}
+				// read root directory (./library), trying to pickup matched directory name
+				$className = self::getClassNameInDirectory(XenForo_Autoloader::getInstance()->getRootDir(), $className);
 			}
 
 			$classNames[$hash] = $className;
@@ -131,9 +96,10 @@ class DevHelper_Generator_File
 		return $classNames[$hash];
 	}
 
-	public static function getClassNameInDirectory($dir, $className)
+	public static function getClassNameInDirectory($dir, $className, $getPath = false)
 	{
 		$found = false;
+		$foundPath = false;
 
 		$classNameLower = strtolower($className);
 		$classNameLower2 = str_replace('_', '', $classNameLower);
@@ -146,12 +112,59 @@ class DevHelper_Generator_File
 			{
 				// we found it!
 				$found = $file;
+				$foundPath = sprintf('%s/%s', $dir, $file);
 				break;
 			}
 		}
 		closedir($dh);
 
-		return $found;
+		if (empty($found))
+		{
+			// try harder, support addon_id to be mapped to Addon/Id (case insensitive)
+			if (strpos($className, '_') !== false)
+			{
+				$parts = explode('_', $className);
+				$partsCount = count($parts);
+				$partsFound = array();
+				while (!empty($parts))
+				{
+					$part = array_shift($parts);
+					$partDir = $dir . '/' . implode('/', $partsFound);
+					$partFound = self::getClassNameInDirectory($partDir, $part);
+					if ($partFound === false)
+					{
+						// failed...
+						break;
+					}
+
+					$partsFound[$partDir] = $partFound;
+				}
+
+				if (count($partsFound) === $partsCount)
+				{
+					$found = implode('_', $partsFound);
+
+					$partsFoundCloned = $partsFound;
+					while (count($partsFoundCloned) > 1)
+					{
+						array_shift($partsFoundCloned);
+					}
+					$partDirs = array_keys($partsFoundCloned);
+					$lastPartDir = reset($partDirs);
+					$lastPartFound = reset($partsFoundCloned);
+					$foundPath = sprintf('%s/%s', $lastPartDir, $lastPartFound);
+				}
+			}
+		}
+
+		if ($getPath)
+		{
+			return $foundPath;
+		}
+		else
+		{
+			return $found;
+		}
 	}
 
 	public static function getClassPath($className)
@@ -301,30 +314,24 @@ class DevHelper_Generator_File
 	{
 		$list = array();
 
-		$libraryPathBasename = self::getClassNameInDirectory(XenForo_Autoloader::getInstance()->getRootDir(), self::getClassName($addOn['addon_id']));
-		if (!empty($libraryPathBasename))
+		$list['library'] = self::getClassNameInDirectory(XenForo_Autoloader::getInstance()->getRootDir(), self::getClassName($addOn['addon_id']), true);
+		if (empty($list['library']))
 		{
-			$libraryPath = 'library/' . $libraryPathBasename;
-			if (is_dir($libraryPath))
-			{
-				$list['library'] = $libraryPath;
-			}
+			throw new XenForo_Exception(sprintf('`library` not found for %s', $addOn['addon_id']));
 		}
 
-		$jsPathBasename = self::getClassNameInDirectory(realpath(XenForo_Autoloader::getInstance()->getRootDir() . '/../js'), self::getClassName($addOn['addon_id']));
-		if (!empty($jsPathBasename))
+		$jsPath = self::getClassNameInDirectory(realpath(XenForo_Autoloader::getInstance()->getRootDir() . '/../js'), self::getClassName($addOn['addon_id']), true);
+		if (!empty($jsPath))
 		{
-			$jsPath = 'js/' . $jsPathBasename;
 			if (is_dir($jsPath))
 			{
 				$list['js'] = $jsPath;
 			}
 		}
 
-		$stylesDefaultPathBasename = self::getClassNameInDirectory(realpath(XenForo_Autoloader::getInstance()->getRootDir() . '/../styles/default'), self::getClassName($addOn['addon_id']));
-		if (!empty($stylesDefaultPathBasename))
+		$stylesDefaultPath = self::getClassNameInDirectory(realpath(XenForo_Autoloader::getInstance()->getRootDir() . '/../styles/default'), self::getClassName($addOn['addon_id']), true);
+		if (!empty($stylesDefaultPath))
 		{
-			$stylesDefaultPath = 'styles/default/' . $stylesDefaultPathBasename;
 			if (is_dir($stylesDefaultPath))
 			{
 				$list['styles_default'] = $stylesDefaultPath;
