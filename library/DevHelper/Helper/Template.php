@@ -2,6 +2,11 @@
 
 class DevHelper_Helper_Template
 {
+	public static function autoExportImport()
+	{
+		return false;
+	}
+	
 	public static function getTemplateDirPath()
 	{
 		return call_user_func_array('sprintf', array(

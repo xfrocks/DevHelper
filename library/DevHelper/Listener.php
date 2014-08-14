@@ -28,7 +28,7 @@ class DevHelper_Listener
 
 	public static function front_controller_pre_view(XenForo_FrontController $fc, XenForo_ControllerResponse_Abstract &$controllerResponse, XenForo_ViewRenderer_Abstract &$viewRenderer, array &$containerParams)
 	{
-		if (XenForo_Application::isRegistered('styles'))
+		if (DevHelper_Helper_Template::autoExportImport() AND XenForo_Application::isRegistered('styles'))
 		{
 			$styles = XenForo_Application::get('styles');
 			$style = reset($styles);

@@ -236,9 +236,11 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
 		{
 			$dw = XenForo_DataWriter::create('XenForo_DataWriter_Template');
 			$dw->setExistingData($template, true);
-			$dw->DevHelper_saveTemplate();
 
-			echo "Saved template {$template['title']}\n";
+			if ($dw->DevHelper_saveTemplate())
+			{
+				echo "Saved template {$template['title']}\n";
+			}
 		}
 
 		echo '</pre>';

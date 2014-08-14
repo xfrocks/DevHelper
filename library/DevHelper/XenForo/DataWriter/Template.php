@@ -4,12 +4,16 @@ class DevHelper_XenForo_DataWriter_Template extends XFCP_DevHelper_XenForo_DataW
 {
 	public function DevHelper_saveTemplate()
 	{
+		if (DevHelper_Helper_Template::autoExportImport() == false)
+		{
+			return false;
+		}
+
 		$template = $this->getMergedData();
-
 		$filePath = DevHelper_Helper_Template::getTemplateFilePath($template);
-
 		XenForo_Helper_File::createDirectory(dirname($filePath));
-		file_put_contents($filePath, $template['template']);
+
+		return file_put_contents($filePath, $template['template']) > 0;
 	}
 
 	protected function _postSaveAfterTransaction()
