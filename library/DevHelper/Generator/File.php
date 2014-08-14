@@ -367,6 +367,7 @@ class DevHelper_Generator_File
 		$xmlPath = $list['library'] . '/addon-' . $addOn['addon_id'] . '.xml';
 		XenForo_Model::create('XenForo_Model_AddOn')->getAddOnXml($addOn)->save($xmlPath);
 		echo "Exported       $xmlPath ($addOn[version_string]/$addOn[version_id])\n";
+		DevHelper_Helper_Phrase::parseXmlForPhraseTracking($xmlPath);
 
 		// generate hashes
 		self::generateHashesFile($addOn, $config, $list);
@@ -433,7 +434,7 @@ class DevHelper_Generator_File
 
 		if (is_dir($entry))
 		{
-			echo "Browsing       $relativePath\n";
+			echo "<span style='color: #ddd'>Browsing       $relativePath</span>\n";
 
 			$children = array();
 
@@ -461,8 +462,6 @@ class DevHelper_Generator_File
 		}
 		elseif (is_file($entry))
 		{
-			echo "Exporting      $relativePath ";
-
 			$ext = XenForo_Helper_File::getFileExtension($entry);
 			if (!empty($options['force']) OR (in_array($ext, $options['extensions']) AND strpos(basename($entry), '.') !== 0) OR in_array(strtolower(basename($entry)), $options['filenames_lowercase']))
 			{
@@ -485,21 +484,24 @@ class DevHelper_Generator_File
 
 					if (!empty($contents))
 					{
+						if ($ext === 'php')
+						{
+							DevHelper_Helper_Phrase::parsePhpForPhraseTracking($relativePath, $contents);
+						}
+						
 						$result = self::writeFile($entryExportPath, $contents, false, false);
 						
 						if ($result === true)
 						{
-							echo 'OK';
+							echo "Exporting      {$relativePath} OK\n";
 						}
 						elseif ($result === 'skip')
 						{
-							echo 'SKIPPED';
+							echo "<span style='color: #ddd'>Exporting      {$relativePath} SKIPPED</span>\n";
 						}
 					}
 				}
 			}
-
-			echo "\n";
 		}
 	}
 

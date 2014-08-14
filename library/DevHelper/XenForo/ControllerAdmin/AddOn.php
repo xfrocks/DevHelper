@@ -227,6 +227,8 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
 			return $this->responseNoPermission();
 		}
 
+		DevHelper_Helper_Phrase::startLookingForPhraseTitles();
+
 		echo '<pre>';
 
 		DevHelper_Generator_File::fileExport($addOn, $config, $exportPath);
@@ -243,9 +245,13 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
 			}
 		}
 
+		$phraseModel = $this->getModelFromCache('XenForo_Model_Phrase');
+		$phrases = $phraseModel->getMasterPhrasesInAddOn($addOnId);
+		DevHelper_Helper_Phrase::finishLookingForPhraseTitles($phrases, $phraseModel);
+
 		echo '</pre>';
 
-		die('done');
+		die('Done');
 	}
 
 	public function actionAllOff()
