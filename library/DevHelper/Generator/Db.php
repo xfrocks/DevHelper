@@ -295,6 +295,9 @@ EOF;
 					unset($field['default']);
 				// BLOB/TEXT column can't have a default value
 				break;
+			case 'money':
+				$dbType = 'DECIMAL(13,4)';
+				break;
 		}
 
 		return $dbType . (!empty($field['required']) ? ' NOT NULL' : '') . (isset($field['default']) ? " DEFAULT '{$field['default']}'" : '') . (!empty($field['autoIncrement']) ? ' AUTO_INCREMENT' : '');
