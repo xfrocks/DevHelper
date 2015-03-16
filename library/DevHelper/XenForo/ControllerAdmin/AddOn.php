@@ -228,6 +228,7 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
 		}
 
 		DevHelper_Helper_Phrase::startLookingForPhraseTitles();
+        DevHelper_Helper_Xfcp::startLookingForXfcpClasses();
 
 		echo '<pre>';
 
@@ -248,6 +249,7 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
 		$phraseModel = $this->getModelFromCache('XenForo_Model_Phrase');
 		$phrases = $phraseModel->getMasterPhrasesInAddOn($addOnId);
 		DevHelper_Helper_Phrase::finishLookingForPhraseTitles($phrases, $phraseModel);
+        DevHelper_Helper_Xfcp::finishLookingForXfcpClasses($addOn);
 
 		echo '</pre>';
 

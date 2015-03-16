@@ -492,6 +492,7 @@ class DevHelper_Generator_File
 						if ($ext === 'php')
 						{
 							DevHelper_Helper_Phrase::parsePhpForPhraseTracking($relativePath, $contents);
+                            DevHelper_Helper_Xfcp::parsePhpForXfcpClass($relativePath, $contents);
 						}
 						
 						$result = self::writeFile($entryExportPath, $contents, false, false);
