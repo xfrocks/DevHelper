@@ -395,12 +395,17 @@ class DevHelper_Generator_File
 				'png',
 				'gif',
 				'swf',
+				'crt',
 			),
 			'filenames_lowercase' => array(
 				'license',
 				'readme',
 				'copyright',
-				'.htaccess'
+				'.htaccess',
+				'changelog',
+				'composer.json',
+				'readme.rdoc',
+				'version',
 			),
 			'force' => true, // always force add top level export entries
 			'addon_id' => $addOn['addon_id'],
