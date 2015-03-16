@@ -134,7 +134,7 @@ class DevHelper_Helper_Phrase
 				}
 				else
 				{
-					break;
+					continue;
 				}
 			}
 			else
