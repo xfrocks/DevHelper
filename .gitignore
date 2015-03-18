@@ -1,6 +1,7 @@
 .DS_Store
 *.devhelper
-library/DevHelper/DevHelper
+library/DevHelper/DevHelper/Config.php
+library/DevHelper/DevHelper/Generated/
 FileSums.php
 js/DevHelper/CodeMirror/mode/css/scss_test.js
 js/DevHelper/CodeMirror/mode/css/test.js

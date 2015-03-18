@@ -57,7 +57,7 @@ class DevHelper_Helper_Xfcp
     public static function parsePhpForXfcpClass($path, $contents)
     {
         if (self::$_lookingForXfcpClasses == false) {
-            return false;
+            return;
         }
 
         $offset = 0;

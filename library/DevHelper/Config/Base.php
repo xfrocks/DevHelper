@@ -2,363 +2,329 @@
 
 abstract class DevHelper_Config_Base
 {
-	protected $_dataClasses = array();
-	protected $_dataPatches = array();
-	protected $_exportPath = false;
-	protected $_exportIncludes = array();
+    protected $_dataClasses = array();
+    protected $_dataPatches = array();
+    protected $_exportPath = false;
+    protected $_exportIncludes = array();
 
-	protected function _upgrade()
-	{
-		return true;
-	}
+    protected function _upgrade()
+    {
+        return true;
+    }
 
-	public function upgradeConfig()
-	{
-		$result = $this->_upgrade();
+    public function upgradeConfig()
+    {
+        $result = $this->_upgrade();
 
-		return empty($result);
-	}
+        return empty($result);
+    }
 
-	public function getDataClasses()
-	{
-		return $this->_dataClasses;
-	}
+    public function getDataClasses()
+    {
+        return $this->_dataClasses;
+    }
 
-	public function getDataClass($name)
-	{
-		$name = $this->_normalizeDbName($name);
+    public function getDataClass($name)
+    {
+        $name = $this->_normalizeDbName($name);
 
-		if (!$this->checkDataClassExists($name))
-			return array();
+        if (!$this->checkDataClassExists($name))
+            return array();
 
-		$dataClass = $this->_dataClasses[$name];
+        $dataClass = $this->_dataClasses[$name];
 
-		foreach ($dataClass['files'] as &$file)
-		{
-			if (!empty($file))
-			{
-				$path = DevHelper_Generator_File::getClassPath($file['className']);
-				$hash = DevHelper_Generator_File::calcHash($path);
-				if ($hash != $file['hash'])
-				{
-					$file['changed'] = true;
-				}
-			}
-		}
+        foreach ($dataClass['files'] as &$file) {
+            if (!empty($file)) {
+                $path = DevHelper_Generator_File::getClassPath($file['className']);
+                $hash = DevHelper_Generator_File::calcHash($path);
+                if ($hash != $file['hash']) {
+                    $file['changed'] = true;
+                }
+            }
+        }
 
-		return $dataClass;
-	}
+        return $dataClass;
+    }
 
-	public function addDataClass($name, $fields = array(), $primaryKey = false, $indeces = array(), $extraData = array())
-	{
-		$name = $this->_normalizeDbName($name);
+    public function addDataClass($name, $fields = array(), $primaryKey = false, $indeces = array(), $extraData = array())
+    {
+        $name = $this->_normalizeDbName($name);
 
-		$this->_dataClasses[$name] = array(
-			'name' => $name,
-			'camelCase' => DevHelper_Generator_File::getCamelCase($name),
-			'camelCasePlural' => false,
-			'camelCaseWSpace' => ucwords(str_replace('_', ' ', $name)),
-			'camelCasePluralWSpace' => false,
-			'fields' => array(),
-			'phrases' => array(),
-			'id_field' => false,
-			'title_field' => false,
-			'primaryKey' => false,
-			'indeces' => array(),
+        $this->_dataClasses[$name] = array(
+            'name' => $name,
+            'camelCase' => DevHelper_Generator_File::getCamelCase($name),
+            'camelCasePlural' => false,
+            'camelCaseWSpace' => ucwords(str_replace('_', ' ', $name)),
+            'camelCasePluralWSpace' => false,
+            'fields' => array(),
+            'phrases' => array(),
+            'id_field' => false,
+            'title_field' => false,
+            'primaryKey' => false,
+            'indeces' => array(),
 
-			'files' => array(
-				'data_writer' => false,
-				'model' => false,
-				'route_prefix_admin' => false,
-				'controller_admin' => false,
-			),
-		);
+            'files' => array(
+                'data_writer' => false,
+                'model' => false,
+                'route_prefix_admin' => false,
+                'controller_admin' => false,
+            ),
+        );
 
-		foreach ($extraData as $key => $value)
-		{
-			$this->_dataClasses[$name][$key] = $value;
-		}
+        foreach ($extraData as $key => $value) {
+            $this->_dataClasses[$name][$key] = $value;
+        }
 
-		foreach ($fields as $fieldName => $fieldInfo)
-		{
-			$fieldInfo = array_merge(array('name' => $fieldName), $fieldInfo);
-			$this->addDataClassField($name, $fieldInfo);
-		}
-		$this->addDataClassPrimaryKey($name, $primaryKey);
-		foreach ($indeces as $index)
-		{
-			$this->addDataClassIndex($name, $index);
-		}
+        foreach ($fields as $fieldName => $fieldInfo) {
+            $fieldInfo = array_merge(array('name' => $fieldName), $fieldInfo);
+            $this->addDataClassField($name, $fieldInfo);
+        }
+        $this->addDataClassPrimaryKey($name, $primaryKey);
+        foreach ($indeces as $index) {
+            $this->addDataClassIndex($name, $index);
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	public function addDataClassField($name, array $field)
-	{
-		$name = $this->_normalizeDbName($name);
-		$field['name'] = $this->_normalizeDbName($field['name']);
-		$field['type'] = strtolower($field['type']);
-		if (!in_array($field['type'], DevHelper_Generator_Db::getDataTypes()))
-			$field['type'] = XenForo_DataWriter::TYPE_SERIALIZED;
+    public function addDataClassField($name, array $field)
+    {
+        $name = $this->_normalizeDbName($name);
+        $field['name'] = $this->_normalizeDbName($field['name']);
+        $field['type'] = strtolower($field['type']);
+        if (!in_array($field['type'], DevHelper_Generator_Db::getDataTypes()))
+            $field['type'] = XenForo_DataWriter::TYPE_SERIALIZED;
 
-		if (empty($this->_dataClasses[$name]['title_field']) AND in_array($field['type'], array(XenForo_DataWriter::TYPE_STRING)))
-		{
-			$this->_dataClasses[$name]['title_field'] = $field['name'];
-		}
+        if (empty($this->_dataClasses[$name]['title_field']) AND in_array($field['type'], array(XenForo_DataWriter::TYPE_STRING))) {
+            $this->_dataClasses[$name]['title_field'] = $field['name'];
+        }
 
-		$this->_dataClasses[$name]['fields'][$field['name']] = $field;
+        $this->_dataClasses[$name]['fields'][$field['name']] = $field;
 
-		return true;
-	}
+        return true;
+    }
 
-	public function addDataClassPrimaryKey($name, $fields)
-	{
-		$name = $this->_normalizeDbName($name);
+    public function addDataClassPrimaryKey($name, $fields)
+    {
+        $name = $this->_normalizeDbName($name);
 
-		if (!is_array($fields))
-		{
-			$fields = array($fields);
-		}
+        if (!is_array($fields)) {
+            $fields = array($fields);
+        }
 
-		$primaryKey = array();
+        $primaryKey = array();
 
-		foreach ($fields as $field)
-		{
-			$field = $this->_normalizeDbName($field);
-			if (!$this->checkDataClassFieldExists($name, $field))
-			{
-				return false;
-			}
-			$primaryKey[] = $field;
-		}
+        foreach ($fields as $field) {
+            $field = $this->_normalizeDbName($field);
+            if (!$this->checkDataClassFieldExists($name, $field)) {
+                return false;
+            }
+            $primaryKey[] = $field;
+        }
 
-		if (!empty($primaryKey))
-		{
-			$this->_dataClasses[$name]['primaryKey'] = $primaryKey;
-			foreach ($primaryKey as $field)
-			{
-				if ($field == $name . '_id')
-				{
-					$this->_dataClasses[$name]['id_field'] = $field;
-					break;
-				}
-			}
-			return true;
-		}
+        if (!empty($primaryKey)) {
+            $this->_dataClasses[$name]['primaryKey'] = $primaryKey;
+            foreach ($primaryKey as $field) {
+                if ($field == $name . '_id') {
+                    $this->_dataClasses[$name]['id_field'] = $field;
+                    break;
+                }
+            }
+            return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	public function addDataClassIndex($name, array $index)
-	{
-		$name = $this->_normalizeDbName($name);
-		$fields = array();
+    public function addDataClassIndex($name, array $index)
+    {
+        $name = $this->_normalizeDbName($name);
+        $fields = array();
 
-		if (!is_array($index['fields']))
-			$index['fields'] = array($index['fields']);
-		foreach ($index['fields'] as $field)
-		{
-			$field = $this->_normalizeDbName($field);
-			if ($this->checkDataClassFieldExists($name, $field))
-			{
-				$fields[] = $field;
-			}
-			else
-			{
-				return false;
-			}
-		}
-		if (empty($fields))
-			return false;
+        if (!is_array($index['fields']))
+            $index['fields'] = array($index['fields']);
+        foreach ($index['fields'] as $field) {
+            $field = $this->_normalizeDbName($field);
+            if ($this->checkDataClassFieldExists($name, $field)) {
+                $fields[] = $field;
+            } else {
+                return false;
+            }
+        }
+        if (empty($fields))
+            return false;
 
-		$indexName = implode('_', $fields);
-		$type = !empty($index['type']) ? $index['type'] : 'NORMAL';
-		if (!in_array(strtoupper($type), array(
-				'NORMAL',
-				'UNIQUE',
-				'FULLTEXT',
-				'SPATIAL'
-			)))
-			$type = 'NORMAL';
+        $indexName = implode('_', $fields);
+        $type = !empty($index['type']) ? $index['type'] : 'NORMAL';
+        if (!in_array(strtoupper($type), array(
+            'NORMAL',
+            'UNIQUE',
+            'FULLTEXT',
+            'SPATIAL'
+        ))
+        )
+            $type = 'NORMAL';
 
-		$this->_dataClasses[$name]['indeces'][$indexName] = array(
-			'name' => $indexName,
-			'fields' => $fields,
-			'type' => strtoupper($type),
-		);
+        $this->_dataClasses[$name]['indeces'][$indexName] = array(
+            'name' => $indexName,
+            'fields' => $fields,
+            'type' => strtoupper($type),
+        );
 
-		return true;
-	}
+        return true;
+    }
 
-	public function updateDataClassFile($name, $fileType, $className, $path)
-	{
-		$name = $this->_normalizeDbName($name);
+    public function updateDataClassFile($name, $fileType, $className, $path)
+    {
+        $name = $this->_normalizeDbName($name);
 
-		$this->_dataClasses[$name]['files'][$fileType] = array(
-			'className' => $className,
-			'hash' => DevHelper_Generator_File::calcHash($path),
-		);
-	}
+        $this->_dataClasses[$name]['files'][$fileType] = array(
+            'className' => $className,
+            'hash' => DevHelper_Generator_File::calcHash($path),
+        );
+    }
 
-	public function checkDataClassExists($name)
-	{
-		$name = $this->_normalizeDbName($name);
+    public function checkDataClassExists($name)
+    {
+        $name = $this->_normalizeDbName($name);
 
-		return isset($this->_dataClasses[$name]);
-	}
+        return isset($this->_dataClasses[$name]);
+    }
 
-	public function checkDataClassFieldExists($name, $field)
-	{
-		$name = $this->_normalizeDbName($name);
-		$field = $this->_normalizeDbName($field);
+    public function checkDataClassFieldExists($name, $field)
+    {
+        $name = $this->_normalizeDbName($name);
+        $field = $this->_normalizeDbName($field);
 
-		return isset($this->_dataClasses[$name]['fields'][$field]);
-	}
+        return isset($this->_dataClasses[$name]['fields'][$field]);
+    }
 
-	public function getDataPatches()
-	{
-		return $this->_dataPatches;
-	}
+    public function getDataPatches()
+    {
+        return $this->_dataPatches;
+    }
 
-	public function addDataPatch($table, array $field)
-	{
-		$field['name'] = DevHelper_Generator_Db::getFieldName($this, $this->_normalizeDbName($field['name']));
-		$field['type'] = strtolower($field['type']);
-		if (!in_array($field['type'], DevHelper_Generator_Db::getDataTypes()))
-			$field['type'] = XenForo_DataWriter::TYPE_SERIALIZED;
+    public function addDataPatch($table, array $field)
+    {
+        $field['name'] = DevHelper_Generator_Db::getFieldName($this, $this->_normalizeDbName($field['name']));
+        $field['type'] = strtolower($field['type']);
+        if (!in_array($field['type'], DevHelper_Generator_Db::getDataTypes()))
+            $field['type'] = XenForo_DataWriter::TYPE_SERIALIZED;
 
-		$this->_dataPatches[$table][$field['name']] = $field;
+        $this->_dataPatches[$table][$field['name']] = $field;
 
-		return true;
-	}
+        return true;
+    }
 
-	public function setExportPath($path)
-	{
-		if (is_dir($path) AND is_writable($path))
-		{
-			$this->_exportPath = $path;
-		}
-		else
-		{
-			die('EXPORT PATH IS NOT WRITABLE');
-		}
-	}
+    public function setExportPath($path)
+    {
+        if (is_dir($path) AND is_writable($path)) {
+            $this->_exportPath = $path;
+        } else {
+            die('EXPORT PATH IS NOT WRITABLE');
+        }
+    }
 
-	public function getExportPath()
-	{
-		$path = $this->_exportPath;
+    public function getExportPath()
+    {
+        $path = $this->_exportPath;
 
-		if ($path === false)
-		{
-			return false;
-		}
-		elseif (is_dir($path) AND is_writable($path))
-		{
-			return $path;
-		}
-		else
-		{
-			var_dump($path, is_dir($path), is_writable($path));
-			die('EXPORT PATH IS NOT WRITABLE');
-		}
-	}
+        if ($path === false) {
+            return false;
+        } elseif (is_dir($path) AND is_writable($path)) {
+            return $path;
+        } else {
+            var_dump($path, is_dir($path), is_writable($path));
+            die('EXPORT PATH IS NOT WRITABLE');
+        }
+    }
 
-	public function getExportIncludes()
-	{
-		return $this->_exportIncludes;
-	}
+    public function getExportIncludes()
+    {
+        return $this->_exportIncludes;
+    }
 
-	public function getPrefix()
-	{
-		$configClassName = get_class($this);
-		$parts = explode('_', $configClassName);
-		array_pop($parts);
-		array_pop($parts);
-		$prefix = implode('_', $parts);
+    public function getPrefix()
+    {
+        $configClassName = get_class($this);
+        $parts = explode('_', $configClassName);
+        array_pop($parts);
+        array_pop($parts);
+        $prefix = implode('_', $parts);
 
-		return $prefix;
-	}
+        return $prefix;
+    }
 
-	public function outputSelf()
-	{
-		$className = get_class($this);
+    public function outputSelf()
+    {
+        $className = get_class($this);
 
-		foreach ($this->_dataClasses as $dataClass)
-		{
-			if (empty($dataClass['id_field']))
-			{
-				throw new XenForo_Exception("$dataClass[name] does not have an id_field.", true);
-			}
-		}
+        foreach ($this->_dataClasses as $dataClass) {
+            if (empty($dataClass['id_field'])) {
+                throw new XenForo_Exception("$dataClass[name] does not have an id_field.", true);
+            }
+        }
 
-		$dataClasses = DevHelper_Generator_File::varExport($this->_dataClasses);
-		$dataPatches = DevHelper_Generator_File::varExport($this->_dataPatches);
-		$exportPath = DevHelper_Generator_File::varExport($this->_exportPath);
-		$exportIncludes = DevHelper_Generator_File::varExport($this->_exportIncludes);
+        $dataClasses = DevHelper_Generator_File::varExport($this->_dataClasses);
+        $dataPatches = DevHelper_Generator_File::varExport($this->_dataPatches);
+        $exportPath = DevHelper_Generator_File::varExport($this->_exportPath);
+        $exportIncludes = DevHelper_Generator_File::varExport($this->_exportIncludes);
 
-		$contents = <<<EOF
+        $contents = <<<EOF
 <?php
+
 class $className extends DevHelper_Config_Base
 {
-	protected \$_dataClasses = $dataClasses;
-	protected \$_dataPatches = $dataPatches;
-	protected \$_exportPath = $exportPath;
-	protected \$_exportIncludes = $exportIncludes;
+    protected \$_dataClasses = $dataClasses;
+    protected \$_dataPatches = $dataPatches;
+    protected \$_exportPath = $exportPath;
+    protected \$_exportIncludes = $exportIncludes;
 
-	/**
-	 * Return false to trigger the upgrade!
-	 * common use methods:
-	 * 	public function addDataClass(\$name, \$fields = array(), \$primaryKey = false, \$indeces = array())
-	 *	public function addDataPatch(\$table, array \$field)
-	 *	public function setExportPath(\$path)
-	**/
-	protected function _upgrade()
-	{
-		return true; // remove this line to trigger update
+    /**
+     * Return false to trigger the upgrade!
+     **/
+    protected function _upgrade()
+    {
+        return true; // remove this line to trigger update
 
-		/*
-		\$this->addDataClass(
-				'name_here',
-				array( // fields
-						'field_here' => array(
-								'type' => 'type_here',
-								// 'length' => 'length_here',
-								// 'required' => true,
-								// 'allowedValues' => array('value_1', 'value_2'),
-								// 'default' => 0,
-								// 'autoIncrement' => true,
-						),
-						// other fields go here
-				),
-				'primary_key_field_here',
-				array( // indeces
-						array(
-								'fields' => array('field_1', 'field_2'),
-								'type' => 'NORMAL', // UNIQUE or FULLTEXT
-						),
-				),
-		);
-		*/
-	}
+        /*
+        \$this->addDataClass(
+            'name_here',
+            array( // fields
+                'field_here' => array(
+                    'type' => 'type_here',
+                    // 'length' => 'length_here',
+                    // 'required' => true,
+                    // 'allowedValues' => array('value_1', 'value_2'),
+                    // 'default' => 0,
+                    // 'autoIncrement' => true,
+                ),
+                // other fields go here
+            ),
+            array('primary_key_1', 'primary_key_2'), // or 'primary_key', both are okie
+            array( // indeces
+                array(
+                    'fields' => array('field_1', 'field_2'),
+                    'type' => 'NORMAL', // UNIQUE or FULLTEXT
+                ),
+            ),
+        );
+        */
+    }
 }
 EOF;
 
-		return $contents;
-	}
+        return $contents;
+    }
 
-	protected function _normalizeDbName($name)
-	{
-		return $this->_normalizeName($name);
-	}
+    protected function _normalizeDbName($name)
+    {
+        return $this->_normalizeName($name);
+    }
 
-	protected function _normalizeName($name)
-	{
-		return preg_replace('/[^a-zA-Z_]/', '', $name);
-	}
-
-	protected function _getConfigModel()
-	{
-		return $this->getModelFromCache('DevHelper_Model_Config');
-	}
+    protected function _normalizeName($name)
+    {
+        return preg_replace('/[^a-zA-Z_]/', '', $name);
+    }
 
 }

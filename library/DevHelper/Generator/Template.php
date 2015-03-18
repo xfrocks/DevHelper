@@ -1,73 +1,68 @@
 <?php
+
 class DevHelper_Generator_Template
 {
-	public static function getTemplateTitle(array $addOn, DevHelper_Config_Base $config, array $dataClass, $title)
-	{
-		return strtolower($addOn['addon_id'] . '_' . $title);
-	}
+    public static function getTemplateTitle(array $addOn, DevHelper_Config_Base $config, array $dataClass, $title)
+    {
+        return strtolower($addOn['addon_id'] . '_' . $title);
+    }
 
-	public static function generateAdminTemplate(array $addOn, $title, $template)
-	{
-		if (self::checkAdminTemplateExists($title))
-		{
-			return false;
-		}
+    public static function generateAdminTemplate(array $addOn, $title, $template)
+    {
+        if (self::checkAdminTemplateExists($title)) {
+            return false;
+        }
 
-		$propertyModel = self::_getStylePropertyModel();
+        $propertyModel = self::_getStylePropertyModel();
 
-		$properties = $propertyModel->keyPropertiesByName($propertyModel->getEffectiveStylePropertiesInStyle(-1));
-		$propertyChanges = $propertyModel->translateEditorPropertiesToArray($template, $template, $properties);
+        $properties = $propertyModel->keyPropertiesByName($propertyModel->getEffectiveStylePropertiesInStyle(-1));
+        $propertyChanges = $propertyModel->translateEditorPropertiesToArray($template, $template, $properties);
 
-		$writer = XenForo_DataWriter::create('XenForo_DataWriter_AdminTemplate');
-		$writer->bulkSet(array(
-			'title' => $title,
-			'template' => $template,
-			'addon_id' => $addOn['addon_id'],
-		));
+        $writer = XenForo_DataWriter::create('XenForo_DataWriter_AdminTemplate');
+        $writer->bulkSet(array(
+            'title' => $title,
+            'template' => $template,
+            'addon_id' => $addOn['addon_id'],
+        ));
 
-		try
-		{
-			$writer->save();
-		}
-		catch (Exception $ex)
-		{
-			throw new XenForo_Exception("Exception creating template $title: " . $ex->getMessage() . '<br/><pre>' . htmlentities($template) . '</pre>');
-		}
+        try {
+            $writer->save();
+        } catch (Exception $ex) {
+            throw new XenForo_Exception("Exception creating template $title: " . $ex->getMessage() . '<br/><pre>' . htmlentities($template) . '</pre>');
+        }
 
-		$propertyModel->saveStylePropertiesInStyleFromTemplate(-1, $propertyChanges, $properties);
+        $propertyModel->saveStylePropertiesInStyleFromTemplate(-1, $propertyChanges, $properties);
 
-		return true;
-	}
+        return true;
+    }
 
-	public static function checkAdminTemplateExists($title)
-	{
-		$info = self::_getAdminTemplateModel()->getAdminTemplateByTitle($title);
+    public static function checkAdminTemplateExists($title)
+    {
+        $info = self::_getAdminTemplateModel()->getAdminTemplateByTitle($title);
 
-		return !empty($info);
-	}
+        return !empty($info);
+    }
 
-	protected static function _getAdminTemplateModel()
-	{
-		static $model = null;
+    /**
+     * @return XenForo_Model_AdminTemplate
+     */
+    protected static function _getAdminTemplateModel()
+    {
+        static $model = null;
 
-		if ($model === null)
-		{
-			$model = XenForo_Model::create('XenForo_Model_AdminTemplate');
-		}
+        if ($model === null) {
+            $model = XenForo_Model::create('XenForo_Model_AdminTemplate');
+        }
 
-		return $model;
-	}
+        return $model;
+    }
 
-	protected static function _getStylePropertyModel()
-	{
-		static $model = null;
-
-		if ($model === null)
-		{
-			$model = XenForo_Model::create('XenForo_Model_StyleProperty');
-		}
-
-		return $model;
-	}
+    /**
+     * @return XenForo_Model_StyleProperty
+     */
+    protected static function _getStylePropertyModel()
+    {
+        return self::_getAdminTemplateModel()->getModelFromCache('XenForo_Model_StyleProperty');
+    }
 
 }

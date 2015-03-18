@@ -1,0 +1,5 @@
+<?php
+
+class XFCP_DevHelper_XenForo_ControllerAdmin_AdminTemplateModification extends XenForo_ControllerAdmin_AdminTemplateModification
+{
+}
