@@ -6,6 +6,10 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
 
     public function actionIndex()
     {
+        /** @var DevHelper_ControllerHelper_AddOn $helper */
+        $helper = $this->getHelper('DevHelper_ControllerHelper_AddOn');
+        $helper->selfCheck();
+
         $response = parent::actionIndex();
 
         if ($response instanceof XenForo_ControllerResponse_View) {

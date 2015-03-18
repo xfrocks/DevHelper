@@ -14,6 +14,7 @@ class DevHelper_Listener
             'XenForo_ControllerAdmin_Permission',
             'XenForo_ControllerAdmin_RoutePrefix',
             'XenForo_ControllerAdmin_TemplateModification',
+            'XenForo_ControllerAdmin_Tools',
 
             'XenForo_DataWriter_AddOn',
             'XenForo_DataWriter_Template',

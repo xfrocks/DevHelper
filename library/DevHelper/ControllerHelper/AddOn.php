@@ -2,6 +2,16 @@
 
 class DevHelper_ControllerHelper_AddOn extends XenForo_ControllerHelper_Abstract
 {
+    public function selfCheck()
+    {
+        if (!DevHelper_Installer::checkAddOnVersion()) {
+            throw new XenForo_Exception(sprintf(
+                'DevHelper version mis-matched. <a href="%s">Sync Now</a>.',
+                XenForo_Link::buildAdminLink('tools/dev/helper/sync')
+            ));
+        }
+    }
+
     public function filterKeepActiveAddOns(array &$dataGrouped, array $addOns = null)
     {
         $removedCount = 0;
