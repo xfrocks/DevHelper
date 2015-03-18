@@ -19,6 +19,8 @@ class DevHelper_Listener
             'XenForo_DataWriter_Template',
 
             'XenForo_Model_AddOn',
+
+            'XenForo_ViewAdmin_AddOn_Upgrade',
         );
 
         if (in_array($class, $classes)) {

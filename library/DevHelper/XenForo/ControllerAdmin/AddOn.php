@@ -184,8 +184,7 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
         $dw->set('uninstall_callback_method', 'uninstall');
         $dw->save();
 
-        $xmlDirPath = dirname(DevHelper_Generator_File::getClassPath($className));
-        $xmlPath = $xmlDirPath . '/addon-' . $addOn['addon_id'] . '.xml';
+        $xmlPath = DevHelper_Generator_File::getAddOnXmlPath($addOn);
         $this->_getAddOnModel()->getAddOnXml($addOn)->save($xmlPath);
 
         if ($this->_input->filterSingle('run', XenForo_Input::UINT)) {
