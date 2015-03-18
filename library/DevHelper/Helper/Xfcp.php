@@ -23,9 +23,21 @@ class DevHelper_Helper_Xfcp
             }
 
             $realClazz = substr($clazz, $prefixLength);
-            if (!class_exists($realClazz)) {
+            $realPath = DevHelper_Generator_File::getClassPath($realClazz);
+            if (!file_exists($realPath)) {
                 // the real class could not be found, hmm...
-                continue;
+                // try to replace 'Extend_' with 'XenForo_' to support our legacy add-ons
+                if (substr($realClazz, 0, 7) !== 'Extend_') {
+                    // no hope
+                    continue;
+                }
+
+                $realClazz = 'XenForo_' . substr($realClazz, 7);
+                $realPath = DevHelper_Generator_File::getClassPath($realClazz);
+                if (!file_exists($realPath)) {
+                    // not found either... bye!
+                    continue;
+                }
             }
 
             $ghostClazz = $prefix . 'DevHelper_XFCP_' . $clazz;
@@ -38,21 +50,19 @@ class DevHelper_Helper_Xfcp
             $ghostContents = "<?php\n\nclass XFCP_{$clazz} extends {$realClazz}\n{\n}\n";
 
             DevHelper_Generator_File::filePutContents($ghostPath, $ghostContents);
-            echo "<span style='color: #ddd'>Generated      {$ghostClazz}</span>\n";
+            echo "<span style='color: #ddd'>Generated      XFCP_{$clazz} ({$realClazz})</span>\n";
         }
     }
 
     public static function parsePhpForXfcpClass($path, $contents)
     {
-        if (self::$_lookingForXfcpClasses == false)
-        {
+        if (self::$_lookingForXfcpClasses == false) {
             return false;
         }
 
         $offset = 0;
         $extendsXfcp = '#\sextends\sXFCP_(?<clazz>[^\s]+)\s#';
-        while (true)
-        {
+        while (true) {
             if (preg_match($extendsXfcp, $contents, $matches, PREG_OFFSET_CAPTURE, $offset)) {
                 $clazz = $matches['clazz'][0];
                 $offset = $matches[0][1] + strlen($matches[0][0]);
