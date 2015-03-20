@@ -178,7 +178,8 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
 
         $config = $this->_getConfigModel()->loadAddOnConfig($addOn);
 
-        list($className) = DevHelper_Generator_Code_Installer::generate($addOn, $config);
+        list($className, $contents) = DevHelper_Generator_Code_Installer::generate($addOn, $config);
+        DevHelper_Generator_File::writeClass($className, $contents);
 
         $dw = XenForo_DataWriter::create('XenForo_DataWriter_AddOn');
         $dw->setExistingData($addOn);
