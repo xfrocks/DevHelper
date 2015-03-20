@@ -107,62 +107,6 @@ class DevHelper_Listener
         }
     }
 
-    protected static function _injectHtml(&$target, $html, $offsetInTarget = 0, $mark = '<!-- search and replace -->', $revertMark = '<!-- revert all the thing! -->')
-    {
-        if ($offsetInTarget === false)
-            return;
-        // do nothing if invalid offset is given
-        if (empty($html))
-            return;
-        // the html is empty
-
-        $injected = false;
-        $isRevert = (strpos($html, $revertMark) !== false);
-
-        $startPos = strpos($html, $mark);
-        if ($startPos !== false) {
-            $endPos = strpos($html, $mark, $startPos + 1);
-            if ($endPos !== false) {
-                // found the two marks
-                $markLen = strlen($mark);
-                $marked = trim(substr($html, $startPos + $markLen, $endPos - $startPos - $markLen));
-
-                if (!$isRevert) {
-                    // normal mode, look for the first occurence
-                    $markedPos = strpos($target, $marked, $offsetInTarget);
-                } else {
-                    // revert mode, look for the last occurence
-                    $markedPos = strrpos($target, $marked, $offsetInTarget);
-                }
-
-                if ($markedPos !== false) {
-                    // the marked text has been found
-                    // start injecting our html in place
-                    $html = str_replace($mark, '', $html);
-                    $html = str_replace($revertMark, '', $html);
-
-                    $target = substr_replace($target, $html, $markedPos, strlen($marked));
-                }
-
-                $injected = true;
-                // assume that it was injected
-            }
-        }
-
-        if (!$injected) {
-            $html = str_replace($mark, '', $html);
-            $html = str_replace($revertMark, '', $html);
-
-            if (!$isRevert) {
-                //  normal mode, append the html
-                $target .= $html;
-            } else {
-                // revert mode, insert instead of append
-                $target = $html . $target;
-            }
-        }
-    }
-
     protected static function _filterDisabledAddOnOptions(&$html)
     {
         $offset = 0;
