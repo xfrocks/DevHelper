@@ -86,7 +86,7 @@ class $className
             }
         }
 
-        foreach (self::\$_tables as \$table){
+        foreach (self::\$_tables as \$table) {
             \$db->query(\$table['dropQuery']);
         }
 
