@@ -23,6 +23,7 @@ class DevHelper_Generator_Code_Model extends DevHelper_Generator_Code_Common
         $tableAlias = $this->_dataClass['name'];
         if (in_array($tableAlias, array(
             'group',
+            'join',
             'order'
         ))) {
             $tableAlias = '_' . $tableAlias;
