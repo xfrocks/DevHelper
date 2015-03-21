@@ -27,6 +27,13 @@ class DevHelper_Autoloader extends XenForo_Autoloader
 
     public function autoloaderClassToFile($class)
     {
+        static $classes = array(
+            'XenForo_ViewRenderer_Json',
+        );
+        if (in_array($class, $classes, true)) {
+            $class = 'DevHelper_' . $class;
+        }
+
         $classFile = parent::autoloaderClassToFile($class);
 
         $strPos = 0;
