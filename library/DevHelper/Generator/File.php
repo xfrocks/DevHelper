@@ -358,6 +358,7 @@ class DevHelper_Generator_File
                 'gif',
                 'swf',
                 'crt',
+                'pem',
             ),
             'filenames_lowercase' => array(
                 'license',
