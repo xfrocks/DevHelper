@@ -429,6 +429,10 @@ class DevHelper_Generator_File
                 if (!$isDevHelper) {
                     $entryExportPath = $exportPath . '/' . $relativePath;
 
+                    if ($ext === 'php') {
+                        DevHelper_Helper_ShippableHelper::checkForUpdate($entry);
+                    }
+
                     $contents = self::fileGetContents($entry);
 
                     if (!empty($contents)) {

@@ -29,6 +29,11 @@ class DevHelper_Listener
         }
     }
 
+    public static function init_dependencies(XenForo_Dependencies_Abstract $dependencies, array $data)
+    {
+        DevHelper_Autoloader::throwIfNotSetup();
+    }
+
     public static function front_controller_pre_view(XenForo_FrontController $fc, XenForo_ControllerResponse_Abstract &$controllerResponse, XenForo_ViewRenderer_Abstract &$viewRenderer, array &$containerParams)
     {
         if (DevHelper_Helper_Template::autoExportImport() AND XenForo_Application::isRegistered('styles')) {
