@@ -40,7 +40,7 @@ class DevHelper_Helper_Xfcp
                 }
             }
 
-            $ghostClazz = $prefix . 'DevHelper_XFCP_' . $clazz;
+            $ghostClazz = $prefix . 'DevHelper_XFCP_' . $realClazz;
             $ghostPath = DevHelper_Generator_File::getClassPath($ghostClazz);
             if (file_exists($ghostPath)) {
                 // ghost file exists, yay!
