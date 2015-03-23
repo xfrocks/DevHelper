@@ -1,5 +1,27 @@
 <?php
 
+if (!class_exists('XenForo_Application')) {
+    // being called directly? Try to install itself
+    $fileDir = getcwd();
+    require($fileDir . '/library/XenForo/Autoloader.php');
+    XenForo_Autoloader::getInstance()->setupAutoloader($fileDir . '/library');
+    XenForo_Application::initialize($fileDir . '/library', $fileDir);
+
+    $dependencies = new XenForo_Dependencies_Public();
+    $dependencies->preLoadData();
+
+    /** @var XenForo_Model_AddOn $addOnModel */
+    $addOnModel = XenForo_Model::create('XenForo_Model_AddOn');
+
+    $devHelperAddOn = $addOnModel->getAddOnById('devHelper');
+    if (!empty($devHelperAddOn)) {
+        die("DevHelper add-on has already been installed.\n");
+    }
+
+    $addOnModel->installAddOnXmlFromFile('library/DevHelper/addon-devHelper.xml');
+    die("DevHelper add-on has been installed successfully.\n");
+}
+
 class DevHelper_Installer
 {
     /* Start auto-generated lines of code. Change made will be overwriten... */
