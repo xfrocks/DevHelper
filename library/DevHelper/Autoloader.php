@@ -9,9 +9,18 @@ class DevHelper_Autoloader extends XenForo_Autoloader
         if (empty($_SERVER['SCRIPT_FILENAME'])) {
             throw new XenForo_Exception('Cannot get value for $_SERVER[\'SCRIPT_FILENAME\']');
         }
-        $fileName = basename($_SERVER['SCRIPT_FILENAME']);
 
-        if (in_array($fileName, array('index.php', 'admin.php'), true) && !self::$_DevHelper_isSetup) {
+        /** @var XenForo_Application $app */
+        $app = XenForo_Application::getInstance();
+        $root = $app->getRootDir();
+        $candidates = array(
+            file_get_contents($root . '/index.php'),
+            file_get_contents($root . '/admin.php'),
+        );
+
+        if (in_array(file_get_contents($_SERVER['SCRIPT_FILENAME']), $candidates, true)
+            && !self::$_DevHelper_isSetup
+        ) {
             throw new XenForo_Exception('DevHelper_Autoloader must be used instead of XenForo_Autoloader');
         }
     }
