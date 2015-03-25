@@ -16,6 +16,8 @@ class DevHelper_Listener
             'XenForo_ControllerAdmin_TemplateModification',
             'XenForo_ControllerAdmin_Tools',
 
+            'XenForo_ControllerHelper_Editor',
+
             'XenForo_DataWriter_AddOn',
             'XenForo_DataWriter_Template',
 
