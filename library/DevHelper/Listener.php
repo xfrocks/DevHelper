@@ -96,15 +96,6 @@ class DevHelper_Listener
         }
     }
 
-    public static function template_post_render($templateName, &$content, array &$containerData, XenForo_Template_Abstract $template)
-    {
-        switch ($templateName) {
-            case 'PAGE_CONTAINER':
-                DevHelper_Generator_File::minifyJs($template);
-                break;
-        }
-    }
-
     public static function template_hook($hookName, &$contents, array $hookParams, XenForo_Template_Abstract $template)
     {
         switch ($hookName) {

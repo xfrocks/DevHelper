@@ -5,13 +5,10 @@ class DevHelper_Generator_File
     const COMMENT_AUTO_GENERATED_START = '/* Start auto-generated lines of code. Change made will be overwriten... */';
     const COMMENT_AUTO_GENERATED_END = '/* End auto-generated lines of code. Feel free to make changes below */';
 
-    public static function minifyJs(XenForo_Template_Abstract $template)
+    public static function minifyJs(array $jsFiles)
     {
-        $scripts = explode("\n", $template->getRequiredExternalsAsHtml('js'));
-
-        foreach ($scripts as $script) {
-            if (preg_match('/src="([^"]+\.js)[^"]*"/', $script, $matches)) {
-                $path = $matches[1];
+        if (true) {
+            foreach ($jsFiles as $path) {
                 $pathInfo = pathinfo($path);
 
                 if (strpos($path, 'js/xenforo/') !== false) {
