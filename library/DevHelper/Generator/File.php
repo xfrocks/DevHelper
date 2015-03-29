@@ -267,7 +267,9 @@ class DevHelper_Generator_File
 
         /** @var XenForo_Application $application */
         $application = XenForo_Application::getInstance();
-        $root = rtrim(realpath($application->getRootDir()), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        $root = rtrim(realpath($application->getRootDir()), DIRECTORY_SEPARATOR);
+        $rootWin = $root . '/'; //For dev on Windows OS
+        $root = $root . DIRECTORY_SEPARATOR;
 
         foreach ($directories as $key => $directory) {
             $directoryHashes = XenForo_Helper_Hash::hashDirectory($directory, array(
@@ -277,8 +279,7 @@ class DevHelper_Generator_File
 
             foreach ($directoryHashes as $filePath => $hash) {
                 if (strpos($filePath, 'DevHelper') === false AND strpos($filePath, 'FileSums') === false) {
-                    $relative = str_replace($root, '', $filePath);
-
+                    $relative = str_replace(array($root, $rootWin), '', $filePath);
                     $hashes[$relative] = $hash;
                 }
             }
@@ -342,8 +343,8 @@ class DevHelper_Generator_File
         }
         XenForo_Helper_File::createDirectory($exportPath /*, true */);
         $exportPath = realpath($exportPath);
-        $options = array(
-            'extensions' => array(
+
+	$extensions = array(
                 'php',
                 'inc',
                 'txt',
@@ -358,8 +359,24 @@ class DevHelper_Generator_File
                 'gif',
                 'swf',
                 'crt',
-                'pem',
-            ),
+                'pem'
+        );
+        
+	$extraExtensions = $config->getExtraExtensions();
+	if(!empty($extraExtensions))
+	{
+		if($extraExtensions == '*')
+		{
+			$extensions = array();
+		}
+		else
+		{
+			$extensions = array_merge($extensions, $extraExtensions);
+		}
+	}
+
+        $options = array(
+            'extensions' => $extensions,
             'filenames_lowercase' => array(
                 'license',
                 'readme',
@@ -420,7 +437,7 @@ class DevHelper_Generator_File
             }
         } elseif (is_file($entry)) {
             $ext = XenForo_Helper_File::getFileExtension($entry);
-            if (!empty($options['force']) OR (in_array($ext, $options['extensions']) AND strpos(basename($entry), '.') !== 0) OR in_array(strtolower(basename($entry)), $options['filenames_lowercase'])) {
+            if (!empty($options['force']) OR empty($options['extensions']) OR (in_array($ext, $options['extensions']) AND strpos(basename($entry), '.') !== 0) OR in_array(strtolower(basename($entry)), $options['filenames_lowercase'])) {
                 if ($options['addon_id'] == 'devHelper') {
                     $isDevHelper = (strpos($entry, 'DevHelper/DevHelper') !== false);
                 } else {

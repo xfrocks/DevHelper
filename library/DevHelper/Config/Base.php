@@ -6,6 +6,7 @@ abstract class DevHelper_Config_Base
     protected $_dataPatches = array();
     protected $_exportPath = false;
     protected $_exportIncludes = array();
+    protected $_extraExtensions = array();
 
     protected function _upgrade()
     {
@@ -253,6 +254,11 @@ abstract class DevHelper_Config_Base
         $prefix = implode('_', $parts);
 
         return $prefix;
+    }
+
+    public function getExtraExtensions()
+    {
+    	return $this->_extraExtensions;
     }
 
     public function outputSelf()
