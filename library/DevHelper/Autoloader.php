@@ -12,7 +12,7 @@ class DevHelper_Autoloader extends XenForo_Autoloader
         $fileName = basename($_SERVER['SCRIPT_FILENAME']);
 
         if (in_array($fileName, array('index.php', 'admin.php'), true) && !self::$_DevHelper_isSetup) {
-            throw new XenForo_Exception('DevHelper_Autoloader must be used instead of XenForo_Autoloader');
+            //throw new XenForo_Exception('DevHelper_Autoloader must be used instead of XenForo_Autoloader');
         }
     }
 
