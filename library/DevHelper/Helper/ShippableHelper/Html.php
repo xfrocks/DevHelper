@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Html
- * @version 1
+ * @version 2
  */
 class DevHelper_Helper_ShippableHelper_Html
 {
@@ -85,5 +85,74 @@ class DevHelper_Helper_ShippableHelper_Html
         }
 
         return $snippet;
+    }
+
+
+    public static function getMetaTags($html)
+    {
+        $tags = array();
+
+        $headPos = strpos($html, '</head>');
+        if ($headPos === false) {
+            return $tags;
+        }
+
+        $head = substr($html, 0, $headPos);
+
+        $offset = 0;
+        while (true) {
+            if (preg_match('#<meta[^>]+>#i', $head, $matches, PREG_OFFSET_CAPTURE, $offset)) {
+                $tag = $matches[0][0];
+                $offset = $matches[0][1] + strlen($tag);
+                $name = null;
+                $value = null;
+
+                if (preg_match('#name="(?<name>[^"]+)"#i', $tag, $matches)) {
+                    $name = $matches['name'];
+                } elseif (preg_match('#property="(?<name>[^"]+)"#i', $tag, $matches)) {
+                    $name = $matches['name'];
+                } else {
+                    continue;
+                }
+
+                if (preg_match('#content="(?<value>[^"]+)"#', $tag, $matches)) {
+                    $value = self::entityDecode($matches['value']);
+                } else {
+                    continue;
+                }
+
+                $tags[] = array(
+                    'name' => $name,
+                    'value' => $value,
+                );
+            } else {
+                break;
+            }
+        }
+
+        return $tags;
+    }
+
+    public static function getTitleTag($html)
+    {
+        if (preg_match('#<title>(?<title>[^<]+)</title>#i', $html, $matches)) {
+            return self::entityDecode($matches['title']);
+        }
+
+        return '';
+    }
+
+    public static function entityDecode($html)
+    {
+        $decoded = $html;
+
+        // required to deal with &quot; etc.
+        $decoded = html_entity_decode($decoded, ENT_COMPAT, 'UTF-8');
+
+        // required to deal with &#1234; etc.
+        $convmap = array(0x0, 0x2FFFF, 0, 0xFFFF);
+        $decoded = mb_decode_numericentity($decoded, $convmap, 'UTF-8');
+
+        return $decoded;
     }
 }
