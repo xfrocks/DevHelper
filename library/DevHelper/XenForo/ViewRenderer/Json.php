@@ -44,12 +44,15 @@ class DevHelper_XenForo_ViewRenderer_Json extends _XenForo_ViewRenderer_Json
                     $queryText = preg_replace('#\s+#', ' ', $queryText);
                     $queryText = trim($queryText);
 
-                    $boundParams = array();
                     foreach ($query->getQueryParams() AS $param) {
-                        $boundParams[] = $param;
+                        $param = sprintf('{%s}', htmlentities($param));
+                        $pos = strpos($queryText, '?');
+                        if ($pos !== false) {
+                            $queryText = substr_replace($queryText, $param, $pos, 1);
+                        }
                     }
 
-                    $params['_queries'][] = sprintf("%s\n\n(%s)", $queryText, implode(', ', $boundParams));
+                    $params['_queries'][] = $queryText;
                     $params['_totalQueryRunTime'] += $query->getElapsedSecs();
                 }
             }
