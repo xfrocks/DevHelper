@@ -32,6 +32,7 @@ class DevHelper_Generator_Code_RoutePrefixAdmin extends DevHelper_Generator_Code
             }
         }
 
+        eval("class $className {}");
         $dw = XenForo_DataWriter::create('XenForo_DataWriter_RoutePrefix');
         $dw->bulkSet(array(
             'original_prefix' => $this->_info['routePrefix'],
