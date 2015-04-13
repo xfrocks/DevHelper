@@ -339,6 +339,10 @@ class DevHelper_Generator_File
             if ($addOnEventListener['event_id'] === 'file_health_check') {
                 $fileHealthCheckFound = true;
             }
+
+            if (!is_callable(array($addOnEventListener['callback_class'], $addOnEventListener['callback_method']))) {
+                die(sprintf("Callback is not callable %s::%s\n", $addOnEventListener['callback_class'], $addOnEventListener['callback_method']));
+            }
         }
         if (!$fileHealthCheckFound) {
             die("No `file_health_check` event listener found.\n");
