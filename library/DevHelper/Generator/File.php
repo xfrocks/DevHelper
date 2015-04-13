@@ -330,6 +330,20 @@ class DevHelper_Generator_File
         // generate hashes
         self::generateHashesFile($addOn, $config, $list);
 
+        // check for file_health_check event listener
+        /** @var XenForo_Model_CodeEvent $codeEventModel */
+        $codeEventModel = XenForo_Model::create('XenForo_Model_CodeEvent');
+        $addOnEventListeners = $codeEventModel->getEventListenersByAddOn($addOn['addon_id']);
+        $fileHealthCheckFound = false;
+        foreach ($addOnEventListeners as $addOnEventListener) {
+            if ($addOnEventListener['event_id'] === 'file_health_check') {
+                $fileHealthCheckFound = true;
+            }
+        }
+        if (!$fileHealthCheckFound) {
+            die("No `file_health_check` event listener found.\n");
+        }
+
         /** @var XenForo_Application $application */
         $application = XenForo_Application::getInstance();
         $rootPath = realpath($application->getRootDir());
