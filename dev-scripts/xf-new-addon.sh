@@ -27,9 +27,11 @@ if [ $# -ge 2 ]; then
         fi
 
         if [ ! -d "${PATH_TO_XENFORO}/tests/" ]; then
-            echo "${PATH_TO_XENFORO}/tests/" does not exists! Quit now...
-            echo Run xf-setup-root at XenForo root first maybe?
-            exit 1
+            if [ $ADDON_ID ! -eq 'DevHelper' ]; then
+                echo "${PATH_TO_XENFORO}/tests/" does not exists! Quit now...
+                echo Run xf-setup-root at XenForo root first maybe?
+                exit 1
+            fi
         fi
     else
         echo "${PATH_TO_XENFORO}" does not exists! Quit now...
