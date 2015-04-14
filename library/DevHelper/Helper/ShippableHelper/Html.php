@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Html
- * @version 2
+ * @version 3
  */
 class DevHelper_Helper_ShippableHelper_Html
 {
@@ -82,6 +82,20 @@ class DevHelper_Helper_ShippableHelper_Html
 
         while (!empty($stack)) {
             $snippet .= sprintf('</%s>', array_pop($stack));
+        }
+
+        $snippet = utf8_trim($snippet);
+        if ($snippet === '') {
+            // this is bad...
+            // happens if the $maxLength is too low and for some reason the very first tag cannot finish
+            $snippet = utf8_trim(strip_tags($string));
+            if ($snippet !== '') {
+                $snippet = XenForo_Template_Helper_Core::callHelper('snippet', array($snippet, $maxLength, $options));
+            } else {
+                // this is super bad...
+                // the string is one big html tag and it is too damn long
+                $snippet = '…';
+            }
         }
 
         return $snippet;
