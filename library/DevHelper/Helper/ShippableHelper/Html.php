@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Html
- * @version 3
+ * @version 4
  */
 class DevHelper_Helper_ShippableHelper_Html
 {
@@ -32,7 +32,7 @@ class DevHelper_Helper_ShippableHelper_Html
                 $endPos = utf8_strpos($snippet, '>', $startPos);
                 if ($endPos === false) {
                     // we found a partial open tag, best to delete the whole thing
-                    $snippet = utf8_substr($snippet, 0, $startPos);
+                    $snippet = utf8_substr($snippet, 0, $startPos) . '…';
                     break;
                 }
 
@@ -101,6 +101,13 @@ class DevHelper_Helper_ShippableHelper_Html
         return $snippet;
     }
 
+    public static function stripFont($html)
+    {
+        $html = preg_replace('#(<[^>]+)( style="[^"]+")([^>]*>)#', '$1$3', $html);
+        $html = preg_replace('#<\/?(b|i)>#', '', $html);
+
+        return $html;
+    }
 
     public static function getMetaTags($html)
     {
