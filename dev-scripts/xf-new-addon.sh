@@ -68,7 +68,7 @@ if [ $# -ge 2 ]; then
         echo $ADDON_ID exists in $PATH_TO_XENFORO already...
     fi
 
-    if [ ! -d "${ADDON_DIR}/repo/.git" ]; then
+    if [ ! -e "${ADDON_DIR}/repo/.gitignore" ]; then
         echo Initializing git repo...
         cd "${ADDON_DIR}/repo/"
         git init
