@@ -427,6 +427,7 @@ class DevHelper_Generator_File
                 'woff',
                 'woff2',
                 'otf',
+                'md',
             ),
             'filenames_lowercase' => array(
                 'license',
@@ -440,6 +441,8 @@ class DevHelper_Generator_File
             ),
             'force' => true, // always force add top level export entries
             'addon_id' => $addOn['addon_id'],
+
+            'excludes' => $config->getExportExcludes(),
         );
 
         foreach ($list as $type => $entry) {
@@ -462,6 +465,11 @@ class DevHelper_Generator_File
         }
 
         $relativePath = trim(str_replace($rootPath, '', $entry), '/');
+
+        if (in_array($relativePath, $options['excludes'])) {
+            echo "<span style='color: #ddd'>Excluded       $relativePath</span>\n";
+            return;
+        }
 
         if (is_dir($entry)) {
             echo "<span style='color: #ddd'>Browsing       $relativePath</span>\n";

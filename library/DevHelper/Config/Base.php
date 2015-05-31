@@ -6,6 +6,7 @@ abstract class DevHelper_Config_Base
     protected $_dataPatches = array();
     protected $_exportPath = false;
     protected $_exportIncludes = array();
+    protected $_exportExcludes = array();
     protected $_exportAddOns = array();
     protected $_exportStyles = array();
 
@@ -239,6 +240,11 @@ abstract class DevHelper_Config_Base
         return $this->_exportIncludes;
     }
 
+    public function getExportExcludes()
+    {
+        return $this->_exportExcludes;
+    }
+
     public function getExportAddOns()
     {
         return $this->_exportAddOns;
@@ -268,6 +274,7 @@ abstract class DevHelper_Config_Base
         $dataPatches = DevHelper_Generator_File::varExport($this->_dataPatches);
         $exportPath = DevHelper_Generator_File::varExport($this->_exportPath);
         $exportIncludes = DevHelper_Generator_File::varExport($this->_exportIncludes);
+        $exportExcludes = DevHelper_Generator_File::varExport($this->_exportExcludes);
         $exportAddOns = DevHelper_Generator_File::varExport($this->_exportAddOns);
         $exportStyles = DevHelper_Generator_File::varExport($this->_exportStyles);
 
@@ -280,6 +287,7 @@ class $className extends DevHelper_Config_Base
     protected \$_dataPatches = $dataPatches;
     protected \$_exportPath = $exportPath;
     protected \$_exportIncludes = $exportIncludes;
+    protected \$_exportExcludes = $exportExcludes;
     protected \$_exportAddOns = $exportAddOns;
     protected \$_exportStyles = $exportStyles;
 
