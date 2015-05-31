@@ -17,6 +17,11 @@ class DevHelper_Generator_Code_ControllerAdmin extends DevHelper_Generator_Code_
 
     protected function _generate()
     {
+        if (count($this->_dataClass['primaryKey']) > 1) {
+            throw new XenForo_Exception(sprintf('Cannot generate %s: too many fields in primary key', $this->_info['controller']));
+        }
+        $idField = reset($this->_dataClass['primaryKey']);
+
         $variableName = DevHelper_Generator_Code_Model::getVariableName($this->_addOn, $this->_config, $this->_dataClass);
         $variableNamePlural = DevHelper_Generator_Code_Model::getVariableNamePlural($this->_addOn, $this->_config, $this->_dataClass);
 
@@ -76,7 +81,7 @@ return \$this->responseView('$viewEditClassName', '$templateEdit', \$viewParams)
 
         $this->_addMethod('actionEdit', 'public', array(), "
 
-\$id = \$this->_input->filterSingle('{$this->_dataClass['id_field']}', XenForo_Input::UINT);
+\$id = \$this->_input->filterSingle('{$idField}', XenForo_Input::UINT);
 \${$variableName} = \$this->_get{$this->_dataClass['camelCase']}OrError(\$id);
 
 \$viewParams = array(
@@ -95,7 +100,7 @@ return \$this->responseView('$viewEditClassName', '$templateEdit', \$viewParams)
 
 \$this->_assertPostOnly();
 
-\$id = \$this->_input->filterSingle('{$this->_dataClass['id_field']}', XenForo_Input::UINT);
+\$id = \$this->_input->filterSingle('{$idField}', XenForo_Input::UINT);
 \$dw = \$this->_get{$this->_dataClass['camelCase']}DataWriter();
 if (\$id) {
     \$dw->setExistingData(\$id);
@@ -118,7 +123,7 @@ return \$this->responseRedirect(
 
         $this->_addMethod('actionDelete', 'public', array(), "
 
-\$id = \$this->_input->filterSingle('{$this->_dataClass['id_field']}', XenForo_Input::UINT);
+\$id = \$this->_input->filterSingle('{$idField}', XenForo_Input::UINT);
 \${$variableName} = \$this->_get{$this->_dataClass['camelCase']}OrError(\$id);
 
 if (\$this->isConfirmedPost()) {
@@ -175,7 +180,20 @@ return XenForo_DataWriter::create('$dataWriterClassName');
 
     protected function _generateTemplates($variableName, $variableNamePlural, $imageField)
     {
-        $dataTitle = "\${$variableName}" . (empty($this->_dataClass['title_field']) ? (".{$this->_dataClass['id_field']}") : ((is_array($this->_dataClass['title_field']) ? (".{$this->_dataClass['title_field'][0]}.{$this->_dataClass['title_field'][1]}") : (".{$this->_dataClass['title_field']}"))));
+        if (count($this->_dataClass['primaryKey']) > 1) {
+            throw new XenForo_Exception(sprintf('Cannot generate %s: too many fields in primary key', $this->_info['controller']));
+        }
+        $idField = reset($this->_dataClass['primaryKey']);
+
+        $dataTitle = "\${$variableName}"
+            . (
+            empty($this->_dataClass['title_field'])
+                ? (".{$idField}")
+                : (
+            is_array($this->_dataClass['title_field'])
+                ? (".{$this->_dataClass['title_field'][0]}.{$this->_dataClass['title_field'][1]}")
+                : (".{$this->_dataClass['title_field']}")
+            ));
 
         // create the phrases
         $phraseClassName = $this->_getPhraseName('');
@@ -223,7 +241,7 @@ EOF;
         $templateListItemsTemplate = <<<EOF
 <xen:foreach loop="\${$variableNamePlural}" value="\${$variableName}">
 	<xen:listitem
-		id="{\${$variableName}.{$this->_dataClass['id_field']}}"
+		id="{\${$variableName}.{$idField}}"
 		href="{xen:adminlink '{$this->_info['routePrefix']}/edit', \${$variableName}}"
 		delete="{xen:adminlink '{$this->_info['routePrefix']}/delete', \${$variableName}}">
 		<xen:label>{{$dataTitle}}</xen:label>{$listItemExtras}
@@ -280,7 +298,7 @@ EOF;
         }
 
         foreach ($this->_dataClass['fields'] as $field) {
-            if ($field['name'] == $this->_dataClass['id_field']) {
+            if ($field['name'] == $idField) {
                 continue;
             }
             if (empty($field['required'])) {
@@ -299,7 +317,7 @@ EOF;
                 $fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle($this->_addOn, $this->_config, $this->_dataClass, $field['name']);
                 $templateEditFields .= <<<EOF
 
-	<xen:textboxunit label="{xen:phrase $fieldPhraseName}:" name="{$field['name']}" value="{\${$variableName}.{$field['name']}}" data-liveTitleTemplate="{xen:if {\${$variableName}.{$this->_dataClass['id_field']}},
+	<xen:textboxunit label="{xen:phrase $fieldPhraseName}:" name="{$field['name']}" value="{\${$variableName}.{$field['name']}}" data-liveTitleTemplate="{xen:if {\${$variableName}.{$idField}},
 		'{xen:phrase $phraseEdit}: <em>%s</em>',
 		'{xen:phrase $phraseAdd}: <em>%s</em>'}" />
 EOF;
@@ -415,7 +433,7 @@ EOF;
         }
 
         $templateEditTemplate = <<<EOF
-<xen:title>{xen:if '{\${$variableName}.{$this->_dataClass['id_field']}}', '{xen:phrase $phraseEdit}', '{xen:phrase $phraseAdd}'}</xen:title>
+<xen:title>{xen:if '{\${$variableName}.{$idField}}', '{xen:phrase $phraseEdit}', '{xen:phrase $phraseAdd}'}</xen:title>
 
 <xen:form action="{xen:adminlink '{$this->_info['routePrefix']}/save'}" $templateEditFormExtra>
 
@@ -425,11 +443,11 @@ EOF;
 		<input type="button" name="delete" value="{xen:phrase $phraseDelete}"
 			accesskey="d" class="button OverlayTrigger"
 			data-href="{xen:adminlink '{$this->_info['routePrefix']}/delete', \${$variableName}}"
-			{xen:if '!{\${$variableName}.{$this->_dataClass['id_field']}}', 'style="display: none"'}
+			{xen:if '!{\${$variableName}.{$idField}}', 'style="display: none"'}
 		/>
 	</xen:submitunit>
 
-	<input type="hidden" name="{$this->_dataClass['id_field']}" value="{\${$variableName}.{$this->_dataClass['id_field']}}" />
+	<input type="hidden" name="{$idField}" value="{\${$variableName}.{$idField}}" />
 </xen:form>
 EOF;
 

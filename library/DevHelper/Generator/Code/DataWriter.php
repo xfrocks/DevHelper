@@ -225,6 +225,11 @@ return array(
 
     protected function _generatePhrasesCode()
     {
+        if (count($this->_dataClass['primaryKey']) > 1) {
+            throw new XenForo_Exception(sprintf('Cannot generate phrases code for %s: too many fields in primary key', $this->_getClassName()));
+        }
+        $idField = reset($this->_dataClass['primaryKey']);
+
         if (!empty($this->_dataClass['phrases'])) {
             foreach ($this->_dataClass['phrases'] as $phraseType) {
                 $camelCase = ucwords(str_replace('_', ' ', $phraseType));
@@ -238,14 +243,14 @@ return array(
 
 \$phrase{$camelCase} = \$this->getExtraData(self::{$constantName});
 if (\$phrase{$camelCase} !== null) {
-    \$this->_insertOrUpdateMasterPhrase({$modelClassName}::{$getPhraseTitleFunction}(\$this->get('{$this->_dataClass['id_field']}')), \$phrase{$camelCase});
+    \$this->_insertOrUpdateMasterPhrase({$modelClassName}::{$getPhraseTitleFunction}(\$this->get('{$idField}')), \$phrase{$camelCase});
 }
 
                 ");
 
                 $this->_addMethod('_postDelete', 'protected', array(), "
 
-\$this->_deleteMasterPhrase({$modelClassName}::{$getPhraseTitleFunction}(\$this->get('{$this->_dataClass['id_field']}')));
+\$this->_deleteMasterPhrase({$modelClassName}::{$getPhraseTitleFunction}(\$this->get('{$idField}')));
 
                 ");
             }

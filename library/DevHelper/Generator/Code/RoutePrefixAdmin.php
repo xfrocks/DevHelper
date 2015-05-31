@@ -19,6 +19,11 @@ class DevHelper_Generator_Code_RoutePrefixAdmin extends DevHelper_Generator_Code
     {
         $className = $this->_getClassName();
 
+        if (count($this->_dataClass['primaryKey']) > 1) {
+            throw new XenForo_Exception(sprintf('Cannot generate %s: too many fields in primary key', $className));
+        }
+        $idField = reset($this->_dataClass['primaryKey']);
+
         // create the route prefix first
         /** @var XenForo_Model_RoutePrefix $routePrefixModel */
         $routePrefixModel = XenForo_Model::create('XenForo_Model_RoutePrefix');
@@ -56,7 +61,7 @@ class DevHelper_Generator_Code_RoutePrefixAdmin extends DevHelper_Generator_Code
 if (in_array(\$routePath, array('add', 'save'))) {
     \$action = \$routePath;
 } else {
-    \$action = \$router->resolveActionWithIntegerParam(\$routePath, \$request, '{$this->_dataClass['id_field']}');
+    \$action = \$router->resolveActionWithIntegerParam(\$routePath, \$request, '{$idField}');
 }
 return \$router->getRouteMatch('{$this->_info['controller']}', \$action, '{$this->_info['majorSection']}');
 
@@ -72,7 +77,7 @@ return \$router->getRouteMatch('{$this->_info['controller']}', \$action, '{$this
         ), "
 
 if (is_array(\$data)) {
-    return XenForo_Link::buildBasicLinkWithIntegerParam(\$outputPrefix, \$action, \$extension, \$data, '{$this->_dataClass['id_field']}');
+    return XenForo_Link::buildBasicLinkWithIntegerParam(\$outputPrefix, \$action, \$extension, \$data, '{$idField}');
 } else {
     return XenForo_Link::buildBasicLink(\$outputPrefix, \$action, \$extension);
 }

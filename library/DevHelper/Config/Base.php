@@ -60,7 +60,6 @@ abstract class DevHelper_Config_Base
             'camelCasePluralWSpace' => false,
             'fields' => array(),
             'phrases' => array(),
-            'id_field' => false,
             'title_field' => false,
             'primaryKey' => false,
             'indeces' => array(),
@@ -126,12 +125,6 @@ abstract class DevHelper_Config_Base
 
         if (!empty($primaryKey)) {
             $this->_dataClasses[$name]['primaryKey'] = $primaryKey;
-            foreach ($primaryKey as $field) {
-                if ($field == $name . '_id') {
-                    $this->_dataClasses[$name]['id_field'] = $field;
-                    break;
-                }
-            }
             return true;
         }
 
@@ -270,12 +263,6 @@ abstract class DevHelper_Config_Base
     public function outputSelf()
     {
         $className = get_class($this);
-
-        foreach ($this->_dataClasses as $dataClass) {
-            if (empty($dataClass['id_field'])) {
-                throw new XenForo_Exception("$dataClass[name] does not have an id_field.", true);
-            }
-        }
 
         $dataClasses = DevHelper_Generator_File::varExport($this->_dataClasses);
         $dataPatches = DevHelper_Generator_File::varExport($this->_dataPatches);
