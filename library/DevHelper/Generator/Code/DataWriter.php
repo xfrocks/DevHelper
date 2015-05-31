@@ -24,6 +24,19 @@ class DevHelper_Generator_Code_DataWriter extends DevHelper_Generator_Code_Commo
                 $field['maxLength'] = $field['length'];
                 unset($field['length']);
             }
+
+            $field['type'] = DevHelper_Generator_File::varExportConstantFromArray($field['type'], array(
+                'XenForo_DataWriter::TYPE_BOOLEAN',
+                'XenForo_DataWriter::TYPE_STRING',
+                'XenForo_DataWriter::TYPE_BINARY',
+                'XenForo_DataWriter::TYPE_INT',
+                'XenForo_DataWriter::TYPE_UINT',
+                'XenForo_DataWriter::TYPE_UINT_FORCED',
+                'XenForo_DataWriter::TYPE_FLOAT',
+                'XenForo_DataWriter::TYPE_SERIALIZED',
+                'XenForo_DataWriter::TYPE_JSON',
+                'XenForo_DataWriter::TYPE_UNKNOWN',
+            ));
         }
         $tableFields = DevHelper_Generator_File::varExport($tableFields, 1);
         $primaryKey = DevHelper_Generator_File::varExport($this->_dataClass['primaryKey']);

@@ -548,8 +548,9 @@ class DevHelper_Generator_File
                     $keyValueLength += strlen($value);
                 }
 
-                if (!is_int($key))
+                if (!is_int($key)) {
                     $allKeysAreInt = false;
+                }
             }
             if ($keyValueLength > 100) {
                 $multiLine = true;
@@ -568,9 +569,13 @@ class DevHelper_Generator_File
                         $output .= ', ';
                     }
                 }
-                if (empty($noKey))
+
+                if (empty($noKey)) {
                     $output .= var_export($key, true) . ' => ';
+                }
+
                 $output .= $str;
+
                 if ($multiLine) {
                     $output .= ',';
                 }
@@ -578,9 +583,13 @@ class DevHelper_Generator_File
                 $first = false;
             }
 
-            if ($multiLine)
+            if ($multiLine) {
                 $output .= "\n" . str_repeat($linePrefix, $level);
+            }
+
             $output .= ')';
+        } elseif (is_object($var) && $var instanceof _DevHelper_Generator_File_Constant) {
+            $output .= strval($var);
         } else {
             $tmp = var_export($var, true);
             if (strpos($tmp, "\n") !== false) {
@@ -591,6 +600,38 @@ class DevHelper_Generator_File
         }
 
         return $output;
+    }
+
+    public static function varExportConstant($str)
+    {
+        return new _DevHelper_Generator_File_Constant($str);
+    }
+
+    public static function varExportConstantFromArray($value, array $constants)
+    {
+        foreach ($constants as $constant) {
+            if ($value === constant($constant)) {
+                return self::varExportConstant($constant);
+            }
+        }
+
+        return $value;
+    }
+
+}
+
+class _DevHelper_Generator_File_Constant
+{
+    protected $_str = '';
+
+    function __construct($str)
+    {
+        $this->_str = $str;
+    }
+
+    function __toString()
+    {
+        return $this->_str;
     }
 
 }
