@@ -189,7 +189,7 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
         $dw->set('uninstall_callback_method', 'uninstall');
         $dw->save();
 
-        $xmlPath = DevHelper_Generator_File::getAddOnXmlPath($addOn);
+        $xmlPath = DevHelper_Generator_File::getAddOnXmlPath($addOn, null, $config);
         $this->_getAddOnModel()->getAddOnXml($addOn)->save($xmlPath);
 
         if ($this->_input->filterSingle('run', XenForo_Input::UINT)) {
@@ -239,7 +239,7 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
         $phraseModel = $this->getModelFromCache('XenForo_Model_Phrase');
         $phrases = $phraseModel->getMasterPhrasesInAddOn($addOnId);
         DevHelper_Helper_Phrase::finishLookingForPhraseTitles($phrases, $phraseModel);
-        DevHelper_Helper_Xfcp::finishLookingForXfcpClasses($addOn);
+        DevHelper_Helper_Xfcp::finishLookingForXfcpClasses($addOn, $config);
 
         echo '</pre>';
 

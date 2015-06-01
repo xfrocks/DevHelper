@@ -573,7 +573,9 @@ EOF;
 
     protected function _getViewClassName($view)
     {
-        return DevHelper_Generator_File::getClassName($this->_addOn['addon_id'], 'ViewAdmin_' . $this->_dataClass['camelCase'] . '_' . ucwords($view));
+        $subClassName = 'ViewAdmin_' . $this->_dataClass['camelCase'] . '_' . ucwords($view);
+
+        return DevHelper_Generator_File::getClassName($this->_addOn['addon_id'], $subClassName, $this->_config);
     }
 
     public static function generate(array $addOn, DevHelper_Config_Base $config, array $dataClass, array $info)
@@ -588,7 +590,7 @@ EOF;
 
     public static function getClassName(array $addOn, DevHelper_Config_Base $config, array $dataClass)
     {
-        return DevHelper_Generator_File::getClassName($addOn['addon_id'], 'ControllerAdmin_' . $dataClass['camelCase']);
+        return DevHelper_Generator_File::getClassName($addOn['addon_id'], 'ControllerAdmin_' . $dataClass['camelCase'], $config);
     }
 
 }

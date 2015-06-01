@@ -11,9 +11,9 @@ class DevHelper_Helper_Xfcp
         self::$_foundXfcpClasses = array();
     }
 
-    public static function finishLookingForXfcpClasses($addOn)
+    public static function finishLookingForXfcpClasses($addOn, DevHelper_Config_Base $config)
     {
-        $prefix = DevHelper_Generator_File::getClassName($addOn['addon_id']) . '_';
+        $prefix = DevHelper_Generator_File::getClassName($addOn['addon_id'], false, $config) . '_';
         $prefixLength = strlen($prefix);
 
         foreach (self::$_foundXfcpClasses as $clazz => $paths) {

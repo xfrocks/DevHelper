@@ -511,7 +511,7 @@ return \$grouped;
 
     public static function getClassName(array $addOn, DevHelper_Config_Base $config, array $dataClass)
     {
-        return DevHelper_Generator_File::getClassName($addOn['addon_id'], 'Model_' . $dataClass['camelCase']);
+        return DevHelper_Generator_File::getClassName($addOn['addon_id'], 'Model_' . $dataClass['camelCase'], $config);
     }
 
     public static function getVariableName(array $addOn, DevHelper_Config_Base $config, array $dataClass)

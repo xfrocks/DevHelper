@@ -56,21 +56,27 @@ class DevHelper_Generator_File
         return preg_replace('/[^a-zA-Z]/', '', ucwords(str_replace('_', ' ', $name)));
     }
 
-    public static function getClassName($addOnId, $subClassName = false)
+    public static function getClassName($addOnId, $subClassName = false, DevHelper_Config_Base $config = null)
     {
         static $classNames = array();
 
         $hash = $addOnId . $subClassName;
 
         if (empty($classNames[$hash])) {
-            if ($subClassName) {
-                $className = self::getClassName($addOnId) . '_' . $subClassName;
-            } else {
-                $className = $addOnId;
-                $className = preg_replace('/[^a-zA-Z_0-9]/', '', $className);
+            if ($subClassName === 'DevHelper_Config') {
+                $tmp = $addOnId;
+                $tmp = preg_replace('/[^a-zA-Z_0-9]/', '', $tmp);
 
                 // read root directory (./library), trying to pickup matched directory name
-                $className = self::getClassNameInDirectory(XenForo_Autoloader::getInstance()->getRootDir(), $className);
+                $tmp = self::getClassNameInDirectory(XenForo_Autoloader::getInstance()->getRootDir(), $tmp);
+
+                $className = $tmp . '_DevHelper_Config';
+            } else {
+                if ($config === null) {
+                    throw new XenForo_Exception(sprintf('%s requires $config when $subClassName=%s', __METHOD__, $subClassName));
+                }
+
+                $className = rtrim(sprintf('%s_%s', $config->getClassPrefix(), $subClassName), '_');
             }
 
             $classNames[$hash] = $className;
@@ -144,11 +150,17 @@ class DevHelper_Generator_File
         return XenForo_Autoloader::getInstance()->autoloaderClassToFile($className);
     }
 
-    public static function getAddOnXmlPath(array $addOn, array $exportAddOn = null)
+    public static function getAddOnXmlPath(array $addOn, array $exportAddOn = null, DevHelper_Config_Base $config = null)
     {
+        if ($config === null) {
+            /** @var DevHelper_Model_Config $configModel */
+            $configModel = XenForo_Model::create('DevHelper_Model_Config');
+            $config = $configModel->loadAddOnConfig($addOn);
+        }
+
         $libraryPath = self::getClassNameInDirectory(
             XenForo_Autoloader::getInstance()->getRootDir(),
-            self::getClassName($addOn['addon_id']),
+            self::getClassName($addOn['addon_id'], false, $config),
             true
         );
 
@@ -157,11 +169,11 @@ class DevHelper_Generator_File
         return $libraryPath . '/addon-' . $addOnId . '.xml';
     }
 
-    public static function getStyleXmlPath(array $addOn, array $style)
+    public static function getStyleXmlPath(array $addOn, array $style, DevHelper_Config_Base $config)
     {
         $libraryPath = self::getClassNameInDirectory(
             XenForo_Autoloader::getInstance()->getRootDir(),
-            self::getClassName($addOn['addon_id']),
+            self::getClassName($addOn['addon_id'], false, $config),
             true
         );
 
@@ -294,7 +306,7 @@ class DevHelper_Generator_File
             }
         }
 
-        $fileSumsClassName = self::getClassName($addOn['addon_id']) . '_FileSums';
+        $fileSumsClassName = self::getClassName($addOn['addon_id'], 'FileSums', $config);
         $fileSumsContents = XenForo_Helper_Hash::getHashClassCode($fileSumsClassName, $hashes);
         self::writeClass($fileSumsClassName, $fileSumsContents);
     }
@@ -303,19 +315,21 @@ class DevHelper_Generator_File
     {
         $list = array();
 
-        $list['library'] = self::getClassNameInDirectory(XenForo_Autoloader::getInstance()->getRootDir(), self::getClassName($addOn['addon_id']), true);
+        $classNameByAddOnId = self::getClassName($addOn['addon_id'], false, $config);
+
+        $list['library'] = self::getClassNameInDirectory(XenForo_Autoloader::getInstance()->getRootDir(), $classNameByAddOnId, true);
         if (empty($list['library'])) {
             throw new XenForo_Exception(sprintf('`library` not found for %s', $addOn['addon_id']));
         }
 
-        $jsPath = self::getClassNameInDirectory(realpath(XenForo_Autoloader::getInstance()->getRootDir() . '/../js'), self::getClassName($addOn['addon_id']), true);
+        $jsPath = self::getClassNameInDirectory(realpath(XenForo_Autoloader::getInstance()->getRootDir() . '/../js'), $classNameByAddOnId, true);
         if (!empty($jsPath)) {
             if (is_dir($jsPath)) {
                 $list['js'] = $jsPath;
             }
         }
 
-        $stylesDefaultPath = self::getClassNameInDirectory(realpath(XenForo_Autoloader::getInstance()->getRootDir() . '/../styles/default'), self::getClassName($addOn['addon_id']), true);
+        $stylesDefaultPath = self::getClassNameInDirectory(realpath(XenForo_Autoloader::getInstance()->getRootDir() . '/../styles/default'), $classNameByAddOnId, true);
         if (!empty($stylesDefaultPath)) {
             if (is_dir($stylesDefaultPath)) {
                 $list['styles_default'] = $stylesDefaultPath;
@@ -332,7 +346,7 @@ class DevHelper_Generator_File
         }
 
         // save add-on XML
-        $xmlPath = self::getAddOnXmlPath($addOn);
+        $xmlPath = self::getAddOnXmlPath($addOn, null, $config);
 
         /** @var XenForo_Model_AddOn $addOnModel */
         $addOnModel = XenForo_Model::create('XenForo_Model_AddOn');
@@ -347,7 +361,7 @@ class DevHelper_Generator_File
                 die(sprintf("Could not find add-on %s\n", $exportAddOnId));
             }
 
-            $exportAddOnPath = self::getAddOnXmlPath($addOn, $exportAddOn);
+            $exportAddOnPath = self::getAddOnXmlPath($addOn, $exportAddOn, $config);
             $addOnModel->getAddOnXml($exportAddOn)->save($exportAddOnPath);
             echo "Exported       $exportAddOnPath ($exportAddOn[version_string]/$exportAddOn[version_id])\n";
         }
@@ -362,7 +376,7 @@ class DevHelper_Generator_File
 
             foreach ($styles as $style) {
                 if (in_array($style['title'], $exportStyles, true)) {
-                    $stylePath = self::getStyleXmlPath($addOn, $style);
+                    $stylePath = self::getStyleXmlPath($addOn, $style, $config);
                     $styleModel->getStyleXml($style)->save($stylePath);
                     echo "Exported       $stylePath\n";
                     $exportedStyleCount++;

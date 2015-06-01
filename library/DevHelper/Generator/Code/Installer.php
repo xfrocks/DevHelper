@@ -116,7 +116,7 @@ EOF;
 
     public static function getClassName(array $addOn, DevHelper_Config_Base $config)
     {
-        return DevHelper_Generator_File::getClassName($addOn['addon_id'], 'Installer');
+        return DevHelper_Generator_File::getClassName($addOn['addon_id'], 'Installer', $config);
     }
 
 }

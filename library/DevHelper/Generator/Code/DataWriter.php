@@ -346,7 +346,7 @@ if (\$this->isInsert()
 
     public static function getClassName(array $addOn, DevHelper_Config_Base $config, array $dataClass)
     {
-        return DevHelper_Generator_File::getClassName($addOn['addon_id'], 'DataWriter_' . $dataClass['camelCase']);
+        return DevHelper_Generator_File::getClassName($addOn['addon_id'], 'DataWriter_' . $dataClass['camelCase'], $config);
     }
 
     public static function generateDataPhraseConstant(array $addOn, DevHelper_Config_Base $config, array $dataClass, $phraseType)
