@@ -131,7 +131,7 @@ class DevHelper_Helper_Phrase
 
         $offset = 0;
         while (true) {
-            if (preg_match('/{xen:phrase (?<title>[^,}]+)(,|})/', $contents, $matches, PREG_OFFSET_CAPTURE, $offset)) {
+            if (preg_match('/{xen:phrase\s+(?<title>[^,}]+)(,|})/', $contents, $matches, PREG_OFFSET_CAPTURE, $offset)) {
                 $phraseTitle = $matches['title'][0];
                 self::$_foundPhraseTitles[$phraseTitle][$path] = substr_count(substr($contents, 0, $offset), "\n");
                 $offset = $matches[0][1] + strlen($matches[0][0]);
