@@ -290,6 +290,7 @@ class DevHelper_Generator_File
         /** @var XenForo_Application $application */
         $application = XenForo_Application::getInstance();
         $root = rtrim(realpath($application->getRootDir()), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        $excludes = $config->getExportExcludes();
 
         foreach ($directories as $key => $directory) {
             $directoryHashes = XenForo_Helper_Hash::hashDirectory($directory, array(
@@ -300,6 +301,17 @@ class DevHelper_Generator_File
             foreach ($directoryHashes as $filePath => $hash) {
                 if (strpos($filePath, 'DevHelper') === false AND strpos($filePath, 'FileSums') === false) {
                     $relative = str_replace($root, '', $filePath);
+
+                    $excluded = false;
+                    foreach ($excludes as $exclude) {
+                        if (strpos($relative, $exclude) === 0) {
+                            $excluded = true;
+                            break;
+                        }
+                    }
+                    if ($excluded) {
+                        continue;
+                    }
 
                     $hashes[$relative] = $hash;
                 }
