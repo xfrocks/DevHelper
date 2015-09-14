@@ -418,6 +418,12 @@ class DevHelper_Generator_File
             }
         }
         if (!$fileHealthCheckFound) {
+            // try to generate the file health check event listener ourselves
+            if (DevHelper_Generator_Code_Listener::generateFileHealthCheck($addOn, $config)) {
+                $fileHealthCheckFound = true;
+            }
+        }
+        if (!$fileHealthCheckFound) {
             die("No `file_health_check` event listener found.\n");
         }
 
