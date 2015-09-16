@@ -53,15 +53,24 @@ return array(
 
         ");
 
-        $this->_addMethod('_getExistingData', 'protected', array('$data'), "
+        if (count($this->_dataClass['primaryKey']) == 1) {
+            $idField = reset($this->_dataClass['primaryKey']);
+            $this->_addMethod('_getExistingData', 'protected', array('$data'), "
 
-if (!\$id = \$this->_getExistingPrimaryKey(\$data, '{$this->_dataClass['id_field']}')) {
+if (!\$id = \$this->_getExistingPrimaryKey(\$data, '{$idField}')) {
     return false;
 }
 
 return array('$tableName' => \$this->_get{$this->_dataClass['camelCase']}Model()->get{$this->_dataClass['camelCase']}ById(\$id));
 
-        ");
+            ");
+        } else {
+            $this->_addMethod('_getExistingData', 'protected', array('$data'), "
+
+throw new XenForo_Exception('{$className} does not support _getExistingData()');
+
+            ");
+        }
 
         $this->_addMethod('_getUpdateCondition', 'protected', array('$tableName'), "
 
@@ -238,12 +247,12 @@ return array(
 
     protected function _generatePhrasesCode()
     {
-        if (count($this->_dataClass['primaryKey']) > 1) {
-            throw new XenForo_Exception(sprintf('Cannot generate phrases code for %s: too many fields in primary key', $this->_getClassName()));
-        }
-        $idField = reset($this->_dataClass['primaryKey']);
-
         if (!empty($this->_dataClass['phrases'])) {
+            if (count($this->_dataClass['primaryKey']) > 1) {
+                throw new XenForo_Exception(sprintf('Cannot generate phrases code for %s: too many fields in primary key', $this->_getClassName()));
+            }
+            $idField = reset($this->_dataClass['primaryKey']);
+
             foreach ($this->_dataClass['phrases'] as $phraseType) {
                 $camelCase = ucwords(str_replace('_', ' ', $phraseType));
                 $constantName = self::generateDataPhraseConstant($this->_addOn, $this->_config, $this->_dataClass, $phraseType);

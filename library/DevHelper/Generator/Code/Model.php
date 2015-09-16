@@ -17,6 +17,10 @@ class DevHelper_Generator_Code_Model extends DevHelper_Generator_Code_Common
     {
         $className = $this->_getClassName();
         $tableName = DevHelper_Generator_Db::getTableName($this->_config, $this->_dataClass['name']);
+        $idField = '';
+        if (count($this->_dataClass['primaryKey']) == 1) {
+            $idField = reset($this->_dataClass['primaryKey']);
+        }
         $getFunctionName = self::generateGetDataFunctionName($this->_addOn, $this->_config, $this->_dataClass);
         $countFunctionName = self::generateCountDataFunctionName($this->_addOn, $this->_config, $this->_dataClass);
 
@@ -55,32 +59,34 @@ class DevHelper_Generator_Code_Model extends DevHelper_Generator_Code_Common
             'array &$fetchOptions',
         ));
 
-        $this->_addMethod('getList', 'public', array(
-            '$conditions' => 'array $conditions = array()',
-            '$fetchOptions' => 'array $fetchOptions = array()',
-        ), "
+        if (!empty($idField)) {
+            $this->_addMethod('getList', 'public', array(
+                '$conditions' => 'array $conditions = array()',
+                '$fetchOptions' => 'array $fetchOptions = array()',
+            ), "
 
 \${$variableNamePlural} = \$this->{$getFunctionName}(\$conditions, \$fetchOptions);
 \$list = array();
 
 foreach (\${$variableNamePlural} as \$id => \${$variableName}) {
-    \$list[\$id] = \${$variableName}" . (empty($this->_dataClass['title_field']) ? ("['{$this->_dataClass['id_field']}']") : ((is_array($this->_dataClass['title_field']) ? ("['{$this->_dataClass['title_field'][0]}']['{$this->_dataClass['title_field'][1]}']") : ("['{$this->_dataClass['title_field']}']")))) . ";
+    \$list[\$id] = \${$variableName}" . (empty($this->_dataClass['title_field']) ? ("['{$idField}']") : ((is_array($this->_dataClass['title_field']) ? ("['{$this->_dataClass['title_field'][0]}']['{$this->_dataClass['title_field'][1]}']") : ("['{$this->_dataClass['title_field']}']")))) . ";
 }
 
 return \$list;
 
-        ");
+            ");
 
-        $this->_addMethod("get{$this->_dataClass['camelCase']}ById", 'public', array(
-            '$id',
-            '$fetchOptions' => 'array $fetchOptions = array()',
-        ), "
+            $this->_addMethod("get{$this->_dataClass['camelCase']}ById", 'public', array(
+                '$id',
+                '$fetchOptions' => 'array $fetchOptions = array()',
+            ), "
 
-\${$variableNamePlural} = \$this->{$getFunctionName}(array('{$this->_dataClass['id_field']}' => \$id), \$fetchOptions);
+\${$variableNamePlural} = \$this->{$getFunctionName}(array('{$idField}' => \$id), \$fetchOptions);
 
 return reset(\${$variableNamePlural});
 
-        ");
+            ");
+        }
 
         $this->_addMethod($getFunctionName, 'public', array(
             '$conditions' => 'array $conditions = array()',
@@ -93,7 +99,7 @@ return reset(\${$variableNamePlural});
 \$joinOptions = \$this->prepare{$this->_dataClass['camelCase']}FetchOptions(\$fetchOptions);
 \$limitOptions = \$this->prepareLimitFetchOptions(\$fetchOptions);
 
-\${$variableNamePlural} = \$this->fetchAllKeyed(\$this->limitQueryResults(\"
+\${$variableNamePlural} = \$this->" . (!empty($idField) ? "fetchAllKeyed" : "_getDb()->fetchAll") . "(\$this->limitQueryResults(\"
     SELECT {$tableAlias}.*
         \$joinOptions[selectFields]
     FROM `{$tableName}` AS {$tableAlias}
@@ -101,7 +107,7 @@ return reset(\${$variableNamePlural});
     WHERE \$whereConditions
         \$orderClause
     \", \$limitOptions['limit'], \$limitOptions['offset']
-), '{$this->_dataClass['id_field']}');
+)" . (!empty($idField) ? ", '{$idField}'" : "") . ");
 
         ", '001');
 
@@ -224,6 +230,11 @@ return \$this->getOrderByClause(\$choices, \$fetchOptions, \$defaultOrderSql);
             return '';
         }
 
+        if (count($this->_dataClass['primaryKey']) > 1) {
+            throw new XenForo_Exception(sprintf('Cannot generate image code for %s: too many fields in primary key', $this->_getClassName()));
+        }
+        $idField = reset($this->_dataClass['primaryKey']);
+
         $getFunctionName = self::generateGetDataFunctionName($this->_addOn, $this->_config, $this->_dataClass);
         $variableName = self::getVariableName($this->_addOn, $this->_config, $this->_dataClass);
         $variableNamePlural = self::getVariableNamePlural($this->_addOn, $this->_config, $this->_dataClass);
@@ -282,11 +293,11 @@ if (!empty(\$internal)) {
             '$size',
         ), "
 
-if (empty(\${$variableName}['{$this->_dataClass['id_field']}']) OR empty(\${$variableName}['{$imageField}'])) {
+if (empty(\${$variableName}['{$idField}']) OR empty(\${$variableName}['{$imageField}'])) {
     return '';
 }
 
-return '/{$imagePath}/' . \${$variableName}['{$this->_dataClass['id_field']}']  . '_' . \${$variableName}['{$imageField}'] . strtolower(\$size) . '.jpg';
+return '/{$imagePath}/' . \${$variableName}['{$idField}']  . '_' . \${$variableName}['{$imageField}'] . strtolower(\$size) . '.jpg';
 
         ");
 
@@ -299,6 +310,11 @@ return '/{$imagePath}/' . \${$variableName}['{$this->_dataClass['id_field']}']  
         $variableNamePlural = self::getVariableNamePlural($this->_addOn, $this->_config, $this->_dataClass);
 
         if (!empty($this->_dataClass['phrases'])) {
+            if (count($this->_dataClass['primaryKey']) > 1) {
+                throw new XenForo_Exception(sprintf('Cannot generate phrases code for %s: too many fields in primary key', $this->_getClassName()));
+            }
+            $idField = reset($this->_dataClass['primaryKey']);
+
             $statements = '';
 
             foreach ($this->_dataClass['phrases'] as $phraseType) {
@@ -311,7 +327,7 @@ return \"{$phraseTitlePrefix}{\$id}_{$phraseType}\";
 
                 ");
 
-                $statements .= "        '{$phraseType}' => new XenForo_Phrase(self::{$getPhraseTitleFunction}(\${$variableName}['{$this->_dataClass['id_field']}'])),\n";
+                $statements .= "        '{$phraseType}' => new XenForo_Phrase(self::{$getPhraseTitleFunction}(\${$variableName}['{$idField}'])),\n";
             }
 
             $getFunctionName = self::generateGetDataFunctionName($this->_addOn, $this->_config, $this->_dataClass);
@@ -362,6 +378,11 @@ foreach (\${$variableNamePlural} as &\${$variableName}) {
             return;
         }
 
+        if (count($this->_dataClass['primaryKey']) > 1) {
+            throw new XenForo_Exception(sprintf('Cannot generate parent code for %s: too many fields in primary key', $this->_getClassName()));
+        }
+        $idField = reset($this->_dataClass['primaryKey']);
+
         $displayOrderField = false;
         $depthField = false;
         $lftField = false;
@@ -401,7 +422,7 @@ XenForo_Db::beginTransaction(\$db);
 
 \$changes = \$this->{$getStructureChangesFunctionName}(\$grouped);
 foreach (\$changes AS \$id => \$oneChanges) {
-    \$db->update('{$tableName}', \$oneChanges, '{$this->_dataClass['id_field']} = ' . \$db->quote(\$id));
+    \$db->update('{$tableName}', \$oneChanges, '{$idField} = ' . \$db->quote(\$id));
 }
 
 XenForo_Db::commit(\$db);
@@ -446,7 +467,7 @@ foreach (\$grouped[\$parentId] AS \$id => \${$variableName}) {
 
     \$thisBreadcrumb = \$breadcrumb + array(
         \$id => array(
-            '{$this->_dataClass['id_field']}' => \$id,{$titleFieldBreadcrumb}
+            '{$idField}' => \$id,{$titleFieldBreadcrumb}
             '{$parentField}' => \${$variableName}['{$parentField}'],
         )
     );
@@ -486,7 +507,7 @@ return \$changes;
 
 \$grouped = array();
 foreach (\${$variableNamePlural} AS \${$variableName}) {
-    \$grouped[\${$variableName}['{$parentField}']][\${$variableName}['{$this->_dataClass['id_field']}']] = \${$variableName};
+    \$grouped[\${$variableName}['{$parentField}']][\${$variableName}['{$idField}']] = \${$variableName};
 }
 
 return \$grouped;
