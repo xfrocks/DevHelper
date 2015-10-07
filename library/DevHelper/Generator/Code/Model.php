@@ -86,6 +86,22 @@ return \$list;
 return reset(\${$variableNamePlural});
 
             ");
+
+            $this->_addMethod("get{$this->_dataClass['camelCase']}IdsInRange", 'public', array(
+                '$start',
+                '$limit',
+            ), "
+
+\$db = \$this->_getDb();
+
+return \$db->fetchCol(\$db->limit('
+    SELECT {$idField}
+    FROM {$tableName}
+    WHERE {$idField} > ?
+    ORDER BY {$idField}
+', \$limit), \$start);
+
+            ");
         }
 
         $this->_addMethod($getFunctionName, 'public', array(
