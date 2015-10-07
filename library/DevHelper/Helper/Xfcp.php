@@ -22,7 +22,8 @@ class DevHelper_Helper_Xfcp
                 continue;
             }
 
-            $realClazz = substr($clazz, $prefixLength);
+            $clazzWithoutPrefix = substr($clazz, $prefixLength);
+            $realClazz = $clazzWithoutPrefix;
             $realPath = DevHelper_Generator_File::getClassPath($realClazz);
             if (!file_exists($realPath)) {
                 // the real class could not be found, hmm...
@@ -40,7 +41,7 @@ class DevHelper_Helper_Xfcp
                 }
             }
 
-            $ghostClazz = $prefix . 'DevHelper_XFCP_' . $realClazz;
+            $ghostClazz = $prefix . 'DevHelper_XFCP_' . $clazzWithoutPrefix;
             $ghostPath = DevHelper_Generator_File::getClassPath($ghostClazz);
             if (file_exists($ghostPath)) {
                 // ghost file exists, yay!
