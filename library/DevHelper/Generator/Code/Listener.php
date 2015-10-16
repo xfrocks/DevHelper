@@ -12,7 +12,8 @@ class DevHelper_Generator_Code_Listener
 
         $fileSumsClass = DevHelper_Generator_File::getClassName($addOn['addon_id'], 'FileSums', $config);
         $methodCode = <<<EOF
-public static function file_health_check(XenForo_ControllerAdmin_Abstract \$controller, array &\$hashes) {
+public static function file_health_check(XenForo_ControllerAdmin_Abstract \$controller, array &\$hashes)
+{
     \$hashes += {$fileSumsClass}::getHashes();
 }
 EOF;
@@ -22,6 +23,7 @@ EOF;
         {
             /** @var XenForo_DataWriter_CodeEventListener $dw */
             $dw = XenForo_DataWriter::create('XenForo_DataWriter_CodeEventListener');
+            $dw->setImportMode(true);
             $dw->bulkSet(array(
                 'event_id' => 'file_health_check',
                 'callback_class' => self::getClassName($addOn, $config),
