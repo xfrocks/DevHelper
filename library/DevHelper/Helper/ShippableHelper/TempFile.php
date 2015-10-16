@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_TempFile
- * @version 1
+ * @version 2
  */
 class DevHelper_Helper_ShippableHelper_TempFile
 {
@@ -29,6 +29,7 @@ class DevHelper_Helper_ShippableHelper_TempFile
         curl_setopt($ch, CURLOPT_FILE, $fh);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_exec($ch);
 
         $downloaded = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE)) == 200;
