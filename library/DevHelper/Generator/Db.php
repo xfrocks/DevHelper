@@ -96,6 +96,7 @@ EOF;
         $conditionsFields = array();
 
         $intTypes = array(
+            XenForo_DataWriter::TYPE_BOOLEAN,
             XenForo_DataWriter::TYPE_INT,
             XenForo_DataWriter::TYPE_UINT,
             XenForo_DataWriter::TYPE_UINT_FORCED,
