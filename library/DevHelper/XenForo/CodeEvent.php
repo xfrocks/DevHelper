@@ -1,0 +1,62 @@
+<?php
+
+/** @var XenForo_Application $application */
+$application = XenForo_Application::getInstance();
+$originalContents = file_get_contents($application->getRootDir() . '/library/XenForo/CodeEvent.php');
+$contents = substr($originalContents, strpos($originalContents, '<?php') + 5);
+$contents = str_replace(
+    'class XenForo_CodeEvent',
+    'class _XenForo_CodeEvent',
+    $contents
+);
+$contents = str_replace('self::', 'static::', $contents);
+eval($contents);
+
+abstract class DevHelper_XenForo_CodeEvent extends _XenForo_CodeEvent
+{
+    public static function fire($event, array $args = array(), $hint = null)
+    {
+        if ($event === 'front_controller_pre_route') {
+            $addOns = XenForo_Application::get('addOns');
+            if (!isset($addOns['devHelper'])) {
+                // looks like our add-on hasn't been installed (or disabled)
+                /** @var XenForo_Model_AddOn $addOnModel */
+                $addOnModel = XenForo_Model::create('XenForo_Model_AddOn');
+
+                $addOn = $addOnModel->getAddOnById('devHelper');
+                if (!empty($addOn)) {
+                    /** @var XenForo_DataWriter_AddOn $addOnDw */
+                    $addOnDw = XenForo_DataWriter::create('XenForo_DataWriter_AddOn');
+                    $addOnDw->setExistingData($addOn);
+                    $addOnDw->set('active', 1);
+                    $addOnDw->save();
+
+                    $message = 'Re-enabled DevHelper add-on.';
+                } else {
+                    $xmlPath = 'library/DevHelper/addon-devHelper.xml';
+                    if (!file_exists($xmlPath)) {
+                        die(sprintf('XML path (%s) does not exist', $xmlPath));
+                    }
+                    $addOnModel->installAddOnXmlFromFile($xmlPath);
+
+                    $message = 'Installed DevHelper add-on.';
+                }
+
+                /** @var XenForo_FrontController $fc */
+                $fc = $args[0];
+                $redirect = $fc->getRequest()->getRequestUri();
+
+                die(sprintf('<' . 'script>alert(%s);window.location = %s;</script>',
+                    json_encode($message),
+                    json_encode(XenForo_Link::buildAdminLink('full:tools/run-deferred', null, array(
+                        'redirect' => $redirect,
+                    )))));
+            }
+        }
+
+        return parent::fire($event, $args, $hint);
+    }
+
+}
+
+eval('abstract class XenForo_CodeEvent extends DevHelper_XenForo_CodeEvent {}');

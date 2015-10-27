@@ -37,6 +37,7 @@ class DevHelper_Autoloader extends XenForo_Autoloader
     public function autoloaderClassToFile($class)
     {
         static $classes = array(
+            'XenForo_CodeEvent',
             'XenForo_Template_Abstract',
             'XenForo_ViewRenderer_Json',
         );
