@@ -169,12 +169,20 @@
 
 $0]]></replace>
     </modification>
+    <modification template="addon_install" modification_key="devhelper_addon_install_auto_complete" description="Enable auto complete for server_file field." execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[name="server_file"]]></find>
+      <replace><![CDATA[$0 inputclass="AutoComplete AcSingle" data-acurl="{xen:adminlink tools/add-ons/server-file}"]]></replace>
+    </modification>
     <modification template="addon_list" modification_key="devhelper_addon_list_popup" description="Insert popup control buttons." execution_order="10" enabled="1" action="str_replace">
       <find><![CDATA[</xen:popup>]]></find>
       <replace><![CDATA[<xen:link href="{xen:adminlink 'add-ons/data-manager', $addOn}" displayif="{$canAccessDevelopment}">{xen:phrase devhelper_data_manager}</xen:link>
 <xen:link href="{xen:adminlink 'add-ons/file-export', $addOn}" displayif="{$canAccessDevelopment}">{xen:phrase devhelper_file_export}</xen:link>
 
 $0]]></replace>
+    </modification>
+    <modification template="addon_upgrade" modification_key="devhelper_addon_upgrade_auto_complete" description="Enable auto complete for server_file field." execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[name="server_file"]]></find>
+      <replace><![CDATA[$0 inputclass="AutoComplete AcSingle" data-acurl="{xen:adminlink tools/add-ons/server-file}"]]></replace>
     </modification>
     <modification template="admin_template_edit" modification_key="devhelper_admin_template_edit_code_mirror" description="CodeMirror integration." execution_order="10" enabled="1" action="str_replace">
       <find><![CDATA[<xen:require js="js/xenforo/template_edit.js" />]]></find>
@@ -201,6 +209,7 @@ $0]]></replace>
   </admin_template_modifications>
   <code_events/>
   <code_event_listeners>
+    <listener event_id="file_health_check" execute_order="10" callback_class="DevHelper_Listener" callback_method="file_health_check" active="1" hint="" description=""/>
     <listener event_id="init_dependencies" execute_order="10" callback_class="DevHelper_Listener" callback_method="init_dependencies" active="1" hint="" description=""/>
     <listener event_id="load_class" execute_order="10" callback_class="DevHelper_Listener" callback_method="load_class" active="1" hint="" description=""/>
     <listener event_id="template_hook" execute_order="10" callback_class="DevHelper_Listener" callback_method="template_hook" active="1" hint="" description=""/>

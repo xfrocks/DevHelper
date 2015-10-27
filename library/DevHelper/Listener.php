@@ -140,4 +140,8 @@ class DevHelper_Listener
         }
     }
 
+    public static function file_health_check(XenForo_ControllerAdmin_Abstract $controller, array &$hashes)
+    {
+        $hashes += DevHelper_FileSums::getHashes();
+    }
 }
