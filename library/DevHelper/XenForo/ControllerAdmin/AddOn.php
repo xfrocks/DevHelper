@@ -243,6 +243,8 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
 
         echo '</pre>';
 
+        DevHelper_Generator_Code_XenForoConfig::updateConfig('development.default_addon', $addOn['addon_id']);
+
         die('Done');
     }
 
