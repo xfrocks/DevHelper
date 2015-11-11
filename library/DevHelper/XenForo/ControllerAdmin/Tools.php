@@ -83,7 +83,7 @@ class DevHelper_XenForo_ControllerAdmin_Tools extends XFCP_DevHelper_XenForo_Con
         $results = array();
         foreach ($paths as $path) {
             $relativePath = preg_replace('#^' . preg_quote($app->getRootDir()) . '/#', '', $path);
-            $results[$relativePath] = $relativePath;
+            $results[$relativePath] = basename($path);
         }
 
         $view = $this->responseView();
