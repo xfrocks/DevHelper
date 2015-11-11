@@ -313,7 +313,7 @@ if (empty(\${$variableName}['{$idField}']) OR empty(\${$variableName}['{$imageFi
     return '';
 }
 
-return '/{$imagePath}/' . \${$variableName}['{$idField}']  . '_' . \${$variableName}['{$imageField}'] . strtolower(\$size) . '.jpg';
+return '/{$imagePath}/' . \${$variableName}['{$idField}'] . '_' . \${$variableName}['{$imageField}'] . strtolower(\$size) . '.jpg';
 
         ");
 
@@ -449,14 +449,14 @@ return \$changes;
 
         $titleFieldBreadcrumb = '';
         if (!empty($this->_dataClass['title_field']) AND !is_array($this->_dataClass['title_field'])) {
-            $titleFieldBreadcrumb = "\n                    '{$this->_dataClass['title_field']}' => \${$variableName}['{$this->_dataClass['title_field']}'],";
+            $titleFieldBreadcrumb = "\n                '{$this->_dataClass['title_field']}' => \${$variableName}['{$this->_dataClass['title_field']}'],";
         }
 
         $breadcrumbStatements = '';
         if (!empty($breadcrumbField)) {
-            $breadcrumbStatements = "\n    if (\${$variableName}['category_breadcrumb'] != \$serializedBreadcrumb)";
-            $breadcrumbStatements .= "\n    {\n        \$thisChanges['category_breadcrumb'] = \$serializedBreadcrumb;";
-            $titleFieldBreadcrumb .= "\n    }";
+            $breadcrumbStatements = "\n    if (\${$variableName}['category_breadcrumb'] != \$serializedBreadcrumb) {";
+            $breadcrumbStatements .= "\n        \$thisChanges['category_breadcrumb'] = \$serializedBreadcrumb;";
+            $breadcrumbStatements .= "\n    }";
         }
 
         $this->_addMethod($getStructureChangesFunctionName, 'protected', array(
@@ -482,11 +482,11 @@ foreach (\$grouped[\$parentId] AS \$id => \${$variableName}) {
     \$nextPosition++;
 
     \$thisBreadcrumb = \$breadcrumb + array(
-        \$id => array(
-            '{$idField}' => \$id,{$titleFieldBreadcrumb}
-            '{$parentField}' => \${$variableName}['{$parentField}'],
-        )
-    );
+            \$id => array(
+                '{$idField}' => \$id,{$titleFieldBreadcrumb}
+                '{$parentField}' => \${$variableName}['{$parentField}'],
+            )
+        );
 
     \$changes += \$this->{$getStructureChangesFunctionName}(
         \$grouped,
