@@ -474,8 +474,18 @@ class DevHelper_Generator_File
             'force' => true, // always force add top level export entries
             'addon_id' => $addOn['addon_id'],
 
-            'excludes' => $config->getExportExcludes(),
+            'excludes' => array(),
+            'excludeRegExs' => array(),
         );
+
+        $excludes = $config->getExportExcludes();
+        foreach ($excludes as $exclude) {
+            if (preg_match('/^#.+#$/', $exclude)) {
+                $options['excludeRegExs'][] = $exclude;
+            } else {
+                $options['excludes'][] = $exclude;
+            }
+        }
 
         foreach ($list as $type => $entry) {
             self::_fileExport($entry, $exportPath, $rootPath, $options);
@@ -503,6 +513,13 @@ class DevHelper_Generator_File
             return;
         }
 
+        foreach ($options['excludeRegExs'] as $excludeRegEx) {
+            if (preg_match($excludeRegEx, $relativePath)) {
+                echo "<span style='color: #ddd'>RegExcluded    $relativePath</span>\n";
+                return;
+            }
+        }
+
         if (is_dir($entry)) {
             echo "<span style='color: #ddd'>Browsing       $relativePath</span>\n";
 
@@ -528,7 +545,11 @@ class DevHelper_Generator_File
             }
         } elseif (is_file($entry)) {
             $ext = XenForo_Helper_File::getFileExtension($entry);
-            if (!empty($options['force']) OR (in_array($ext, $options['extensions']) AND strpos(basename($entry), '.') !== 0) OR in_array(strtolower(basename($entry)), $options['filenames_lowercase'])) {
+            if (!empty($options['force'])
+                || (in_array($ext, $options['extensions'])
+                    && strpos(basename($entry), '.') !== 0)
+                || in_array(strtolower(basename($entry)), $options['filenames_lowercase'])
+            ) {
                 if ($options['addon_id'] == 'devHelper') {
                     $isDevHelper = (strpos($entry, 'DevHelper/DevHelper') !== false);
                 } else {
