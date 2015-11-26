@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_DateTime
- * @version 2
+ * @version 3
  */
 class DevHelper_Helper_ShippableHelper_DateTime
 {
@@ -44,10 +44,11 @@ class DevHelper_Helper_ShippableHelper_DateTime
      * @param int $hour in user timezone
      * @param int $minute in user timezone
      * @param int $second in user timezone
+     * @param int|null $offset custom offset to override user's
      *
      * @return int timestamp in GMT
      */
-    public static function gmmktime($year, $month = 0, $day = 0, $hour = 0, $minute = 0, $second = 0)
+    public static function gmmktime($year, $month = 0, $day = 0, $hour = 0, $minute = 0, $second = 0, $offset = null)
     {
         if (is_array($year)) {
             $args = func_get_args();
@@ -57,7 +58,7 @@ class DevHelper_Helper_ShippableHelper_DateTime
 
             $values = $year;
             $year = 0;
-            foreach (array('year', 'month', 'day', 'hour', 'minute', 'second') as $key) {
+            foreach (array('year', 'month', 'day', 'hour', 'minute', 'second', 'offset') as $key) {
                 if (isset($values[$key])
                     && is_int($values[$key])
                 ) {
@@ -67,8 +68,32 @@ class DevHelper_Helper_ShippableHelper_DateTime
         }
 
         $timestamp = gmmktime($hour, $minute, $second, $month, $day, $year);
-        $offset = XenForo_Locale::getTimeZoneOffset();
+
+        if ($offset === null) {
+            $offset = XenForo_Locale::getTimeZoneOffset();
+        }
 
         return $timestamp - $offset;
     }
+
+    /**
+     * Get timezone offset by string or object
+     *
+     * @param string|DateTimeZone $timeZoneString String time zone to override user timezone
+     * @return int
+     */
+    public static function getTimeZoneOffset($timeZoneString)
+    {
+        $dt = new DateTime('@' . XenForo_Application::$time);
+
+        if ($timeZoneString instanceof DateTimeZone) {
+            $timeZone = $timeZoneString;
+        } else {
+            $timeZone = new DateTimeZone($timeZoneString);
+        }
+        $dt->setTimezone($timeZone);
+
+        return $dt->getOffset();
+    }
+
 }
