@@ -7,3 +7,4 @@ js/DevHelper/CodeMirror/mode/css/scss_test.js
 js/DevHelper/CodeMirror/mode/css/test.js
 js/DevHelper/CodeMirror/mode/javascript/test.js
 library/DevHelper/DevHelper/XFCP
+library/DevHelper/Config.php
