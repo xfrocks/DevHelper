@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Html
- * @version 4
+ * @version 5
  */
 class DevHelper_Helper_ShippableHelper_Html
 {
@@ -15,14 +15,35 @@ class DevHelper_Helper_ShippableHelper_Html
      */
     public static function snippet($string, $maxLength = 0, array $options = array())
     {
-        if ($maxLength == 0 || $maxLength > utf8_strlen($string)) {
-            return $string;
+        $options = array_merge(array(
+            'previewBreakBbCode' => 'prbreak',
+            'ellipsis' => '…',
+        ), $options);
+
+        if (!empty($options['previewBreakBbCode'])
+            && preg_match(sprintf('#\[%1$s\](?<preview>.*)\[/%1$s\]#', preg_quote($options['previewBreakBbCode'], '#')),
+                $string, $matches, PREG_OFFSET_CAPTURE)
+        ) {
+            // preview break bbcode found
+            if (!empty($matches['preview'][0])) {
+                // preview text specified, use it directly
+                $string = $matches['preview'][0];
+                $maxLength = 0;
+            } else {
+                // use content before the found bbcode to continue
+                $string = substr($string, 0, $matches[0][1]);
+                $maxLength = 0;
+            }
         }
 
         $snippet = XenForo_Template_Helper_Core::callHelper('snippet', array($string, $maxLength, $options));
 
         // TODO: find better way to avoid having to call this
         $snippet = htmlspecialchars_decode($snippet);
+
+        if ($maxLength == 0 || $maxLength > utf8_strlen($string)) {
+            return $snippet;
+        }
 
         $offset = 0;
         $stack = array();
@@ -32,7 +53,7 @@ class DevHelper_Helper_ShippableHelper_Html
                 $endPos = utf8_strpos($snippet, '>', $startPos);
                 if ($endPos === false) {
                     // we found a partial open tag, best to delete the whole thing
-                    $snippet = utf8_substr($snippet, 0, $startPos) . '…';
+                    $snippet = utf8_substr($snippet, 0, $startPos) . $options['ellipsis'];
                     break;
                 }
 
@@ -94,7 +115,7 @@ class DevHelper_Helper_ShippableHelper_Html
             } else {
                 // this is super bad...
                 // the string is one big html tag and it is too damn long
-                $snippet = '…';
+                $snippet = $options['ellipsis'];
             }
         }
 
