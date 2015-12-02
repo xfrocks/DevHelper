@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Image
- * @version 2
+ * @version 5
  */
 class DevHelper_Helper_ShippableHelper_Image
 {
@@ -24,25 +24,25 @@ class DevHelper_Helper_ShippableHelper_Image
 
             $imageInfo['typeInt'] = $info[2];
             switch ($imageInfo['typeInt']) {
-                case IMAGETYPE_GIF:
-                    $imageInfo['type'] = 'gif';
-                    break;
                 case IMAGETYPE_JPEG:
                     $imageInfo['type'] = 'jpeg';
                     break;
                 case IMAGETYPE_PNG:
                     $imageInfo['type'] = 'png';
                     break;
+                default:
+                    $imageInfo['typeInt'] = 0;
             }
         }
 
         return $imageInfo;
     }
 
-    public static function getThumbnailUrl($fullPath, $width, $height = 0)
+    public static function getThumbnailUrl($fullPath, $width, $height = 0, $dir = null)
     {
-        $thumbnailPath = self::getThumbnailPath($fullPath, $width, $height);
-        $thumbnailUrl = XenForo_Application::$externalDataUrl . self::_getThumbnailRelativePath($fullPath, $width, $height);
+        $thumbnailPath = self::getThumbnailPath($fullPath, $width, $height, $dir);
+        $thumbnailUrl = XenForo_Application::$externalDataUrl
+            . self::_getThumbnailRelativePath($fullPath, $width, $height, $dir);
         if (file_exists($thumbnailPath) && filesize($thumbnailPath) > 0) {
             return $thumbnailUrl;
         }
@@ -50,6 +50,7 @@ class DevHelper_Helper_ShippableHelper_Image
         $tempPath = self::_getTempPath($fullPath);
         $imageInfo = self::getImageInfo($tempPath);
 
+        $image = null;
         if (!empty($imageInfo['typeInt'])) {
             $image = XenForo_Image_Abstract::createFromFile($tempPath, $imageInfo['typeInt']);
         }
@@ -57,6 +58,7 @@ class DevHelper_Helper_ShippableHelper_Image
             // could not open the image, create a new image
             $longer = max($width, $height);
             $image = XenForo_Image_Abstract::createImage($longer, $longer);
+            $imageInfo['typeInt'] = IMAGETYPE_PNG;
         }
 
         if ($width === '' && $height > 0) {
@@ -102,24 +104,26 @@ class DevHelper_Helper_ShippableHelper_Image
 
         XenForo_Helper_File::createDirectory(dirname($thumbnailPath), true);
         $outputPath = tempnam(XenForo_Helper_File::getTempDir(), __CLASS__);
+
+        /** @noinspection PhpParamsInspection */
         $image->output($imageInfo['typeInt'], $outputPath);
         XenForo_Helper_File::safeRename($outputPath, $thumbnailPath);
 
         return $thumbnailUrl;
     }
 
-    public static function getThumbnailPath($fullPath, $width, $height = 0)
+    public static function getThumbnailPath($fullPath, $width, $height = 0, $dir = null)
     {
-        return XenForo_Helper_File::getExternalDataPath() . self::_getThumbnailRelativePath($fullPath, $width, $height);
+        $thumbnailPath = XenForo_Helper_File::getExternalDataPath()
+            . self::_getThumbnailRelativePath($fullPath, $width, $height, $dir);
+
+        return $thumbnailPath;
     }
 
     protected static function _getTempPath($path)
     {
         if (Zend_Uri::check($path)) {
-            $tempFileDownload = array();
-            $tempFileDownload[] = substr(__CLASS__, 0, strpos(__CLASS__, 'ShippableHelper_Image')) . 'ShippableHelper_TempFile';
-            $tempFileDownload[] = 'download';
-            $tempPath = call_user_func($tempFileDownload, $path);
+            $tempPath = DevHelper_Helper_ShippableHelper_TempFile::download($path);
         } else {
             $tempPath = $path;
         }
@@ -127,7 +131,7 @@ class DevHelper_Helper_ShippableHelper_Image
         return $tempPath;
     }
 
-    protected static function _getThumbnailRelativePath($fullPath, $width, $height = 0)
+    protected static function _getThumbnailRelativePath($fullPath, $width, $height, $dir)
     {
         $fileName = preg_replace('#[^a-zA-Z0-9]#', '', basename($fullPath)) . md5(serialize(array(
                 'fullPath' => $fullPath,
@@ -143,10 +147,10 @@ class DevHelper_Helper_ShippableHelper_Image
 
         $divider = substr(md5($fileName), 0, 2);
 
-        return sprintf(
-            '/%s/%sx%s/%s/%s.%s',
-            str_replace('_', '/', substr(__CLASS__, 0, strpos(__CLASS__, '_ShippableHelper_Image'))),
-            $width, $height, $divider, $fileName, $ext
-        );
+        if (empty($dir)) {
+            $dir = trim(str_replace('_', '/', substr(__CLASS__, 0, strpos(__CLASS__, '_ShippableHelper_Image'))), '/');
+        }
+
+        return sprintf('/%s/%sx%s/%s/%s.%s', $dir, $width, $height, $divider, $fileName, $ext);
     }
 }
