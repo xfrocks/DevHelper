@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Updater
- * @version 2
+ * @version 3
  */
 class DevHelper_Helper_ShippableHelper_Updater
 {
@@ -809,14 +809,9 @@ EOF;
 
     private static function _getCache($apiUrl)
     {
-        $cache = XenForo_Application::getCache();
-        if (!empty($cache)) {
-            $data = $cache->load(self::KEY);
-        } else {
-            /** @var XenForo_Model_DataRegistry $dataRegistryModel */
-            $dataRegistryModel = XenForo_Model::create('XenForo_Model_DataRegistry');
-            $data = $dataRegistryModel->get(self::KEY);
-        }
+        /** @var XenForo_Model_DataRegistry $dataRegistryModel */
+        $dataRegistryModel = XenForo_Model::create('XenForo_Model_DataRegistry');
+        $data = $dataRegistryModel->get(self::KEY);
 
         if (!empty($data)
             && isset($data[$apiUrl])
@@ -829,16 +824,6 @@ EOF;
 
     private static function _setCache($apiUrl, array $thisData)
     {
-        $cache = XenForo_Application::getCache();
-        if (!empty($cache)) {
-            $data = $cache->load(self::KEY);
-            if (empty($data)) {
-                $data = array();
-            }
-            $data[$apiUrl] = $thisData;
-            return $cache->save($data, self::KEY);
-        }
-
         /** @var XenForo_Model_DataRegistry $dataRegistryModel */
         $dataRegistryModel = XenForo_Model::create('XenForo_Model_DataRegistry');
         $data = $dataRegistryModel->get(self::KEY);
