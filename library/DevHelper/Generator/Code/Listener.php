@@ -36,6 +36,42 @@ EOF;
         return false;
     }
 
+    public static function generateLoadClass($realClazz, array $addOn, DevHelper_Config_Base $config)
+    {
+        $method = sprintf('load_class_%s', $realClazz);
+
+        $existingContents = self::_getClassContents($addOn, $config);
+        $existingMethods = DevHelper_Helper_Php::extractMethods($existingContents);
+        if (in_array($method, $existingMethods, true)) {
+            return false;
+        }
+
+        $ourClazz = sprintf('%s_%s', $config->getClassPrefix(), $realClazz);
+        $methodCode = <<<EOF
+public static function {$method}(\$class, array &\$extend)
+{
+    if (\$class === '{$realClazz}') {
+        \$extend[] = '{$ourClazz}';
+    }
+}
+EOF;
+
+        $contents = DevHelper_Helper_Php::appendMethod($existingContents, $methodCode);
+        if (!self::_write($addOn, $config, $contents)) {
+            return false;
+        }
+
+        if (!DevHelper_Helper_Xfcp::generateXfcpClass($ourClazz, $realClazz, $config)) {
+            return false;
+        }
+
+        if (!DevHelper_Helper_Xfcp::generateOurClass($ourClazz, $config)) {
+            return false;
+        }
+
+        return $method;
+    }
+
     public static function getClassName(array $addOn, DevHelper_Config_Base $config)
     {
         return DevHelper_Generator_File::getClassName($addOn['addon_id'], 'Listener', $config);

@@ -92,4 +92,75 @@ class DevHelper_XenForo_ControllerAdmin_Tools extends XFCP_DevHelper_XenForo_Con
         );
         return $view;
     }
+
+    public function actionCodeEventListenersHint()
+    {
+        $q = $this->_input->filterSingle('q', XenForo_Input::STRING);
+        $classes = array();
+
+        /** @var XenForo_Application $app */
+        $app = XenForo_Application::getInstance();
+        $libraryPath = sprintf('%s/library/', $app->getRootDir());
+
+        if (strlen($q) > 0
+            && preg_match('/[A-Z]/', $q)
+        ) {
+            $dirPath = '';
+            $pattern = '';
+
+            $classPath = DevHelper_Generator_File::getClassPath($q);
+            if (is_file($classPath)) {
+                $classes[] = $q;
+            }
+
+            $_dirPath = preg_replace('/\.php$/', '', $classPath);
+            if (is_dir($_dirPath)) {
+                $dirPath = $_dirPath;
+            } else {
+                $_parentDirPath = dirname($_dirPath);
+                if (is_dir($_parentDirPath)) {
+                    $dirPath = $_parentDirPath;
+                    $pattern = basename($_dirPath);
+                }
+            }
+
+            if ($dirPath !== '') {
+                $files = scandir($dirPath);
+
+                foreach ($files as $file) {
+                    if (substr($file, 0, 1) === '.') {
+                        continue;
+                    }
+
+                    if ($pattern !== ''
+                        && strpos($file, $pattern) !== 0
+                    ) {
+                        continue;
+                    }
+
+                    $filePath = sprintf('%s/%s', $dirPath, $file);
+
+                    if (is_file($filePath)) {
+                        $contents = file_get_contents($filePath);
+                        if (preg_match('/class\s(?<class>.+?)(\sextends|{)/', $contents, $matches)) {
+                            $classes[] = $matches['class'];
+                        }
+                    } elseif (is_dir($filePath)) {
+                        $classes[] = str_replace('/', '_', str_replace($libraryPath, '', $filePath));
+                    }
+                }
+            }
+        }
+
+        $results = array();
+        foreach ($classes as $class) {
+            $results[$class] = $class;
+        }
+
+        $view = $this->responseView();
+        $view->jsonParams = array(
+            'results' => $results
+        );
+        return $view;
+    }
 }

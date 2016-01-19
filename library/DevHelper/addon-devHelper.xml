@@ -196,6 +196,10 @@ $0]]></replace>
 
 <xen:include template="devhelper_code_mirror" />]]></replace>
     </modification>
+    <modification template="code_event_listener_edit" modification_key="devhelper_code_event_listener_edit_auto_complete" description="Enable auto complete for hint field." execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[name="hint"]]></find>
+      <replace><![CDATA[$0 inputclass="AutoComplete AcSingle" data-acurl="{xen:adminlink tools/code-event-listeners/hint}"]]></replace>
+    </modification>
     <modification template="helper_addon_unit" modification_key="devhelper_helper_addon_unit_auto_hide" description="Hide disabled add-ons from add-on list." execution_order="10" enabled="1" action="preg_replace">
       <find><![CDATA[#<xen:selectunit(.|\r|\n)+</xen:selectunit>#]]></find>
       <replace><![CDATA[<xen:hook name="devhelper_devhelper_helper_addon_unit" params="{xen:array 'addOnOptions=$addOnOptions'}">$0</xen:hook>]]></replace>
