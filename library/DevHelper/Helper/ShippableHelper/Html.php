@@ -2,10 +2,53 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Html
- * @version 5
+ * @version 6
  */
 class DevHelper_Helper_ShippableHelper_Html
 {
+    public static function preSnippet(array &$message, XenForo_BbCode_Parser $parser, array $options = array())
+    {
+        $options = array_merge(array(
+            'previewBreakBbCode' => 'prbreak',
+            'messageKey' => 'message',
+        ), $options);
+
+        $previewFound = false;
+        $tagOpen = '';
+        $tagClose = '';
+
+        if (!empty($options['previewBreakBbCode'])) {
+            $textRef =& $message[$options['messageKey']];
+            $tagOpen = '[' . $options['previewBreakBbCode'] . ']';
+            $posOpen = stripos($textRef, $tagOpen);
+            if ($posOpen !== false) {
+                $tagClose = '[/' . $options['previewBreakBbCode'] . ']';
+                $posClose = stripos($textRef, $tagClose, $posOpen);
+                if ($posClose !== false) {
+                    $previewFound = true;
+                    $previewTextOffset = $posOpen + strlen($tagOpen);
+                    $previewTextLength = $posClose - $posOpen - strlen($tagOpen);
+
+                    if ($previewTextLength > 0) {
+                        $textRef = substr($textRef, $previewTextOffset, $previewTextLength);
+
+                    } else {
+                        $textRef = substr($textRef, 0, $posOpen);
+                    }
+                }
+            }
+        }
+
+        $messageHtml = XenForo_ViewPublic_Helper_Message::getBbCodeWrapper(
+            $message, $parser, $options);
+
+        if ($previewFound) {
+            $messageHtml = sprintf('%s%s%s', $tagOpen, $messageHtml, $tagClose);
+        }
+
+        return $messageHtml;
+    }
+
     /**
      * @param string $string
      * @param int $maxLength
