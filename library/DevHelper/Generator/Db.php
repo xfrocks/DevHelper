@@ -20,7 +20,7 @@ class DevHelper_Generator_Db
 
         $indeces = array();
         foreach ($dataClass['indeces'] as $index) {
-            $indeces[] = ($index['type'] != 'NORMAL' ? $index['type'] : '') . " INDEX `$index[name]` (`" . implode('`,`', $index['fields']) . "`)";
+            $indeces[] = self::_getIndexDefinition($index);
         }
         $indeces = implode("\n    ,", $indeces);
         if (!empty($indeces))
@@ -73,9 +73,32 @@ EOF;
         return "ALTER TABLE `$table` DROP COLUMN `$fieldName`";
     }
 
+    public static function showIndexes(DevHelper_Config_Base $config, $table, array $index)
+    {
+        $indexName = $index['name'];
+
+        return "SHOW INDEXES FROM `$table` WHERE Key_name LIKE '$indexName'";
+    }
+
+    public static function alterTableAddIndex(DevHelper_Config_Base $config, $table, array $index)
+    {
+        $indexDefinition = self::_getIndexDefinition($index);
+
+        return "ALTER TABLE `$table` ADD $indexDefinition";
+    }
+
+    public static function alterTableDropIndex(DevHelper_Config_Base $config, $table, array $index)
+    {
+        $indexName = $index['name'];
+
+        return "ALTER TABLE `$table` DROP INDEX `$indexName`";
+    }
+
     public static function getTableName(DevHelper_Config_Base $config, $name)
     {
-        if (substr($name, 0, 3) === 'xf_') {
+        if (substr($name, 0, 3) === 'xf_'
+            || stripos($name, $config->getPrefix()) !== false
+        ) {
             return $name;
         } else {
             return 'xf_' . self::getFieldName($config, $name, true);
@@ -265,6 +288,27 @@ EOF;
         }
 
         return $dbType . (!empty($field['required']) ? ' NOT NULL' : '') . (isset($field['default']) ? " DEFAULT '{$field['default']}'" : '') . (!empty($field['autoIncrement']) ? ' AUTO_INCREMENT' : '');
+    }
+
+    public static function getIndexTypes()
+    {
+        return array(
+            'NORMAL',
+            'UNIQUE',
+            'FULLTEXT',
+            'SPATIAL',
+        );
+    }
+
+    protected static function _getIndexDefinition($index)
+    {
+        $indexName = $index['name'];
+        $indexType = strtoupper($index['type']);
+
+        $definition = ($indexType != 'NORMAL' ? ($index['type'] . ' ') : '')
+            . "INDEX `{$indexName}` (`" . implode('`,`', $index['fields']) . "`)";
+
+        return $definition;
     }
 
 }

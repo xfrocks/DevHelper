@@ -138,8 +138,10 @@ abstract class DevHelper_Config_Base
         $name = $this->_normalizeDbName($name);
         $fields = array();
 
-        if (!is_array($index['fields']))
+        if (!is_array($index['fields'])) {
             $index['fields'] = array($index['fields']);
+        }
+
         foreach ($index['fields'] as $field) {
             $field = $this->_normalizeDbName($field);
             if ($this->checkDataClassFieldExists($name, $field)) {
@@ -151,16 +153,16 @@ abstract class DevHelper_Config_Base
         if (empty($fields))
             return false;
 
-        $indexName = implode('_', $fields);
+        if (isset($index['name'])) {
+            $indexName = $index['name'];
+        } else {
+            $indexName = implode('_', $fields);
+        }
+
         $type = !empty($index['type']) ? $index['type'] : 'NORMAL';
-        if (!in_array(strtoupper($type), array(
-            'NORMAL',
-            'UNIQUE',
-            'FULLTEXT',
-            'SPATIAL'
-        ))
-        )
+        if (!in_array(strtoupper($type), DevHelper_Generator_Db::getIndexTypes())) {
             $type = 'NORMAL';
+        }
 
         $this->_dataClasses[$name]['indeces'][$indexName] = array(
             'name' => $indexName,
@@ -201,14 +203,43 @@ abstract class DevHelper_Config_Base
         return $this->_dataPatches;
     }
 
-    public function addDataPatch($table, array $field)
+    public function addDataPatch($table, array $patch)
     {
-        $field['name'] = DevHelper_Generator_Db::getFieldName($this, $this->_normalizeDbName($field['name']));
-        $field['type'] = strtolower($field['type']);
-        if (!in_array($field['type'], DevHelper_Generator_Db::getDataTypes()))
-            $field['type'] = XenForo_DataWriter::TYPE_SERIALIZED;
+        if (!empty($patch['index'])) {
+            if (!isset($patch['name'])) {
+                $patch['name'] = implode('_', $patch['fields']);
+            }
+            $patchKey = 'index::' . $patch['name'];
 
-        $this->_dataPatches[$table][$field['name']] = $field;
+            if (isset($patch['type'])) {
+                $patch['type'] = strtoupper($patch['type']);
+            } else {
+                $patch['type'] = '';
+            }
+            if (!in_array($patch['type'], DevHelper_Generator_Db::getIndexTypes())) {
+                $patch['type'] = 'NORMAL';
+            }
+
+            if (!isset($patch['fields'])) {
+                throw new XenForo_Exception('addDataPatch(index=true) requires `fields`');
+            }
+            if (!is_array($patch['fields'])) {
+                $patch['fields'] = array(strval($patch['fields']));
+            }
+        } else {
+            $patch['name'] = DevHelper_Generator_Db::getFieldName($this, $this->_normalizeDbName($patch['name']));
+            $patchKey = $patch['name'];
+
+            if (!isset($patch['type'])) {
+                throw new XenForo_Exception('addDataPatch() requires `type`');
+            }
+            $patch['type'] = strtolower($patch['type']);
+            if (!in_array($patch['type'], DevHelper_Generator_Db::getDataTypes())) {
+                $patch['type'] = XenForo_DataWriter::TYPE_SERIALIZED;
+            }
+        }
+
+        $this->_dataPatches[$table][$patchKey] = $patch;
 
         return true;
     }
