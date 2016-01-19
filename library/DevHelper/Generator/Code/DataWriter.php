@@ -188,15 +188,8 @@ if (is_array(\$uploaded)) {
         \$filePath = {$modelClassName}::getImageFilePath(\$data, \$sizeCode);
         \$directory = dirname(\$filePath);
 
-        if (XenForo_Helper_File::createDirectory(\$directory, true) && is_writable(\$directory)) {
-            if (file_exists(\$filePath)) {
-                unlink(\$filePath);
-            }
-
-            \$success = @rename(\$tempFile, \$filePath);
-            if (\$success) {
-                XenForo_Helper_File::makeWritableByFtpUser(\$filePath);
-            }
+        if (XenForo_Helper_File::createDirectory(\$directory, true)) {
+            XenForo_Helper_File::safeRename(\$tempFile, \$filePath);
         }
     }
 }
