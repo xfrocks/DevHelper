@@ -13,7 +13,7 @@ class DevHelper_Helper_Xfcp
 
     public static function finishLookingForXfcpClasses($addOn, DevHelper_Config_Base $config)
     {
-        $prefix = DevHelper_Generator_File::getClassName($addOn['addon_id'], false, $config) . '_';
+        $prefix = $config->getClassPrefix() . '_';
         $prefixLength = strlen($prefix);
 
         foreach (self::$_foundXfcpClasses as $clazz => $paths) {
@@ -41,18 +41,38 @@ class DevHelper_Helper_Xfcp
                 }
             }
 
-            $ghostClazz = $prefix . 'DevHelper_XFCP_' . $clazzWithoutPrefix;
-            $ghostPath = DevHelper_Generator_File::getClassPath($ghostClazz);
-            if (file_exists($ghostPath)) {
-                // ghost file exists, yay!
-                continue;
+            if (self::generateXfcpClass($clazz, $realClazz, $config)) {
+                echo "<span style='color: #ddd'>Generated      XFCP_{$clazz} ({$realClazz})</span>\n";
             }
-
-            $ghostContents = "<?php\n\nclass XFCP_{$clazz} extends {$realClazz}\n{\n}\n";
-
-            DevHelper_Generator_File::filePutContents($ghostPath, $ghostContents);
-            echo "<span style='color: #ddd'>Generated      XFCP_{$clazz} ({$realClazz})</span>\n";
         }
+    }
+
+    public static function generateOurClass($clazz, DevHelper_Config_Base $config)
+    {
+        $path = DevHelper_Generator_File::getClassPath($clazz);
+        $contents = <<<EOF
+<?php
+
+class {$clazz} extends XFCP_{$clazz}
+{
+}
+EOF;
+
+        return DevHelper_Generator_File::writeFile($path, $contents, true, false) === true;
+    }
+
+    public static function generateXfcpClass($clazz, $realClazz, DevHelper_Config_Base $config)
+    {
+        $ghostClazz = str_replace($config->getClassPrefix(), $config->getClassPrefix() . '_DevHelper_XFCP', $clazz);
+        $ghostPath = DevHelper_Generator_File::getClassPath($ghostClazz);
+        if (file_exists($ghostPath)) {
+            // ghost file exists, yay!
+            return true;
+        }
+
+        $ghostContents = "<?php\n\nclass XFCP_{$clazz} extends {$realClazz}\n{\n}\n";
+
+        return DevHelper_Generator_File::filePutContents($ghostPath, $ghostContents);
     }
 
     public static function parsePhpForXfcpClass($path, $contents)
