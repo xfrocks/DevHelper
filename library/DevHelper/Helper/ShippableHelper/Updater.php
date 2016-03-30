@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Updater
- * @version 3
+ * @version 4
  */
 class DevHelper_Helper_ShippableHelper_Updater
 {
@@ -782,10 +782,16 @@ EOF;
         }
 
         $client = XenForo_Helper_Http::getClient($url);
-        $response = $client->request('GET');
 
-        $responseStatus = $response->getStatus();
-        $responseBody = $response->getBody();
+        try {
+            $response = $client->request('GET');
+
+            $responseStatus = $response->getStatus();
+            $responseBody = $response->getBody();
+        } catch (Exception $e) {
+            $responseStatus = 503;
+            $responseBody = $e->getMessage();
+        }
 
         $json = null;
         if ($responseStatus === 200) {
