@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_ImageSize
- * @version 1
+ * @version 3
  */
 class DevHelper_Helper_ShippableHelper_ImageSize
 {
@@ -59,7 +59,7 @@ class DevHelper_Helper_ShippableHelper_ImageSize
         $startTime = microtime(true);
 
         if (preg_match('#^' . preg_quote(XenForo_Application::getOptions()->get('boardUrl'), '#')
-            . '.+attachments/.+\.(?<id>\d+)/$#', $uri, $matches)) {
+            . '.+attachments/(.+\.)*(?<id>\d+)/$#', $uri, $matches)) {
             return self::_calculateForAttachment($uri, $matches['id']);
         }
 
@@ -151,7 +151,11 @@ class DevHelper_Helper_ShippableHelper_ImageSize
             $context = stream_context_create(array('http' => $httpContext));
         }
 
-        $this->handle = @fopen($uri, 'rb', null, $context);
+        if ($context != null) {
+            $this->handle = @fopen($uri, 'rb', null, $context);
+        } else {
+            $this->handle = @fopen($uri, 'rb');
+        }
     }
 
     private function close()
