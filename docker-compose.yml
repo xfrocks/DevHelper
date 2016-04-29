@@ -1,0 +1,28 @@
+version: '2'
+
+services:
+  php-apache:
+    build:
+      context: https://github.com/xfrocks/docker-xenforo.git
+      dockerfile: php-apache/Dockerfile
+    expose:
+      - "80"
+    links:
+      - mysqld:mysqld
+    volumes:
+      - .:/var/www/html/
+
+  mysqld:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: 'password'
+    expose:
+      - "3306"
+    volumes:
+      - ./internal_data/mysql:/var/lib/mysql:rw
+
+  mysql:
+    image: arey/mysql-client
+    links:
+      - mysqld:mysqld
+    entrypoint: mysql -hmysqld -uroot -ppassword
