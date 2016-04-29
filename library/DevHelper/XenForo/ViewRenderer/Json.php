@@ -52,7 +52,7 @@ class DevHelper_XenForo_ViewRenderer_Json extends _XenForo_ViewRenderer_Json
                         }
                     }
 
-                    $params['_queries'][] = $queryText;
+                    $params['_queries'][] = htmlentities($queryText);
                     $params['_totalQueryRunTime'] += $query->getElapsedSecs();
                 }
             }
