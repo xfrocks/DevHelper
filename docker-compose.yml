@@ -12,6 +12,15 @@ services:
     volumes:
       - .:/var/www/html/
 
+  php-cli:
+    build:
+      context: https://github.com/xfrocks/docker-xenforo.git
+      dockerfile: php-cli/Dockerfile
+    links:
+      - php-apache:php-apache
+    volumes:
+      - .:/var/www/html/
+
   mysqld:
     image: mysql:latest
     environment:
