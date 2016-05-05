@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_ImageSize
- * @version 3
+ * @version 4
  */
 class DevHelper_Helper_ShippableHelper_ImageSize
 {
@@ -58,9 +58,13 @@ class DevHelper_Helper_ShippableHelper_ImageSize
 
         $startTime = microtime(true);
 
-        if (preg_match('#^' . preg_quote(XenForo_Application::getOptions()->get('boardUrl'), '#')
-            . '.+attachments/(.+\.)*(?<id>\d+)/$#', $uri, $matches)) {
-            return self::_calculateForAttachment($uri, $matches['id']);
+        if (preg_match('#attachments/(.+\.)*(?<id>\d+)/$#', $uri, $matches)) {
+            $attachmentResult = self::_calculateForAttachment($uri, $matches['id']);
+            if (!empty($attachmentResult['width'])
+                && !empty($attachmentResult['height'])
+            ) {
+                return $attachmentResult;
+            }
         }
 
         if ($instance === null) {
