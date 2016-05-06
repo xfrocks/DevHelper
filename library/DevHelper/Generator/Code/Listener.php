@@ -43,7 +43,7 @@ EOF;
         $existingContents = self::_getClassContents($addOn, $config);
         $existingMethods = DevHelper_Helper_Php::extractMethods($existingContents);
         if (in_array($method, $existingMethods, true)) {
-            return false;
+            return $method;
         }
 
         $ourClazz = sprintf('%s_%s', $config->getClassPrefix(), $realClazz);
