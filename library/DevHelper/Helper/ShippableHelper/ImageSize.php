@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_ImageSize
- * @version 4
+ * @version 5
  */
 class DevHelper_Helper_ShippableHelper_ImageSize
 {
@@ -411,6 +411,11 @@ class DevHelper_Helper_ShippableHelper_ImageSize
     private function readInt($str)
     {
         $size = unpack('C*', $str);
+        if (!isset($size[1])
+            || !isset($size[2])
+        ) {
+            return 0;
+        }
 
         return ($size[1] << 8) + $size[2];
     }
