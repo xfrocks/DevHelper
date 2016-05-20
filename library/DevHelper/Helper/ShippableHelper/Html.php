@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Html
- * @version 6
+ * @version 7
  */
 class DevHelper_Helper_ShippableHelper_Html
 {
@@ -192,10 +192,10 @@ class DevHelper_Helper_ShippableHelper_Html
                 $name = null;
                 $value = null;
 
-                if (preg_match('#name="(?<name>[^"]+)"#i', $tag, $matches)) {
+                if (preg_match('#(name|property)="(?<name>[^"]+)"#i', $tag, $matches)) {
                     $name = $matches['name'];
-                } elseif (preg_match('#property="(?<name>[^"]+)"#i', $tag, $matches)) {
-                    $name = $matches['name'];
+                } elseif (preg_match('#itemprop="(?<itemprop>[^"]+)"#i', $tag, $matches)) {
+                    $name = $matches['itemprop'];
                 } else {
                     continue;
                 }
