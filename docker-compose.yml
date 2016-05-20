@@ -20,6 +20,7 @@ services:
       - php-apache:php-apache
     volumes:
       - .:/var/www/html/
+    working_dir: /var/www/html/
 
   mysqld:
     image: mysql:latest
