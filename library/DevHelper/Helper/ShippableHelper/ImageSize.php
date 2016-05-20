@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_ImageSize
- * @version 5
+ * @version 6
  */
 class DevHelper_Helper_ShippableHelper_ImageSize
 {
@@ -30,6 +30,12 @@ class DevHelper_Helper_ShippableHelper_ImageSize
             }
         }
 
+        $originalUri = $uri;
+        $requestPaths = XenForo_Application::get('requestPaths');
+        if (strpos($uri, $requestPaths['fullBasePath']) === 0) {
+            $uri = substr($uri, strlen($requestPaths['fullBasePath']));
+        }
+
         $data = self::_calculate($uri);
         if (empty($data['width'])
             || empty($data['height'])
@@ -37,12 +43,15 @@ class DevHelper_Helper_ShippableHelper_ImageSize
             $absoluteUri = XenForo_Link::convertUriToAbsoluteUri($uri, true);
             if ($absoluteUri != $uri) {
                 $data = self::_calculate($absoluteUri);
-                if (isset($data['uri'])) {
-                    // use the original uri for cache tracking
-                    $data['uri'] = $uri;
-                }
             }
         }
+
+        if (!empty($data['uri'])
+            && $data['uri'] != $originalUri
+        ) {
+            $data['_calculateUri'] = $data['uri'];
+        }
+        $data['uri'] = $originalUri;
 
         if ($cache) {
             $cache->save(serialize($data), $cacheId, array(), $ttl);
