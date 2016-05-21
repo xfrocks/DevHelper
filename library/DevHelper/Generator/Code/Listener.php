@@ -19,8 +19,7 @@ public static function file_health_check(XenForo_ControllerAdmin_Abstract \$cont
 EOF;
 
         $contents = DevHelper_Helper_Php::appendMethod($existingContents, $methodCode);
-        if (self::_write($addOn, $config, $contents))
-        {
+        if (self::_write($addOn, $config, $contents)) {
             /** @var XenForo_DataWriter_CodeEventListener $dw */
             $dw = XenForo_DataWriter::create('XenForo_DataWriter_CodeEventListener');
             $dw->setImportMode(true);
@@ -98,7 +97,8 @@ EOF;
         return $contents;
     }
 
-    protected static function _write(array $addOn, DevHelper_Config_Base $config, $contents) {
+    protected static function _write(array $addOn, DevHelper_Config_Base $config, $contents)
+    {
         $className = self::getClassName($addOn, $config);
         $path = DevHelper_Generator_File::getClassPath($className);
 

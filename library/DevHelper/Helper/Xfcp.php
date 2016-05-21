@@ -82,7 +82,7 @@ EOF;
         }
 
         $offset = 0;
-        $extendsXfcp = '#\sextends\sXFCP_(?<clazz>[^\s]+)\s#';
+        $extendsXfcp = '#\sextends\sXFCP_(?<' . 'clazz>[^\s]+)\s#';
         while (true) {
             if (preg_match($extendsXfcp, $contents, $matches, PREG_OFFSET_CAPTURE, $offset)) {
                 $clazz = $matches['clazz'][0];

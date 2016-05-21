@@ -64,7 +64,8 @@ class DevHelper_Helper_ShippableHelper_Html
         ), $options);
 
         if (!empty($options['previewBreakBbCode'])
-            && preg_match(sprintf('#\[%1$s\](?<preview>.*)\[/%1$s\]#', preg_quote($options['previewBreakBbCode'], '#')),
+            && preg_match(sprintf('#\[%1$s\](?<' . 'preview>.*)\[/%1$s\]#',
+                preg_quote($options['previewBreakBbCode'], '#')),
                 $string, $matches, PREG_OFFSET_CAPTURE)
         ) {
             // preview break bbcode found

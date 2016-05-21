@@ -2,11 +2,12 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Updater
- * @version 5
+ * @version 6
  */
 class DevHelper_Helper_ShippableHelper_Updater
 {
     const KEY = 'ShippableHelper_Updater';
+    const API_URL = 'https://xfrocks.com/api/index.php?updater';
 
     public static $_version = 2016050601;
 
@@ -16,12 +17,15 @@ class DevHelper_Helper_ShippableHelper_Updater
      * 2. Or it has been enabled at some point
      *
      * @param XenForo_Dependencies_Abstract $dependencies
-     * @param string $apiUrl
+     * @param string|null $apiUrl
      * @param string|null $addOnId
      * @throws XenForo_Exception
      */
-    public static function onInitDependencies(XenForo_Dependencies_Abstract $dependencies, $apiUrl, $addOnId = null)
-    {
+    public static function onInitDependencies(
+        XenForo_Dependencies_Abstract $dependencies,
+        $apiUrl = null,
+        $addOnId = null
+    ) {
         if (get_class($dependencies) !== 'XenForo_Dependencies_Admin') {
             // do nothing unless user are in AdminCP
             return;
@@ -30,6 +34,13 @@ class DevHelper_Helper_ShippableHelper_Updater
         if (XenForo_Application::$versionId < 1020000) {
             // only run if XenForo is at least 1.2.0
             return;
+        }
+
+        if (!is_string($apiUrl)) {
+            // use default api url if nothing provided
+            // this will also make this method compatible with XenForo code event
+            // in which an array will be sent as the second parameter
+            $apiUrl = self::API_URL;
         }
 
         if (!Zend_Uri::check($apiUrl)) {
@@ -70,15 +81,20 @@ class DevHelper_Helper_ShippableHelper_Updater
     /**
      * Removes trace of Updater if it is no longer needed.
      *
-     * @param string $apiUrl
+     * @param string|null $apiUrl
      * @param string|null $addOnId
      * @throws Zend_Exception
      */
-    public static function onUninstall($apiUrl, $addOnId = null)
+    public static function onUninstall($apiUrl = null, $addOnId = null)
     {
         if (XenForo_Application::$versionId < 1020000) {
             // only run if XenForo is at least 1.2.0
             return;
+        }
+
+        if (!is_string($apiUrl)) {
+            // use default api url if nothing provided
+            $apiUrl = self::API_URL;
         }
 
         $addOnId = self::_getAddOnId($addOnId);

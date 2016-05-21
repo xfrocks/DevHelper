@@ -32,8 +32,9 @@ abstract class DevHelper_Config_Base
     {
         $name = $this->_normalizeDbName($name);
 
-        if (!$this->checkDataClassExists($name))
+        if (!$this->checkDataClassExists($name)) {
             return array();
+        }
 
         $dataClass = $this->_dataClasses[$name];
 
@@ -50,8 +51,13 @@ abstract class DevHelper_Config_Base
         return $dataClass;
     }
 
-    public function addDataClass($name, $fields = array(), $primaryKey = false, $indeces = array(), $extraData = array())
-    {
+    public function addDataClass(
+        $name,
+        $fields = array(),
+        $primaryKey = false,
+        $indeces = array(),
+        $extraData = array()
+    ) {
         $name = $this->_normalizeDbName($name);
 
         $this->_dataClasses[$name] = array(
@@ -95,10 +101,13 @@ abstract class DevHelper_Config_Base
         $name = $this->_normalizeDbName($name);
         $field['name'] = $this->_normalizeDbName($field['name']);
         $field['type'] = strtolower($field['type']);
-        if (!in_array($field['type'], DevHelper_Generator_Db::getDataTypes()))
+        if (!in_array($field['type'], DevHelper_Generator_Db::getDataTypes())) {
             $field['type'] = XenForo_DataWriter::TYPE_SERIALIZED;
+        }
 
-        if (empty($this->_dataClasses[$name]['title_field']) AND in_array($field['type'], array(XenForo_DataWriter::TYPE_STRING))) {
+        if (empty($this->_dataClasses[$name]['title_field']) AND in_array($field['type'],
+                array(XenForo_DataWriter::TYPE_STRING))
+        ) {
             $this->_dataClasses[$name]['title_field'] = $field['name'];
         }
 
@@ -150,8 +159,9 @@ abstract class DevHelper_Config_Base
                 return false;
             }
         }
-        if (empty($fields))
+        if (empty($fields)) {
             return false;
+        }
 
         if (isset($index['name'])) {
             $indexName = $index['name'];

@@ -23,8 +23,9 @@ class DevHelper_Generator_Db
             $indeces[] = self::_getIndexDefinition($index);
         }
         $indeces = implode("\n    ,", $indeces);
-        if (!empty($indeces))
+        if (!empty($indeces)) {
             $indeces = ',' . $indeces;
+        }
 
         $sql = <<<EOF
 CREATE TABLE IF NOT EXISTS `$tableName` (
@@ -281,8 +282,9 @@ EOF;
             case XenForo_DataWriter::TYPE_SERIALIZED:
             default:
                 $dbType = 'MEDIUMBLOB';
-                if (isset($field['default']))
+                if (isset($field['default'])) {
                     unset($field['default']);
+                }
                 // BLOB/TEXT column can't have a default value
                 break;
         }

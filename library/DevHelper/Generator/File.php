@@ -73,7 +73,8 @@ class DevHelper_Generator_File
                 $className = $tmp . '_DevHelper_Config';
             } else {
                 if ($config === null) {
-                    throw new XenForo_Exception(sprintf('%s requires $config when $subClassName=%s', __METHOD__, $subClassName));
+                    throw new XenForo_Exception(sprintf('%s requires $config when $subClassName=%s', __METHOD__,
+                        $subClassName));
                 }
 
                 $className = rtrim(sprintf('%s_%s', $config->getClassPrefix(), $subClassName), '_');
@@ -150,8 +151,11 @@ class DevHelper_Generator_File
         return XenForo_Autoloader::getInstance()->autoloaderClassToFile($className);
     }
 
-    public static function getAddOnXmlPath(array $addOn, array $exportAddOn = null, DevHelper_Config_Base $config = null)
-    {
+    public static function getAddOnXmlPath(
+        array $addOn,
+        array $exportAddOn = null,
+        DevHelper_Config_Base $config = null
+    ) {
         if ($config === null) {
             /** @var DevHelper_Model_Config $configModel */
             $configModel = XenForo_Model::create('DevHelper_Model_Config');
@@ -329,19 +333,22 @@ class DevHelper_Generator_File
 
         $classNameByAddOnId = self::getClassName($addOn['addon_id'], false, $config);
 
-        $list['library'] = self::getClassNameInDirectory(XenForo_Autoloader::getInstance()->getRootDir(), $classNameByAddOnId, true);
+        $list['library'] = self::getClassNameInDirectory(XenForo_Autoloader::getInstance()->getRootDir(),
+            $classNameByAddOnId, true);
         if (empty($list['library'])) {
             throw new XenForo_Exception(sprintf('`library` not found for %s', $addOn['addon_id']));
         }
 
-        $jsPath = self::getClassNameInDirectory(realpath(XenForo_Autoloader::getInstance()->getRootDir() . '/../js'), $classNameByAddOnId, true);
+        $jsPath = self::getClassNameInDirectory(realpath(XenForo_Autoloader::getInstance()->getRootDir() . '/../js'),
+            $classNameByAddOnId, true);
         if (!empty($jsPath)) {
             if (is_dir($jsPath)) {
                 $list['js'] = $jsPath;
             }
         }
 
-        $stylesDefaultPath = self::getClassNameInDirectory(realpath(XenForo_Autoloader::getInstance()->getRootDir() . '/../styles/default'), $classNameByAddOnId, true);
+        $stylesDefaultPath = self::getClassNameInDirectory(realpath(XenForo_Autoloader::getInstance()->getRootDir() . '/../styles/default'),
+            $classNameByAddOnId, true);
         if (!empty($stylesDefaultPath)) {
             if (is_dir($stylesDefaultPath)) {
                 $list['styles_default'] = $stylesDefaultPath;
@@ -414,7 +421,8 @@ class DevHelper_Generator_File
             }
 
             if (!is_callable(array($addOnEventListener['callback_class'], $addOnEventListener['callback_method']))) {
-                die(sprintf("Callback is not callable %s::%s\n", $addOnEventListener['callback_class'], $addOnEventListener['callback_method']));
+                die(sprintf("Callback is not callable %s::%s\n", $addOnEventListener['callback_class'],
+                    $addOnEventListener['callback_method']));
             }
         }
         if (!$fileHealthCheckFound) {
@@ -538,8 +546,9 @@ class DevHelper_Generator_File
             }
 
             foreach ($children as $child) {
-                if (!empty($options['force']))
+                if (!empty($options['force'])) {
                     $options['force'] = false;
+                }
                 // reset `force` option for children
                 self::_fileExport($entry . '/' . $child, $exportPath, $rootPath, $options);
             }

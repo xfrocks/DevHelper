@@ -68,8 +68,8 @@ class DevHelper_Helper_ShippableHelper_UpdaterCore
         XenForo_FrontController $fc,
         XenForo_ControllerResponse_Abstract &$controllerResponse,
         XenForo_ViewRenderer_Abstract &$viewRenderer,
-        array &$containerParams)
-    {
+        array &$containerParams
+    ) {
         if (!$controllerResponse instanceof XenForo_ControllerResponse_View) {
             return;
         }
@@ -247,8 +247,13 @@ class DevHelper_Helper_ShippableHelper_UpdaterCore
         if (!empty($_GET[self::PARAM_AUTHORIZE])
             && $_GET[self::PARAM_AUTHORIZE] === self::$_config['apiUrl']
         ) {
-            $downloadLink = XenForo_Link::buildAdminLink('full:add-ons/upgrade', $controllerResponse->params['addOn'], array(
-                self::PARAM_DOWNLOAD => self::$_config['apiUrl']));
+            $downloadLink = XenForo_Link::buildAdminLink(
+                'full:add-ons/upgrade',
+                $controllerResponse->params['addOn'],
+                array(
+                    self::PARAM_DOWNLOAD => self::$_config['apiUrl']
+                )
+            );
             $downloadLinkJson = json_encode($downloadLink);
             $accessTokenParamJson = json_encode(self::PARAM_ACCESS_TOKEN);
 
@@ -513,11 +518,13 @@ EOF;
                     $parentOfFileSystemPath = dirname($fileSystemPath);
                     if (is_dir($parentOfFileSystemPath)) {
                         if (!is_writable($parentOfFileSystemPath)) {
-                            throw new XenForo_Exception('Directory is not writable: ' . $parentOfFileSystemPath, true);
+                            throw new XenForo_Exception('Directory is not writable: '
+                                . $parentOfFileSystemPath, true);
                         }
                     } else {
                         if (!XenForo_Helper_File::createDirectory($parentOfFileSystemPath)) {
-                            throw new XenForo_Exception('Directory cannot be created: ' . $parentOfFileSystemPath, true);
+                            throw new XenForo_Exception('Directory cannot be created: '
+                                . $parentOfFileSystemPath, true);
                         }
                     }
                 }

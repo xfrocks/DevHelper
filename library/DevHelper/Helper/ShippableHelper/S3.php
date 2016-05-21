@@ -42,7 +42,11 @@ class DevHelper_Helper_ShippableHelper_S3 extends Zend_Service_Amazon_S3
         }
         $data = strval($data);
         $headers['x-amz-content-sha256'] = Zend_Crypt::hash('sha256', $data);
-        $headers['x-amz-date'] = sprintf('%sT%sZ', gmdate('Ymd', XenForo_Application::$time), gmdate('His', XenForo_Application::$time));
+        $headers['x-amz-date'] = sprintf(
+            '%sT%sZ',
+            gmdate('Ymd', XenForo_Application::$time),
+            gmdate('His', XenForo_Application::$time)
+        );
         $headers['Host'] = parse_url($this->_endpoint, PHP_URL_HOST);
 
         $retryCount = 0;
@@ -165,10 +169,14 @@ class DevHelper_Helper_ShippableHelper_S3 extends Zend_Service_Amazon_S3
         );
 
         // task 3: calculate signature
-        $dateKey = Zend_Crypt_Hmac::compute('AWS4' . $this->_getSecretKey(), 'sha256', $date, Zend_Crypt_Hmac::BINARY);
-        $dateRegionKey = Zend_Crypt_Hmac::compute($dateKey, 'sha256', $this->_region, Zend_Crypt_Hmac::BINARY);
-        $dateRegionServiceKey = Zend_Crypt_Hmac::compute($dateRegionKey, 'sha256', 's3', Zend_Crypt_Hmac::BINARY);
-        $signingKey = Zend_Crypt_Hmac::compute($dateRegionServiceKey, 'sha256', 'aws4_request', Zend_Crypt_Hmac::BINARY);
+        $dateKey = Zend_Crypt_Hmac::compute('AWS4' . $this->_getSecretKey(), 'sha256',
+            $date, Zend_Crypt_Hmac::BINARY);
+        $dateRegionKey = Zend_Crypt_Hmac::compute($dateKey,
+            'sha256', $this->_region, Zend_Crypt_Hmac::BINARY);
+        $dateRegionServiceKey = Zend_Crypt_Hmac::compute($dateRegionKey,
+            'sha256', 's3', Zend_Crypt_Hmac::BINARY);
+        $signingKey = Zend_Crypt_Hmac::compute($dateRegionServiceKey,
+            'sha256', 'aws4_request', Zend_Crypt_Hmac::BINARY);
 
         $signature = Zend_Crypt_Hmac::compute($signingKey, 'sha256', $stringToSign);
         $headers['Authorization'] = sprintf(

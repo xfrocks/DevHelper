@@ -9,7 +9,7 @@ class DevHelper_Generator_Code_XenForoConfig
         $path = $app->getRootDir() . '/library/config.php';
         $originalContents = file_get_contents($path);
 
-        $varNamePattern = '#(\n|^)(?<varName>\\$config';
+        $varNamePattern = '#(\n|^)(?<' . 'varName>\\$config';
         foreach (explode('.', $key) as $i => $keyPart) {
             // try to match the quote
             $varNamePattern .= '\\[([\'"]?)'
@@ -38,7 +38,10 @@ class DevHelper_Generator_Code_XenForoConfig
 
         $matches = reset($candidates);
 
-        $replacement = $matches[1][0] . $matches['varName'][0] . ' = ' . var_export($value, true) . ';' . $matches[5][0];
+        $replacement = $matches[1][0]
+            . $matches['varName'][0]
+            . ' = ' . var_export($value, true) . ';'
+            . $matches[5][0];
         $contents = substr_replace($originalContents, $replacement, $matches[0][1], strlen($matches[0][0]));
 
         DevHelper_Generator_File::writeFile($path, $contents, true, false);

@@ -27,8 +27,12 @@ class DevHelper_Generator_Phrase
         return true;
     }
 
-    public static function generatePhraseAutoCamelCaseStyle(array $addOn, DevHelper_Config_Base $config, array $dataClass, $dashText)
-    {
+    public static function generatePhraseAutoCamelCaseStyle(
+        array $addOn,
+        DevHelper_Config_Base $config,
+        array $dataClass,
+        $dashText
+    ) {
         $camelCase = ucwords(str_replace('_', ' ', $dashText));
         $title = self::getPhraseName($addOn, $config, $dataClass, $dashText);
         self::generatePhrase($addOn, $title, $camelCase);

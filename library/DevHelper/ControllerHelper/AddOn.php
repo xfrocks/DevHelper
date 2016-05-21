@@ -5,6 +5,7 @@ class DevHelper_ControllerHelper_AddOn extends XenForo_ControllerHelper_Abstract
     public function selfCheck()
     {
         if (!DevHelper_Installer::checkAddOnVersion()) {
+            /** @noinspection HtmlUnknownTarget */
             throw new XenForo_Exception(sprintf(
                 'DevHelper version mis-matched. <a href="%s">Sync Now</a>.',
                 XenForo_Link::buildAdminLink('tools/dev/helper/sync')
