@@ -243,9 +243,42 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
 
         echo '</pre>';
 
-        DevHelper_Generator_Code_XenForoConfig::updateConfig('development.default_addon', $addOn['addon_id']);
-
         die('Done');
+    }
+
+    public function actionSwitchContext()
+    {
+        $addOnId = $this->_input->filterSingle('addon_id', XenForo_Input::STRING);
+        $targetAddOn = $this->_getAddOnOrError($addOnId);
+
+        $addOns = $this->_getAddOnModel()->getAllAddOns();
+
+        $targetAddOnDw = XenForo_DataWriter::create('XenForo_DataWriter_AddOn');
+        $targetAddOnDw->setExistingData($targetAddOn, true);
+        $targetAddOnDw->set('active', 1);
+        $targetAddOnDw->save();
+
+        foreach ($addOns as $addOn) {
+            if (empty($addOn['active'])) {
+                continue;
+            }
+
+            if ($addOn['addon_id'] == 'devHelper'
+                || $addOn['addon_id'] == $targetAddOn['addon_id']
+            ) {
+                continue;
+            }
+
+            $addOnDw = XenForo_DataWriter::create('XenForo_DataWriter_AddOn');
+            $addOnDw->setExistingData($addOn, true);
+            $addOnDw->set('active', 0);
+            $addOnDw->save();
+        }
+
+        DevHelper_Generator_Code_XenForoConfig::updateConfig('development.default_addon', $targetAddOn['addon_id']);
+
+        return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS,
+            XenForo_Link::buildAdminLink('add-ons'));
     }
 
     public function actionAllOff()

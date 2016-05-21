@@ -177,6 +177,7 @@ $0]]></replace>
       <find><![CDATA[</xen:popup>]]></find>
       <replace><![CDATA[<xen:link href="{xen:adminlink 'add-ons/data-manager', $addOn}" displayif="{$canAccessDevelopment}">{xen:phrase devhelper_data_manager}</xen:link>
 <xen:link href="{xen:adminlink 'add-ons/file-export', $addOn}" displayif="{$canAccessDevelopment}">{xen:phrase devhelper_file_export}</xen:link>
+<xen:link href="{xen:adminlink 'add-ons/switch-context', $addOn}" displayif="{$canAccessDevelopment}">{xen:phrase devhelper_switch_context}</xen:link>
 
 $0]]></replace>
     </modification>
@@ -242,6 +243,7 @@ $0]]></replace>
     <phrase title="devhelper_not_available" version_id="1" version_string="0.9"><![CDATA[N/A]]></phrase>
     <phrase title="devhelper_no_data_classes_have_been_added_yet" version_id="1" version_string="0.9"><![CDATA[No data classes have been added yet.]]></phrase>
     <phrase title="devhelper_run_installer" version_id="1" version_string="0.9"><![CDATA[Run Installer]]></phrase>
+    <phrase title="devhelper_switch_context" version_id="15" version_string="20150327"><![CDATA[Switch Context]]></phrase>
   </phrases>
   <route_prefixes/>
   <style_properties/>
