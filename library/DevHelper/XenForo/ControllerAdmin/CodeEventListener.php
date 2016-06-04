@@ -59,7 +59,7 @@ class DevHelper_XenForo_ControllerAdmin_CodeEventListener extends XFCP_DevHelper
                         $this->_request->setParam('callback_method', $method);
 
                         XenForo_DataWriter::create('XenForo_DataWriter_CodeEventListener');
-
+                        DevHelper_XenForo_DataWriter_CodeEventListener::DevHelper_markAsGeneratedCallback($clazz, $method);
                     }
                 }
             }

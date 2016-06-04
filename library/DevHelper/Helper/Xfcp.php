@@ -58,7 +58,7 @@ class {$clazz} extends XFCP_{$clazz}
 }
 EOF;
 
-        return DevHelper_Generator_File::writeFile($path, $contents, true, false) === true;
+        return DevHelper_Generator_File::writeFile($path, $contents, true, false);
     }
 
     public static function generateXfcpClass($clazz, $realClazz, DevHelper_Config_Base $config)
