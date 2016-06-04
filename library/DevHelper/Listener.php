@@ -18,6 +18,8 @@ class DevHelper_Listener
 
             'XenForo_ControllerHelper_Editor',
 
+            'XenForo_ControllerPublic_Forum',
+
             'XenForo_DataWriter_AddOn',
             'XenForo_DataWriter_CodeEventListener',
             'XenForo_DataWriter_Template',
