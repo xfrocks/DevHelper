@@ -38,6 +38,9 @@ EOF;
     public static function generateLoadClass($realClazz, array $addOn, DevHelper_Config_Base $config)
     {
         $method = sprintf('load_class_%s', $realClazz);
+        if (strlen($method) > 50) {
+            $method = sprintf('load_class_%s', md5($realClazz));
+        }
 
         $existingContents = self::_getClassContents($addOn, $config);
         $existingMethods = DevHelper_Helper_Php::extractMethods($existingContents);
