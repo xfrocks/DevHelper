@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Html
- * @version 7
+ * @version 8
  */
 class DevHelper_Helper_ShippableHelper_Html
 {
@@ -84,6 +84,7 @@ class DevHelper_Helper_ShippableHelper_Html
 
         // TODO: find better way to avoid having to call this
         $snippet = htmlspecialchars_decode($snippet);
+        $snippet = preg_replace('#\.\.\.\z#', $options['ellipsis'], $snippet);
 
         if ($maxLength == 0 || $maxLength > utf8_strlen($string)) {
             return $snippet;
