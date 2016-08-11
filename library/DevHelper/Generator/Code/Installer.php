@@ -34,6 +34,7 @@ class DevHelper_Generator_Code_Installer
                     $patch['field'] = $dataPatch['name'];
                     $patch['checkQuery'] = DevHelper_Generator_Db::showColumns($config, $table, $dataPatch);
                     $patch['addQuery'] = DevHelper_Generator_Db::alterTableAddColumn($config, $table, $dataPatch);
+                    $patch['modifyQuery'] = DevHelper_Generator_Db::alterTableModifyColumn($config, $table, $dataPatch);
                     $patch['dropQuery'] = DevHelper_Generator_Db::alterTableDropColumn($config, $table, $dataPatch);
                 }
 
@@ -72,6 +73,8 @@ class $className
             \$existed = \$db->fetchOne(\$patch['checkQuery']);
             if (empty(\$existed)) {
                 \$db->query(\$patch['addQuery']);
+            } else {
+                \$db->query(\$patch['modifyQuery']);
             }
         }
 

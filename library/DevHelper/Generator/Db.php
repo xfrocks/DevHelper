@@ -67,6 +67,14 @@ EOF;
         return "ALTER TABLE `$table` ADD COLUMN `$fieldName` $fieldDefinition";
     }
 
+    public static function alterTableModifyColumn(DevHelper_Config_Base $config, $table, array $field)
+    {
+        $fieldName = $field['name'];
+        $fieldDefinition = self::_getFieldDefinition($field);
+
+        return "ALTER TABLE `$table` MODIFY COLUMN `$fieldName` $fieldDefinition";
+    }
+
     public static function alterTableDropColumn(DevHelper_Config_Base $config, $table, array $field)
     {
         $fieldName = $field['name'];
