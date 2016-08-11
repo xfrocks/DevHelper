@@ -69,6 +69,9 @@ class DevHelper_Generator_File
 
                 // read root directory (./library), trying to pickup matched directory name
                 $tmp = self::getClassNameInDirectory(XenForo_Autoloader::getInstance()->getRootDir(), $tmp);
+                if (empty($tmp)) {
+                    $tmp = $addOnId;
+                }
 
                 $className = $tmp . '_DevHelper_Config';
             } else {
@@ -146,9 +149,30 @@ class DevHelper_Generator_File
         }
     }
 
-    public static function getClassPath($className)
+    public static function getClassPath($className, DevHelper_Config_Base $config = null)
     {
-        return XenForo_Autoloader::getInstance()->autoloaderClassToFile($className);
+        if ($config === null) {
+            return DevHelper_Autoloader::getDevHelperInstance()->autoloaderClassToFile($className);
+        } else {
+            $configClass = get_class($config);
+            $thisClassParts = explode('_', $className);
+            $configClassParts = explode('_', $configClass);
+
+            $configClassPath = self::getClassPath($configClass);
+            $configClassPathParts = explode('/', $configClassPath);
+            while($thisClassParts[0] === $configClassParts[0]) {
+                array_shift($thisClassParts);
+                array_shift($configClassParts);
+            }
+            while(count($configClassParts) > 0) {
+                array_pop($configClassParts);
+                array_pop($configClassPathParts);
+            }
+
+            $path = sprintf('%s/%s.php', implode('/', $configClassPathParts), implode('/', $thisClassParts));
+
+            return $path;
+        }
     }
 
     public static function getAddOnXmlPath(
@@ -162,11 +186,8 @@ class DevHelper_Generator_File
             $config = $configModel->loadAddOnConfig($addOn);
         }
 
-        $libraryPath = self::getClassNameInDirectory(
-            XenForo_Autoloader::getInstance()->getRootDir(),
-            self::getClassName($addOn['addon_id'], false, $config),
-            true
-        );
+        $configClassPath = self::getClassPath(get_class($config));
+        $libraryPath = dirname(dirname($configClassPath));
 
         $addOnId = (!empty($exportAddOn) ? $exportAddOn['addon_id'] : $addOn['addon_id']);
 
@@ -237,15 +258,15 @@ class DevHelper_Generator_File
         }
     }
 
-    public static function writeClass($className, $contents)
+    public static function writeClass($className, $contents, DevHelper_Config_Base $config = null)
     {
-        $path = self::getClassPath($className);
+        $path = self::getClassPath($className, $config);
 
         self::writeFile($path, $contents, true, true);
 
         if (strpos($className, 'DevHelper_Generated') === false) {
             $backupClassName = self::_getBackupClassName($className);
-            $backupPath = self::getClassPath($backupClassName);
+            $backupPath = self::getClassPath($backupClassName, $config);
             self::writeFile($backupPath . '.devhelper', $contents, false, false);
         }
 

@@ -2,37 +2,49 @@ version: '2'
 
 services:
   php-apache:
-    build:
-      context: https://github.com/xfrocks/docker-xenforo.git
-      dockerfile: php-apache/Dockerfile
+    image: xfrocks/docker-xenforo:php-apache
+    environment:
+      - VIRTUAL_HOST=xenforo.local.xfrocks.com
     expose:
       - "80"
     links:
       - mysqld:mysqld
-    volumes:
-      - .:/var/www/html/
+    #volumes:
+      #- /path/to/xenforo:/var/www/html/xenforo:rw
+      #- /path/to/addons:/var/www/html/addons:rw
+      #- .:/var/www/html/:rw
 
   php-cli:
-    build:
-      context: https://github.com/xfrocks/docker-xenforo.git
-      dockerfile: php-cli/Dockerfile
+    image: xfrocks/docker-xenforo:php-cli
     links:
       - php-apache:php-apache
-    volumes:
-      - .:/var/www/html/
+      - mysqld:mysqld
+    volumes_from:
+      - php-apache
     working_dir: /var/www/html/
 
   mysqld:
     image: mysql:latest
     environment:
-      MYSQL_ROOT_PASSWORD: 'password'
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_ONETIME_PASSWORD: 'yes'
+      MYSQL_DATABASE: 'xenforo'
+      MYSQL_USER: 'xenforo'
+      MYSQL_PASSWORD: 'xenforo'
     expose:
       - "3306"
     volumes:
-      - ./internal_data/mysql:/var/lib/mysql:rw
+      - ./.data/mysql:/var/lib/mysql:rw
 
   mysql:
     image: arey/mysql-client
     links:
       - mysqld:mysqld
     entrypoint: mysql -hmysqld -uroot -ppassword
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro

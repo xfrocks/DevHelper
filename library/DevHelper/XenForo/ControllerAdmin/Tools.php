@@ -29,29 +29,34 @@ class DevHelper_XenForo_ControllerAdmin_Tools extends XFCP_DevHelper_XenForo_Con
 
         /** @var XenForo_Application $app */
         $app = XenForo_Application::getInstance();
-        $libraryPath = sprintf('%s/library', $app->getRootDir());
-
-        $library = 'library';
-        $libraryLength = min(strlen($library), strlen($q));
+        $rootDir = $app->getRootDir();
 
         if (strlen($q) > 0
             && strpos($q, '.') === false
-            && substr($q, 0, $libraryLength) === substr($library, 0, $libraryLength)
         ) {
             if (strlen($q) < 7) {
                 $q = 'library/';
                 $paths[] = 'library';
+
+                if (isset($_SERVER['DEVHELPER_ROUTER_PHP'])) {
+                    $routerPhp = $_SERVER['DEVHELPER_ROUTER_PHP'];
+                    $routerPhpDir = dirname($routerPhp);
+                    $paths[] = sprintf('%s/addons', $routerPhpDir);
+                }
             }
 
-            $parts = explode('/', $q);
-            array_shift($parts);
+            $parts = preg_split('#/#', $q, -1, PREG_SPLIT_NO_EMPTY);
 
             $prefix = '';
             if (count($parts) > 0) {
                 $prefix = array_pop($parts);
             }
 
-            $path = rtrim(sprintf('%s/%s', $libraryPath, implode('/', $parts)), '/');
+            if (substr($q, 0, 1) === '/') {
+                $path = '/' . implode('/', $parts);
+            } else {
+                $path = rtrim(sprintf('%s/%s', $rootDir, implode('/', $parts)), '/');
+            }
 
             if (is_dir($path)) {
                 $contents = scandir($path);

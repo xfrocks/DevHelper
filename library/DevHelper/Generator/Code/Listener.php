@@ -82,7 +82,7 @@ EOF;
     protected static function _getClassContents(array $addOn, DevHelper_Config_Base $config)
     {
         $className = self::getClassName($addOn, $config);
-        $path = DevHelper_Generator_File::getClassPath($className);
+        $path = DevHelper_Generator_File::getClassPath($className, $config);
 
         if (file_exists($path)) {
             $contents = file_get_contents($path);
@@ -103,7 +103,7 @@ EOF;
     protected static function _write(array $addOn, DevHelper_Config_Base $config, $contents)
     {
         $className = self::getClassName($addOn, $config);
-        $path = DevHelper_Generator_File::getClassPath($className);
+        $path = DevHelper_Generator_File::getClassPath($className, $config);
 
         return DevHelper_Generator_File::writeFile($path, $contents, true, false) === true;
     }

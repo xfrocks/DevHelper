@@ -49,7 +49,7 @@ class DevHelper_Helper_Xfcp
 
     public static function generateOurClass($clazz, DevHelper_Config_Base $config)
     {
-        $path = DevHelper_Generator_File::getClassPath($clazz);
+        $path = DevHelper_Generator_File::getClassPath($clazz, $config);
         $contents = <<<EOF
 <?php
 
@@ -64,7 +64,7 @@ EOF;
     public static function generateXfcpClass($clazz, $realClazz, DevHelper_Config_Base $config)
     {
         $ghostClazz = str_replace($config->getClassPrefix(), $config->getClassPrefix() . '_DevHelper_XFCP', $clazz);
-        $ghostPath = DevHelper_Generator_File::getClassPath($ghostClazz);
+        $ghostPath = DevHelper_Generator_File::getClassPath($ghostClazz, $config);
         if (file_exists($ghostPath)) {
             // ghost file exists, yay!
             return true;

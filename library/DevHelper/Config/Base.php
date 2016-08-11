@@ -40,7 +40,7 @@ abstract class DevHelper_Config_Base
 
         foreach ($dataClass['files'] as &$file) {
             if (!empty($file)) {
-                $path = DevHelper_Generator_File::getClassPath($file['className']);
+                $path = DevHelper_Generator_File::getClassPath($file['className'], $this);
                 $hash = DevHelper_Generator_File::calcHash($path);
                 if ($hash != $file['hash']) {
                     $file['changed'] = true;
