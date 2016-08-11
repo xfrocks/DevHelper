@@ -19,7 +19,7 @@ class DevHelper_XenForo_ControllerPublic_Forum extends XFCP_DevHelper_XenForo_Co
             try {
                 $response = $this->actionAddThread();
             } catch (Exception $e) {
-                // ignore
+                return $this->responseError($e->getMessage());
             }
         }
 
