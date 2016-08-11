@@ -2,12 +2,18 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_ImageSize
- * @version 6
+ * @version 8
  */
 class DevHelper_Helper_ShippableHelper_ImageSize
 {
-    public static function calculate($uri, $ttl = 300)
+    public static function calculate($uri, $ttl = 604800)
     {
+        if (defined('BDIMAGE_IS_WORKING')
+            && __CLASS__ !== 'bdImage_ShippableHelper_ImageSize'
+        ) {
+            return bdImage_ShippableHelper_ImageSize::calculate($uri, $ttl);
+        }
+
         $cacheId = __CLASS__ . md5($uri);
         $cache = ($ttl > 0 ? XenForo_Application::getCache() : null);
 
@@ -161,7 +167,14 @@ class DevHelper_Helper_ShippableHelper_ImageSize
                 $httpContext['user_agent'] = 'Mozilla/4.0 (MSIE 6.0; Windows NT 5.0)';
             }
 
-            $context = stream_context_create(array('http' => $httpContext));
+            $context = stream_context_create(array(
+                'http' => $httpContext,
+                'ssl' => array(
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'allow_self_signed' => true,
+                )
+            ));
         }
 
         if ($context != null) {

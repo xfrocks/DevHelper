@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_S3
- * @version 1
+ * @version 2
  */
 class DevHelper_Helper_ShippableHelper_S3 extends Zend_Service_Amazon_S3
 {
@@ -84,13 +84,16 @@ class DevHelper_Helper_ShippableHelper_S3 extends Zend_Service_Amazon_S3
             $response = $client->request($method);
             $responseCode = $response->getStatus();
 
-            if (XenForo_Application::debugMode() && $responseCode != 200) {
+            if (XenForo_Application::debugMode() || $responseCode != 200) {
                 XenForo_Helper_File::log(__METHOD__, sprintf(
-                    "%s %s -> %d %s\n\n",
+                    "%s %s %s -> %d %s\n\n",
                     $method,
+                    $path,
                     var_export($headers, true),
                     $responseCode,
-                    $response->getBody()
+                    $responseCode != 200
+                        ? $response->getBody()
+                        : sprintf('Body(length=%d)', strlen($response->getBody()))
                 ));
             }
 

@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Updater
- * @version 6
+ * @version 7
  */
 class DevHelper_Helper_ShippableHelper_Updater
 {
@@ -43,7 +43,7 @@ class DevHelper_Helper_ShippableHelper_Updater
             $apiUrl = self::API_URL;
         }
 
-        if (!Zend_Uri::check($apiUrl)) {
+        if (!parse_url($apiUrl, PHP_URL_HOST)) {
             throw new XenForo_Exception(sprintf('$apiUrl is invalid: %s', $apiUrl));
         }
 

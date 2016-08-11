@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Http
- * @version 1
+ * @version 2
  */
 class DevHelper_Helper_ShippableHelper_Http
 {
@@ -54,7 +54,7 @@ class DevHelper_Helper_ShippableHelper_Http
             $options['originalLimit'] = $limit;
         }
 
-        if (!Zend_Uri::check($url)) {
+        if (!parse_url($url, PHP_URL_HOST)) {
             if (XenForo_Application::debugMode()) {
                 XenForo_Helper_File::log(__METHOD__, sprintf('Cannot resolve malformed url. ($url=%s, $limit=%d) -> %s',
                     $options['originalUrl'], $options['originalLimit'], $url));

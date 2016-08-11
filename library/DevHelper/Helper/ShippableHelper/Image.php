@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Image
- * @version 7
+ * @version 8
  */
 class DevHelper_Helper_ShippableHelper_Image
 {
@@ -90,7 +90,7 @@ class DevHelper_Helper_ShippableHelper_Image
 
     protected static function _getTempPath($path)
     {
-        if (Zend_Uri::check($path)) {
+        if (!!parse_url($path, PHP_URL_HOST)) {
             $tempPath = DevHelper_Helper_ShippableHelper_TempFile::download($path);
         } else {
             $tempPath = $path;

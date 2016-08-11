@@ -2,10 +2,11 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_TempFile
- * @version 4
+ * @version 6
  */
 class DevHelper_Helper_ShippableHelper_TempFile
 {
+    protected static $_maxDownloadSize = 0;
     protected static $_cached = array();
     protected static $_registeredShutdownFunction = false;
 
@@ -28,15 +29,37 @@ class DevHelper_Helper_ShippableHelper_TempFile
         return $tempFile;
     }
 
-    public static function download($url)
+    public static function download($url, array $options = array())
     {
-        if (isset(self::$_cached[$url]) AND file_exists(self::$_cached[$url])) {
-            // use cached temp file, no need to re-download
-            return self::$_cached[$url];
+        $options += array(
+            'tempFile' => '',
+            'userAgent' => '',
+            'timeOutInSeconds' => 0,
+            'maxRedirect' => 3,
+            'maxDownloadSize' => 0,
+            'secured' => 0,
+        );
+
+        $tempFile = trim(strval($options['tempFile']));
+        $managedTempFile = false;
+        if (strlen($tempFile) === 0) {
+            $tempFile = tempnam(XenForo_Helper_File::getTempDir(), self::_getPrefix());
+            self::cache($url, $tempFile);
+            $managedTempFile = true;
         }
 
-        $tempFile = tempnam(XenForo_Helper_File::getTempDir(), self::_getPrefix());
-        self::cache($url, $tempFile);
+        if (isset(self::$_cached[$url])
+            && filesize(self::$_cached[$url]) > 0
+        ) {
+            if ($managedTempFile) {
+                return self::$_cached[$url];
+            } else {
+                copy(self::$_cached[$url], $tempFile);
+                return $tempFile;
+            }
+        }
+
+        self::$_maxDownloadSize = $options['maxDownloadSize'];
 
         $fh = fopen($tempFile, 'wb');
 
@@ -44,7 +67,26 @@ class DevHelper_Helper_ShippableHelper_TempFile
         curl_setopt($ch, CURLOPT_FILE, $fh);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_NOPROGRESS, 0);
+        curl_setopt($ch, CURLOPT_PROGRESSFUNCTION, array(__CLASS__, 'download_curlProgressFunction'));
+
+        if (!empty($options['userAgent'])) {
+            curl_setopt($ch, CURLOPT_USERAGENT, $options['userAgent']);
+        }
+        if ($options['timeOutInSeconds'] > 0) {
+            curl_setopt($ch, CURLOPT_TIMEOUT, $options['timeOutInSeconds']);
+        }
+        if ($options['maxRedirect'] > 0) {
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+            curl_setopt($ch, CURLOPT_MAXREDIRS, $options['maxRedirect']);
+        } else {
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
+        }
+        if ($options['secured'] === 0) {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        }
+
         curl_exec($ch);
 
         $downloaded = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE)) == 200;
@@ -69,8 +111,17 @@ class DevHelper_Helper_ShippableHelper_TempFile
         if ($downloaded) {
             return $tempFile;
         } else {
+            file_put_contents($tempFile, '');
             return false;
         }
+    }
+
+    public static function download_curlProgressFunction($downloadSize, $downloaded)
+    {
+        return ((self::$_maxDownloadSize > 0
+            && ($downloadSize > self::$_maxDownloadSize
+                || $downloaded > self::$_maxDownloadSize))
+            ? 1 : 0);
     }
 
     public static function deleteAllCached()
