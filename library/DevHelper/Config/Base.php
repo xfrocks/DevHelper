@@ -267,14 +267,23 @@ abstract class DevHelper_Config_Base
     {
         $path = $this->_exportPath;
 
-        if ($path === false) {
-            return false;
-        } elseif (is_dir($path) AND is_writable($path)) {
+        if (is_string($path) && is_dir($path) && is_writable($path)) {
             return $path;
-        } else {
-            var_dump($path, is_dir($path), is_writable($path));
-            die('EXPORT PATH IS NOT WRITABLE');
+        } elseif (isset($_SERVER['DEVHELPER_ROUTER_PHP'])) {
+            $libraryPath = DevHelper_Generator_File::getLibraryPath($this);
+            $repoPath = dirname($libraryPath);
+            $candidatePath = dirname($repoPath);
+
+            $routerPhp = $_SERVER['DEVHELPER_ROUTER_PHP'];
+            $routerPhpDir = dirname($routerPhp);
+            $addonsPath = sprintf('%s/addons/', $routerPhpDir);
+
+            if (strpos($candidatePath, $addonsPath) === 0) {
+                return $candidatePath;
+            }
         }
+
+        die(sprintf('Export path (%s) is not writable', $path));
     }
 
     public function getExportIncludes()

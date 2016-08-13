@@ -40,7 +40,10 @@ services:
     image: arey/mysql-client
     links:
       - mysqld:mysqld
-    entrypoint: mysql -hmysqld -uroot -ppassword
+    volumes_from:
+      - php-apache
+    working_dir: /var/www/html/
+    entrypoint: mysql -hmysqld -uxenforo -pxenforo xenforo
 
   nginx-proxy:
     image: jwilder/nginx-proxy

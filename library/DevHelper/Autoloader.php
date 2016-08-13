@@ -18,7 +18,8 @@ class DevHelper_Autoloader extends XenForo_Autoloader
             file_get_contents($root . '/admin.php'),
         );
 
-        if (in_array(file_get_contents($_SERVER['SCRIPT_FILENAME']), $candidates, true)
+        if (empty($_SERVER['DEVHELPER_ROUTER_PHP'])
+            && in_array(file_get_contents($_SERVER['SCRIPT_FILENAME']), $candidates, true)
             && !self::$_DevHelper_isSetup
         ) {
             throw new XenForo_Exception('DevHelper_Autoloader must be used instead of XenForo_Autoloader');
@@ -46,7 +47,7 @@ class DevHelper_Autoloader extends XenForo_Autoloader
         }
 
         $classFile = parent::autoloaderClassToFile($class);
-        $this->_rerouteClassFile($classFile);
+        $classFile = $this->_locateClassFile($classFile);
 
         $strPos = 0;
         if (substr($class, 0, 9) !== 'DevHelper') {
@@ -66,7 +67,7 @@ class DevHelper_Autoloader extends XenForo_Autoloader
 
             $oursClass = 'DevHelper_Helper_' . substr($class, $strPos);
             $oursFile = parent::autoloaderClassToFile($oursClass);
-            $this->_rerouteClassFile($oursFile);
+            $oursFile = $this->_locateClassFile($oursFile);
             if (file_exists($oursFile)) {
                 $oursContents = file_get_contents($oursFile);
 
@@ -90,34 +91,13 @@ class DevHelper_Autoloader extends XenForo_Autoloader
         return $classFile;
     }
 
-    protected function _rerouteClassFile(&$classFile)
+    protected function _locateClassFile($classFile)
     {
-        if (file_exists($classFile)) {
-            return;
+        if (!empty($_SERVER['DEVHELPER_ROUTER_PHP'])) {
+            return DevHelper_Router::locate('library', $classFile);
         }
 
-        if (!isset($_SERVER['DEVHELPER_ROUTER_PHP'])) {
-            return;
-        }
-        $routerPhp = $_SERVER['DEVHELPER_ROUTER_PHP'];
-        $routerPhpDir = dirname($routerPhp);
-        $xenforoLibraryDir = sprintf('%s/xenforo/library/', $routerPhpDir);
-
-        $shortened = str_replace($xenforoLibraryDir, '', $classFile);
-        $parts = explode('/', $shortened);
-        $candidates = array();
-
-        while(count($parts) > 0) {
-            $candidateParts[] = array_shift($parts);
-            $candidateDirPath = sprintf('%s/addons/%s/repo/library/', $routerPhpDir, implode('/', $candidateParts));
-            $candidateDirPath = str_replace('/addons/DevHelper/repo/library/', '/library/', $candidateDirPath);
-
-            $candidatePath = $candidateDirPath . $shortened;
-            if (file_exists($candidatePath)) {
-                $classFile = $candidatePath;
-                return;
-            }
-        }
+        return $classFile;
     }
 
     protected function _setupAutoloader()
