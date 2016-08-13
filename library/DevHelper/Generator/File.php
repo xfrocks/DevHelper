@@ -5,42 +5,6 @@ class DevHelper_Generator_File
     const COMMENT_AUTO_GENERATED_START = '/* Start auto-generated lines of code. Change made will be overwriten... */';
     const COMMENT_AUTO_GENERATED_END = '/* End auto-generated lines of code. Feel free to make changes below */';
 
-    public static function minifyJs(array $jsFiles)
-    {
-        if (true) {
-            foreach ($jsFiles as $path) {
-                $pathInfo = pathinfo($path);
-
-                if (strpos($path, 'js/xenforo/') !== false) {
-                    // ignore xenforo files
-                    continue;
-                }
-
-                $dirName = $pathInfo['dirname'];
-                $realDirName = realpath($dirName);
-                $fullDirName = realpath($realDirName . '/full');
-                $baseName = $pathInfo['basename'];
-
-                $minPath = $realDirName . '/' . $baseName;
-                $fullPath = $fullDirName . '/' . $baseName;
-
-                if (file_exists($fullPath) AND (!file_exists($minPath) OR (filemtime($fullPath) > filemtime($minPath)))) {
-                    $fullContents = file_get_contents($fullPath);
-
-                    if (strpos($fullContents, '/* no minify */') === false) {
-                        require_once(dirname(__FILE__) . '/../Lib/jsmin-php/jsmin.php');
-                        $minified = JSMin::minify($fullContents);
-                    } else {
-                        // the file requested not to be minify... (debugging?)
-                        $minified = $fullContents;
-                    }
-
-                    self::writeFile($minPath, $minified, false, false);
-                }
-            }
-        }
-    }
-
     public static function calcHash($path)
     {
         if (file_exists($path)) {

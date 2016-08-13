@@ -16,7 +16,7 @@ abstract class DevHelper_XenForo_Template_Abstract extends _XenForo_Template_Abs
 {
     protected function _processJsUrls(array $jsFiles)
     {
-        DevHelper_Generator_File::minifyJs($jsFiles);
+        DevHelper_Helper_Js::processJsFiles($jsFiles);
 
         return parent::_processJsUrls($jsFiles);
     }
