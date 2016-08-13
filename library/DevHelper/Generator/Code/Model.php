@@ -442,7 +442,7 @@ foreach (\${$variableNamePlural} as &\${$variableName}) {
         $groupByParentsFunctionName = self::generateGroupByParentsFunctionName($this->_addOn, $this->_config,
             $this->_dataClass);
 
-        $this->_addMethod($rebuildStructureFunctionName, '', array(), "
+        $this->_addMethod($rebuildStructureFunctionName, 'public', array(), "
 
 \$grouped = \$this->{$groupByParentsFunctionName}(\$this->{$getFunctionName}(array(), array('order' => '{$displayOrderField}')));
 
@@ -532,7 +532,7 @@ return \$changes;
 
         ");
 
-        $this->_addMethod($groupByParentsFunctionName, '',
+        $this->_addMethod($groupByParentsFunctionName, 'public',
             array(sprintf('$%s', $variableNamePlural) => sprintf('array $%s', $variableNamePlural)), "
 
 \$grouped = array();

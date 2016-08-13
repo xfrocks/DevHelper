@@ -1,0 +1,3 @@
+FROM xfrocks/docker-xenforo:php-apache
+
+RUN pear install pear/PHP_CodeSniffer

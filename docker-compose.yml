@@ -2,7 +2,9 @@ version: '2'
 
 services:
   php-apache:
-    image: xfrocks/docker-xenforo:php-apache
+    build:
+      context: dev-scripts
+      dockerfile: Dockerfile.php-apache
     environment:
       - VIRTUAL_HOST=xenforo.local.xfrocks.com
     expose:

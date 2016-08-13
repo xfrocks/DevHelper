@@ -268,7 +268,17 @@ class DevHelper_Generator_File
         }
 
         $fileSumsClassName = self::getClassName($addOn['addon_id'], 'FileSums', $config);
-        $fileSumsContents = XenForo_Helper_Hash::getHashClassCode($fileSumsClassName, $hashes);
+        $hashesExported = self::varExport($hashes, 2);
+        $fileSumsContents = "<?php
+
+class {$fileSumsClassName}
+{
+    public static function getHashes()
+    {
+        return {$hashesExported};
+    }
+}
+";
         self::writeClass($fileSumsClassName, $fileSumsContents);
     }
 
@@ -435,8 +445,30 @@ class DevHelper_Generator_File
             }
         }
 
+        // run phpcbf by default if available
+        // append phpcs=1 in file-export url to run phpcs instead
+        if (!empty($_REQUEST['phpcbf'])) {
+            $codingStandardBinary = exec('which phpcbf');
+            if (!empty($codingStandardBinary)) {
+                $codingStandardBinary .= ' --no-patch';
+            }
+        } else {
+            $codingStandardBinary = exec('which phpcs');
+            if (!empty($codingStandardBinary)) {
+                $codingStandardBinary .= ' -s';
+            }
+        }
+        $phpcsOutput = array();
         foreach ($list as $type => $entry) {
-            self::_fileExport($entry, $exportPath, $rootPath, $options);
+            if (!empty($codingStandardBinary)) {
+                exec(sprintf('%1$s --standard=%3$s %2$s',
+                    $codingStandardBinary,
+                    escapeshellarg($entry),
+                    escapeshellarg(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'phpcs.xml')
+                ), $phpcsOutput);
+            }
+
+            self::_fileExport($entry, $exportPath, $rootPath, array_merge($options, array('type' => $type)));
         }
 
         // copy one xml copy to the export directory directory
@@ -446,6 +478,8 @@ class DevHelper_Generator_File
         } else {
             echo "Can't cp       $xmlPath -> $xmlCopyPath\n";
         }
+
+        echo(implode("\n", $phpcsOutput));
     }
 
     protected static function _fileExport($entry, &$exportPath, &$rootPath, $options)
@@ -507,17 +541,48 @@ class DevHelper_Generator_File
 
                 if (!$isDevHelper) {
                     $entryExportPath = $exportPath . '/' . $relativePath;
+                    $contents = null;
 
-                    if ($ext === 'php') {
-                        DevHelper_Helper_ShippableHelper::checkForUpdate($entry);
+                    switch ($ext) {
+                        case 'js':
+                            if ($options['type'] === 'js'
+                                && preg_match('#\.min\.js$#', $entry)
+                            ) {
+                                $fullEntry = sprintf('%s/full/%s', dirname($entry),
+                                    preg_replace('#\.min\.js$#', '.js', basename($entry)));
+                                if (self::fileGetContents($fullEntry)) {
+                                    $contents = '';
+                                }
+                            }
+                            break;
+                        case 'php':
+                            DevHelper_Helper_ShippableHelper::checkForUpdate($entry);
+                            break;
                     }
 
-                    $contents = self::fileGetContents($entry);
+                    if ($contents === null) {
+                        $contents = self::fileGetContents($entry);
+                    }
 
                     if (!empty($contents)) {
-                        if ($ext === 'php') {
-                            DevHelper_Helper_Phrase::parsePhpForPhraseTracking($relativePath, $contents);
-                            DevHelper_Helper_Xfcp::parsePhpForXfcpClass($relativePath, $contents);
+                        switch ($ext) {
+                            case 'js':
+                                if ($options['type'] === 'js'
+                                    && basename(dirname($entry)) === 'full'
+                                    && !preg_match('#\.min\.js$#', $entry)
+                                ) {
+                                    $minifiedExportPath = sprintf('%s/%s', dirname(dirname($entryExportPath)),
+                                        preg_replace('#\.js$#', '.min.js', basename($entryExportPath)));
+                                    $minifiedContents = DevHelper_Helper_Js::minify($contents);
+                                    if (self::writeFile($minifiedExportPath, $minifiedContents, false, false)) {
+                                        echo "Minifying      {$relativePath} OK\n";
+                                    }
+                                }
+                                break;
+                            case 'php':
+                                DevHelper_Helper_Phrase::parsePhpForPhraseTracking($relativePath, $contents);
+                                DevHelper_Helper_Xfcp::parsePhpForXfcpClass($relativePath, $contents);
+                                break;
                         }
 
                         $result = self::writeFile($entryExportPath, $contents, false, false);
