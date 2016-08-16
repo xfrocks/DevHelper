@@ -279,7 +279,11 @@ class {$fileSumsClassName}
     }
 }
 ";
-        self::writeClass($fileSumsClassName, $fileSumsContents);
+
+        $fileSumsClassPath = self::getClassPath($fileSumsClassName, $config);
+        self::writeFile($fileSumsClassPath, $fileSumsContents, false, true);
+
+        return $fileSumsClassPath;
     }
 
     public static function fileExport(array $addOn, DevHelper_Config_Base $config, $exportPath)
@@ -301,13 +305,13 @@ class {$fileSumsClassName}
 
         $jsPath = sprintf('%s/js/%s', $rootPath, str_replace('_', DIRECTORY_SEPARATOR, $classPrefix));
         if (is_dir($jsPath)) {
-            $list['js'] = realpath($jsPath);
+            $list['js'] = $jsPath;
         }
 
         $stylesDefaultPath = sprintf('%s/styles/default/%s', $rootPath,
             str_replace('_', DIRECTORY_SEPARATOR, $classPrefix));
         if (is_dir($stylesDefaultPath)) {
-            $list['styles_default'] = realpath($stylesDefaultPath);
+            $list['styles_default'] = $stylesDefaultPath;
         }
 
         $exportIncludes = $config->getExportIncludes();
@@ -360,9 +364,6 @@ class {$fileSumsClassName}
                 die("Not all export styles could be found...\n");
             }
         }
-
-        // generate hashes
-        self::generateHashesFile($addOn, $config, $list, $rootPath);
 
         // check for file_health_check event listener
         /** @var XenForo_Model_CodeEvent $codeEventModel */
@@ -471,6 +472,9 @@ class {$fileSumsClassName}
             self::_fileExport($entry, $exportPath, $rootPath, array_merge($options, array('type' => $type)));
         }
 
+        $hashesFilePath = self::generateHashesFile($addOn, $config, $list, $rootPath);
+        self::_fileExport($hashesFilePath, $exportPath, $rootPath, $options);
+
         // copy one xml copy to the export directory directory
         $xmlCopyPath = sprintf('%s/%s', dirname($exportPath), basename($xmlPath));
         if (@copy($xmlPath, $xmlCopyPath)) {
@@ -490,14 +494,20 @@ class {$fileSumsClassName}
 
         $relativePath = trim(str_replace($rootPath, '', $entry), '/');
 
-        if (in_array($relativePath, $options['excludes'])) {
-            echo "<span style='color: #ddd'>Excluded       $relativePath</span>\n";
-            return;
-        }
+        if (empty($options['force'])) {
+            if (in_array($relativePath, $options['excludes'])) {
+                echo "<span style='color: #ddd'>Excluded       $relativePath</span>\n";
+                return;
+            }
 
-        foreach ($options['excludeRegExs'] as $excludeRegEx) {
-            if (preg_match($excludeRegEx, $relativePath)) {
-                echo "<span style='color: #ddd'>RegExcluded    $relativePath</span>\n";
+            foreach ($options['excludeRegExs'] as $excludeRegEx) {
+                if (preg_match($excludeRegEx, $relativePath)) {
+                    echo "<span style='color: #ddd'>RegExcluded    $relativePath</span>\n";
+                    return;
+                }
+            }
+
+            if (basename($relativePath) === 'FileSums.php') {
                 return;
             }
         }
