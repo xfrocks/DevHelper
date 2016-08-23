@@ -25,23 +25,24 @@ class DevHelper_XenForo_ControllerAdmin_Tools extends XFCP_DevHelper_XenForo_Con
     public function actionAddOnsServerFile()
     {
         $q = $this->_input->filterSingle('q', XenForo_Input::STRING);
-        $paths = array();
+        $matchedPaths = array();
 
         /** @var XenForo_Application $app */
         $app = XenForo_Application::getInstance();
         $rootDir = $app->getRootDir();
+        $scanPath = '';
 
         if (strlen($q) > 0
             && strpos($q, '.') === false
         ) {
             if (strlen($q) < 7) {
                 $q = 'library/';
-                $paths[] = 'library';
+                $matchedPaths[] = 'library';
 
                 if (isset($_SERVER['DEVHELPER_ROUTER_PHP'])) {
                     $routerPhp = $_SERVER['DEVHELPER_ROUTER_PHP'];
                     $routerPhpDir = dirname($routerPhp);
-                    $paths[] = sprintf('%s/addons', $routerPhpDir);
+                    $matchedPaths[] = sprintf('%s/addons', $routerPhpDir);
                 }
             }
 
@@ -53,32 +54,44 @@ class DevHelper_XenForo_ControllerAdmin_Tools extends XFCP_DevHelper_XenForo_Con
             }
 
             if (substr($q, 0, 1) === '/') {
-                $path = '/' . implode('/', $parts);
+                $scanPath = '/' . implode('/', $parts);
             } else {
-                $path = rtrim(sprintf('%s/%s', $rootDir, implode('/', $parts)), '/');
+                $scanPath = rtrim(sprintf('%s/%s', $rootDir, implode('/', $parts)), '/');
             }
 
-            if (is_dir($path)) {
-                $contents = scandir($path);
+            $pathWithPrefix = $scanPath . '/' . $prefix;
+            if (is_dir($pathWithPrefix)) {
+                $scanPath = $pathWithPrefix;
+                $prefix = '';
+            }
 
-                foreach ($contents as $content) {
-                    if (substr($content, 0, 1) === '.') {
-                        continue;
-                    }
+            if (is_dir($scanPath)) {
+                $contentPaths = glob(sprintf('%s/*', $scanPath));
 
+                foreach ($contentPaths as $contentPath) {
                     if ($prefix !== ''
-                        && substr($content, 0, strlen($prefix)) !== $prefix
+                        && substr(basename($contentPath), 0, strlen($prefix)) !== $prefix
                     ) {
                         continue;
                     }
 
-                    $contentPath = sprintf('%s/%s', $path, $content);
                     if (is_dir($contentPath)) {
-                        $paths[] = $contentPath;
+                        $matchedPaths[] = $contentPath . '/';
                     } else {
                         $ext = XenForo_Helper_File::getFileExtension($contentPath);
                         if ($ext === 'xml') {
-                            array_unshift($paths, $contentPath);
+                            array_unshift($matchedPaths, $contentPath);
+                        }
+                    }
+                }
+            }
+
+            if (count($matchedPaths) <= 3) {
+                foreach ($matchedPaths as $matchedPath) {
+                    if (is_dir($matchedPath)) {
+                        $xmlPaths = glob(sprintf('%s/addon-*.xml', rtrim($matchedPath, '/')));
+                        foreach ($xmlPaths as $xmlPath) {
+                            array_unshift($matchedPaths, $xmlPath);
                         }
                     }
                 }
@@ -86,9 +99,13 @@ class DevHelper_XenForo_ControllerAdmin_Tools extends XFCP_DevHelper_XenForo_Con
         }
 
         $results = array();
-        foreach ($paths as $path) {
-            $relativePath = preg_replace('#^' . preg_quote($app->getRootDir()) . '/#', '', $path);
-            $results[$relativePath] = basename($path);
+        foreach ($matchedPaths as $matchedPath) {
+            $relativePath = preg_replace('#^' . preg_quote($app->getRootDir()) . '/#', '', $matchedPath);
+            $results[$relativePath] = basename($matchedPath);
+
+            if (substr($matchedPath, 0, strlen($scanPath)) === $scanPath) {
+                $results[$relativePath] = ltrim(substr_replace($matchedPath, '', 0, strlen($scanPath)), '/');
+            }
         }
 
         $view = $this->responseView();
