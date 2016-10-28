@@ -26,6 +26,8 @@ class DevHelper_Listener
 
             'XenForo_Model_AddOn',
 
+            'XenForo_Route_PrefixAdmin_Templates',
+
             'XenForo_ViewAdmin_AddOn_Upgrade',
         );
 
