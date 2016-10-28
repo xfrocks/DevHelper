@@ -2,12 +2,29 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Image
- * @version 8
+ * @version 9
  */
 class DevHelper_Helper_ShippableHelper_Image
 {
     public static function getThumbnailUrl($fullPath, $width, $height = 0, $dir = null)
     {
+        if (defined('BDIMAGE_IS_WORKING')) {
+            $size = $width;
+            $mode = bdImage_Integration::MODE_CROP_EQUAL;
+            if ($width > 0 && $height > 0) {
+                $size = $width;
+                $mode = $height;
+            } elseif ($width > 0) {
+                $size = $width;
+                $mode = bdImage_Integration::MODE_STRETCH_HEIGHT;
+            } elseif ($height > 0) {
+                $size = $height;
+                $mode = bdImage_Integration::MODE_STRETCH_WIDTH;
+            }
+
+            return bdImage_Integration::buildThumbnailLink($fullPath, $size, $mode);
+        }
+
         $thumbnailPath = self::getThumbnailPath($fullPath, $width, $height, $dir);
         $thumbnailUrl = XenForo_Application::$externalDataUrl
             . self::_getThumbnailRelativePath($fullPath, $width, $height, $dir);
@@ -24,51 +41,11 @@ class DevHelper_Helper_ShippableHelper_Image
         }
         if (empty($image)) {
             // could not open the image, create a new image
-            $longer = max($width, $height);
-            $image = XenForo_Image_Abstract::createImage($longer, $longer);
+            $image = XenForo_Image_Abstract::createImage(1, 1);
             $imageInfo['typeInt'] = IMAGETYPE_PNG;
         }
 
-        if (in_array($width, array('', 0), true) && $height > 0) {
-            // stretch width
-            $targetHeight = $height;
-            $targetWidth = $targetHeight / $image->getHeight() * $image->getWidth();
-            $image->thumbnail($targetWidth, $targetHeight);
-        } elseif (in_array($height, array('', 0), true) && $width > 0) {
-            // stretch height
-            $targetWidth = $width;
-            $targetHeight = $targetWidth / $image->getWidth() * $image->getHeight();
-            $image->thumbnail($targetWidth, $targetHeight);
-        } elseif ($width > 0 && $height > 0) {
-            // exact crop
-            $origRatio = $image->getWidth() / $image->getHeight();
-            $cropRatio = $width / $height;
-            if ($origRatio > $cropRatio) {
-                $thumbnailHeight = $height;
-                $thumbnailWidth = $height * $origRatio;
-            } else {
-                $thumbnailWidth = $width;
-                $thumbnailHeight = $width / $origRatio;
-            }
-
-            if ($thumbnailWidth <= $image->getWidth() && $thumbnailHeight <= $image->getHeight()) {
-                $image->thumbnail($thumbnailWidth, $thumbnailHeight);
-                $image->crop(0, 0, $width, $height);
-            } else {
-                // thumbnail requested is larger then the image size
-                if ($origRatio > $cropRatio) {
-                    $image->crop(0, 0, $image->getHeight() * $cropRatio, $image->getHeight());
-                } else {
-                    $image->crop(0, 0, $image->getWidth(), $image->getWidth() / $cropRatio);
-                }
-            }
-        } elseif ($width > 0) {
-            // square crop
-            $image->thumbnailFixedShorterSide($width);
-            $image->crop(0, 0, $width, $width);
-        }
-
-        // TODO: progressive jpeg
+        DevHelper_Helper_ShippableHelper_ImageCore::thumbnail($image, $imageInfo, $width, $height);
 
         XenForo_Helper_File::createDirectory(dirname($thumbnailPath), true);
         $outputPath = tempnam(XenForo_Helper_File::getTempDir(), __CLASS__);
@@ -106,13 +83,7 @@ class DevHelper_Helper_ShippableHelper_Image
                 'width' => $width,
                 'height' => $height,
             )));
-
-        if (XenForo_Helper_File::getFileExtension($fullPath) === 'png') {
-            $ext = 'png';
-        } else {
-            $ext = 'jpg';
-        }
-
+        $ext = XenForo_Helper_File::getFileExtension($fullPath);
         $divider = substr(md5($fileName), 0, 2);
 
         if (empty($dir)) {
@@ -136,18 +107,7 @@ class DevHelper_Helper_ShippableHelper_Image
         ) {
             $imageInfo['width'] = $info[0];
             $imageInfo['height'] = $info[1];
-
             $imageInfo['typeInt'] = $info[2];
-            switch ($imageInfo['typeInt']) {
-                case IMAGETYPE_JPEG:
-                    $imageInfo['type'] = 'jpeg';
-                    break;
-                case IMAGETYPE_PNG:
-                    $imageInfo['type'] = 'png';
-                    break;
-                default:
-                    $imageInfo['typeInt'] = 0;
-            }
         }
 
         return $imageInfo;
