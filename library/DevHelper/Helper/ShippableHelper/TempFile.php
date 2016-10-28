@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_TempFile
- * @version 6
+ * @version 7
  */
 class DevHelper_Helper_ShippableHelper_TempFile
 {
@@ -97,6 +97,10 @@ class DevHelper_Helper_ShippableHelper_TempFile
 
         if (XenForo_Application::debugMode()) {
             $fileSize = filesize($tempFile);
+            if ($downloaded && $fileSize === 0) {
+                clearstatcache();
+                $fileSize = filesize($tempFile);
+            }
 
             XenForo_Helper_File::log(__CLASS__, call_user_func_array('sprintf', array(
                 'download %s -> %s, %s, %d bytes%s',
