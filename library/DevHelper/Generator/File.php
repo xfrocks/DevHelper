@@ -228,20 +228,17 @@ class DevHelper_Generator_File
         array $addOn,
         DevHelper_Config_Base $config,
         array $directories,
-        $rootPath = null
+        $exportPath,
+        $rootPath
     ) {
         $hashes = array();
-
-        if ($rootPath === null) {
-            /** @var XenForo_Application $application */
-            $application = XenForo_Application::getInstance();
-            $rootPath = realpath($application->getRootDir());
-        }
+        $exportPath = rtrim($exportPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
         $rootPath = rtrim($rootPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
         $excludes = $config->getExportExcludes();
 
         foreach ($directories as $key => $directory) {
+            $directory = preg_replace('#^' . preg_quote($rootPath, '#') . '#', $exportPath, $directory);
             $directoryHashes = XenForo_Helper_Hash::hashDirectory($directory, array(
                 '.php',
                 '.js'
@@ -249,7 +246,7 @@ class DevHelper_Generator_File
 
             foreach ($directoryHashes as $filePath => $hash) {
                 if (strpos($filePath, 'DevHelper') === false AND strpos($filePath, 'FileSums') === false) {
-                    $relative = str_replace($rootPath, '', $filePath);
+                    $relative = preg_replace('#^' . preg_quote($exportPath, '#') . '#', '', $filePath);
 
                     $excluded = false;
                     foreach ($excludes as $exclude) {
@@ -472,7 +469,7 @@ class {$fileSumsClassName}
             self::_fileExport($entry, $exportPath, $rootPath, array_merge($options, array('type' => $type)));
         }
 
-        $hashesFilePath = self::generateHashesFile($addOn, $config, $list, $rootPath);
+        $hashesFilePath = self::generateHashesFile($addOn, $config, $list, $exportPath, $rootPath);
         self::_fileExport($hashesFilePath, $exportPath, $rootPath, $options);
 
         // copy one xml copy to the export directory directory
