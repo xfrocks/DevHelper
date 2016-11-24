@@ -2,12 +2,63 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_ImageCore
- * @version 1
+ * @version 2
  */
 class DevHelper_Helper_ShippableHelper_ImageCore
 {
-    public static function thumbnail(XenForo_Image_Abstract $image, array $imageInfo, $width, $height = 0)
+    /**
+     * @param string $path
+     * @return array
+     */
+    public static function open($path)
     {
+        $accessiblePath = self::_getAccessiblePath($path);
+        $imageInfo = self::_getImageInfo($accessiblePath);
+
+        $image = null;
+        if (!empty($imageInfo['typeInt'])) {
+            $image = XenForo_Image_Abstract::createFromFile($accessiblePath, $imageInfo['typeInt']);
+        }
+
+        return array(
+            'image' => $image,
+            'imageInfo' => $imageInfo,
+        );
+    }
+
+    /**
+     * @param array $data
+     * @param string $path
+     * @return bool
+     */
+    public static function save(array $data, $path)
+    {
+        XenForo_Helper_File::createDirectory(dirname($path), true);
+        $outputPath = tempnam(XenForo_Helper_File::getTempDir(), __CLASS__);
+
+        /** @noinspection PhpUndefinedMethodInspection */
+        $data['image']->output($data['imageInfo']['typeInt'], $outputPath);
+        return XenForo_Helper_File::safeRename($outputPath, $path);
+    }
+
+    /**
+     * @param array $data
+     * @param int $width
+     * @param int $height
+     * @return array()
+     */
+    public static function thumbnail(array $data, $width, $height = 0)
+    {
+        $image = $data['image'];
+        $imageInfo = $data['imageInfo'];
+
+        if (empty($image)) {
+            // no image input, create a new one
+            $size = min(100, max($width, $height));
+            $image = XenForo_Image_Abstract::createImage($size, $size);
+            $imageInfo['typeInt'] = IMAGETYPE_PNG;
+        }
+
         $isGd = $image instanceof XenForo_Image_Gd;
         $isImageMagick = $image instanceof XenForo_Image_ImageMagick_Pecl;
         if ($imageInfo['typeInt'] === IMAGETYPE_GIF && $isImageMagick) {
@@ -63,6 +114,108 @@ class DevHelper_Helper_ShippableHelper_ImageCore
                 _DevHelper_Helper_ShippableHelper_ImageCore_ImageMagick::progressiveJpeg($image);
             }
         }
+
+        return array(
+            'image' => $image,
+            'imageInfo' => $imageInfo,
+        );
+    }
+
+    protected static function _getAccessiblePath($path)
+    {
+        if (!!parse_url($path, PHP_URL_HOST)) {
+            $url = $path;
+
+            $boardUrl = XenForo_Application::getOptions()->get('boardUrl');
+            if (strpos($url, '..') === false
+                && strpos($url, $boardUrl) === 0
+            ) {
+                $localFilePath = self::_getLocalFilePath(substr($url, strlen($boardUrl)));
+                if (strlen($localFilePath) > 0
+                    && bdImage_Helper_File::existsAndNotEmpty($localFilePath)
+                ) {
+                    return $localFilePath;
+                }
+            }
+
+            if (preg_match('#attachments/(.+\.)*(?<id>\d+)/#', $url, $matches)) {
+                $fullIndex = XenForo_Link::buildPublicLink('full:index');
+                $canonicalIndex = XenForo_Link::buildPublicLink('canonical:index');
+                if (strpos($url, $fullIndex) === 0 || strpos($url, $canonicalIndex) === 0) {
+                    $attachmentDataFilePath = self::_getAttachmentDataFilePath($matches['id']);
+                    if (bdImage_Helper_File::existsAndNotEmpty($attachmentDataFilePath)) {
+                        return $attachmentDataFilePath;
+                    }
+                }
+            }
+
+            $tempPath = DevHelper_Helper_ShippableHelper_TempFile::download($url);
+        } else {
+            $tempPath = $path;
+        }
+
+        return $tempPath;
+    }
+
+    protected static function _getLocalFilePath($path)
+    {
+        // remove query parameters
+        $path = preg_replace('#(\?|\#).*$#', '', $path);
+        if (strlen($path) === 0) {
+            return $path;
+        }
+
+        $extension = XenForo_Helper_File::getFileExtension($path);
+        if (!in_array($extension, array('gif', 'jpeg', 'jpg', 'png'), true)) {
+            return '';
+        }
+
+        /** @var XenForo_Application $app */
+        $app = XenForo_Application::getInstance();
+        $path = sprintf('%s/%s', rtrim($app->getRootDir(), '/'), ltrim($path, '/'));
+
+        return $path;
+    }
+
+    protected static function _getAttachmentDataFilePath($attachmentId)
+    {
+        /** @var XenForo_Model_Attachment $attachmentModel */
+        static $attachmentModel = null;
+        static $attachments = array();
+
+        if ($attachmentModel === null) {
+            $attachmentModel = XenForo_Model::create('XenForo_Model_Attachment');
+        }
+
+        if (!isset($attachments[$attachmentId])) {
+            $attachments[$attachmentId] = $attachmentModel->getAttachmentById($attachmentId);
+        }
+
+        if (empty($attachments[$attachmentId])) {
+            return '';
+        }
+
+        return $attachmentModel->getAttachmentDataFilePath($attachments[$attachmentId]);
+    }
+
+    protected static function _getImageInfo($path)
+    {
+        $imageInfo = array();
+
+        $fileSize = @filesize($path);
+        if (!empty($fileSize)) {
+            $imageInfo['fileSize'] = $fileSize;
+        }
+
+        if (!empty($imageInfo['fileSize'])
+            && $info = @getimagesize($path)
+        ) {
+            $imageInfo['width'] = $info[0];
+            $imageInfo['height'] = $info[1];
+            $imageInfo['typeInt'] = $info[2];
+        }
+
+        return $imageInfo;
     }
 }
 
