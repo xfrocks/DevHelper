@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_ImageSize
- * @version 9
+ * @version 10
  */
 class DevHelper_Helper_ShippableHelper_ImageSize
 {
@@ -66,6 +66,53 @@ class DevHelper_Helper_ShippableHelper_ImageSize
         return $data;
     }
 
+    public static function getDataUriMatchesRatio($uri, $rgba = null)
+    {
+        if (!function_exists('imagecreatetruecolor')) {
+            return '';
+        }
+
+        $calculated = self::calculate($uri);
+        if ($calculated['width'] === 0 || $calculated['height'] === 0) {
+            return '';
+        }
+
+        return self::getDataUriAtSize($calculated['width'], $calculated['height'], $rgba);
+    }
+
+    public static function getDataUriAtSize($width, $height, $rgba = null)
+    {
+        if (!function_exists('imagecreatetruecolor')) {
+            return '';
+        }
+
+        $gcd = self::_findGreatestCommonDivisor($width, $height);
+        $width /= $gcd;
+        $height /= $gcd;
+
+        $image = imagecreate($width, $height);
+        imagealphablending($image, false);
+        imagesavealpha($image, true);
+        if (!is_array($rgba) || count($rgba) < 3) {
+            $color = imagecolorallocatealpha($image, 255, 255, 255, 127);
+        } else {
+            $rgba = array_values($rgba);
+            $r = max(0, min(255, $rgba[0] < 1 ? floor(255 * $rgba[0]) : $rgba[0]));
+            $g = max(0, min(255, $rgba[1] < 1 ? floor(255 * $rgba[1]) : $rgba[0]));
+            $b = max(0, min(255, $rgba[2] < 1 ? floor(255 * $rgba[2]) : $rgba[0]));
+            $a = isset($rgba[3]) ? max(0, min(127, $rgba[3] < 1 ? floor(127 * $rgba[3]) : $rgba[0])) : 0;
+            $color = imagecolorallocatealpha($image, $r, $g, $b, $a);
+        }
+        imagefilledrectangle($image, 0, 0, $width, $height, $color);
+
+        ob_start();
+        imagepng($image);
+        $imageBytes = ob_get_contents();
+        ob_end_clean();
+
+        return 'data:image/png;base64,' . base64_encode($imageBytes);
+    }
+
     protected static function _calculate($uri)
     {
         /** @var self $instance */
@@ -98,8 +145,8 @@ class DevHelper_Helper_ShippableHelper_ImageSize
 
         return array(
             'uri' => $uri,
-            'width' => ($size ? $size[0] : ''),
-            'height' => ($size ? $size[1] : ''),
+            'width' => ($size ? intval($size[0]) : 0),
+            'height' => ($size ? intval($size[1]) : 0),
             'timestamp' => time(),
         );
     }
@@ -134,6 +181,16 @@ class DevHelper_Helper_ShippableHelper_ImageSize
             'height' => ($attachments[$attachmentId] ? $attachments[$attachmentId]['height'] : ''),
             'timestamp' => time(),
         );
+    }
+
+    protected static function _findGreatestCommonDivisor($a, $b)
+    {
+        $mod = $a % $b;
+        if ($mod === 0) {
+            return $b;
+        } else {
+            return self::_findGreatestCommonDivisor($b, $mod);
+        }
     }
 
     // https://github.com/tommoor/fastimage/commit/7bf53fcfebb5bc04b78a8cf23862778256de2241
