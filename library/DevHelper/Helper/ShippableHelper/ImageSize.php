@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_ImageSize
- * @version 10
+ * @version 11
  */
 class DevHelper_Helper_ShippableHelper_ImageSize
 {
@@ -73,7 +73,7 @@ class DevHelper_Helper_ShippableHelper_ImageSize
         }
 
         $calculated = self::calculate($uri);
-        if ($calculated['width'] === 0 || $calculated['height'] === 0) {
+        if ($calculated['width'] < 1 || $calculated['height'] < 1) {
             return '';
         }
 
@@ -82,7 +82,7 @@ class DevHelper_Helper_ShippableHelper_ImageSize
 
     public static function getDataUriAtSize($width, $height, $rgba = null)
     {
-        if (!function_exists('imagecreatetruecolor')) {
+        if (!function_exists('imagecreatetruecolor') || $width < 1 || $height < 1) {
             return '';
         }
 
@@ -120,12 +120,16 @@ class DevHelper_Helper_ShippableHelper_ImageSize
 
         $startTime = microtime(true);
 
-        if (preg_match('#attachments/(.+\.)*(?<id>\d+)/$#', $uri, $matches)) {
-            $attachmentResult = self::_calculateForAttachment($uri, $matches['id']);
-            if (!empty($attachmentResult['width'])
-                && !empty($attachmentResult['height'])
-            ) {
-                return $attachmentResult;
+        if (preg_match('#attachments/(.+\.)*(?<id>\d+)/#', $uri, $matches)) {
+            $fullIndex = XenForo_Link::buildPublicLink('full:index');
+            $canonicalIndex = XenForo_Link::buildPublicLink('canonical:index');
+            if (strpos($uri, $fullIndex) === 0 || strpos($uri, $canonicalIndex) === 0) {
+                $attachmentResult = self::_calculateForAttachment($uri, $matches['id']);
+                if (!empty($attachmentResult['width'])
+                    && !empty($attachmentResult['height'])
+                ) {
+                    return $attachmentResult;
+                }
             }
         }
 
@@ -167,7 +171,6 @@ class DevHelper_Helper_ShippableHelper_ImageSize
             $attachments[$attachmentId] = $attachmentModel->getAttachmentById($attachmentId);
         }
 
-
         if (XenForo_Application::debugMode()) {
             $elapsedTime = microtime(true) - $startTime;
             XenForo_Helper_File::log(__CLASS__, sprintf('$attachmentId=%d; $elapsedTime=%.6f',
@@ -177,8 +180,8 @@ class DevHelper_Helper_ShippableHelper_ImageSize
         return array(
             'uri' => $uri,
             'attachmentId' => $attachmentId,
-            'width' => ($attachments[$attachmentId] ? $attachments[$attachmentId]['width'] : ''),
-            'height' => ($attachments[$attachmentId] ? $attachments[$attachmentId]['height'] : ''),
+            'width' => ($attachments[$attachmentId] ? intval($attachments[$attachmentId]['width']) : 0),
+            'height' => ($attachments[$attachmentId] ? intval($attachments[$attachmentId]['height']) : 0),
             'timestamp' => time(),
         );
     }
