@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_ImageSize
- * @version 12
+ * @version 13
  */
 class DevHelper_Helper_ShippableHelper_ImageSize
 {
@@ -134,16 +134,17 @@ class DevHelper_Helper_ShippableHelper_ImageSize
 
         $startTime = microtime(true);
 
-        if (preg_match('#attachments/(.+\.)*(?<id>\d+)/#', $uri, $matches)) {
-            $fullIndex = XenForo_Link::buildPublicLink('full:index');
-            $canonicalIndex = XenForo_Link::buildPublicLink('canonical:index');
-            if (strpos($uri, $fullIndex) === 0 || strpos($uri, $canonicalIndex) === 0) {
-                $attachmentResult = self::_calculateForAttachment($uri, $matches['id']);
-                if (!empty($attachmentResult['width'])
-                    && !empty($attachmentResult['height'])
-                ) {
-                    return $attachmentResult;
-                }
+        if (preg_match('#^(?<prefix>.+)?attachments/(.+\.)*(?<id>\d+)/#', $uri, $matches)
+            && ($matches['prefix'] === ''
+                || strpos($matches['prefix'], XenForo_Link::buildPublicLink('full:index')) === 0
+                || strpos($matches['prefix'], XenForo_Link::buildPublicLink('canonical:index')) === 0
+            )
+        ) {
+            $attachmentResult = self::_calculateForAttachment($uri, $matches['id']);
+            if (!empty($attachmentResult['width'])
+                && !empty($attachmentResult['height'])
+            ) {
+                return $attachmentResult;
             }
         }
 
@@ -154,17 +155,18 @@ class DevHelper_Helper_ShippableHelper_ImageSize
             $instance->load($uri);
         }
 
-        $size = $instance->getSize();
+        list($width, $height) = $instance->getSize();
 
         if (XenForo_Application::debugMode()) {
             $elapsedTime = microtime(true) - $startTime;
-            XenForo_Helper_File::log(__CLASS__, sprintf('$uri=%s; $elapsedTime=%.6f', $uri, $elapsedTime));
+            XenForo_Helper_File::log(__CLASS__, sprintf('$uri=%s; $width=%d, $height=%d; $elapsedTime=%.6f',
+                $uri, $width, $height, $elapsedTime));
         }
 
         return array(
             'uri' => $uri,
-            'width' => ($size ? intval($size[0]) : 0),
-            'height' => ($size ? intval($size[1]) : 0),
+            'width' => $width,
+            'height' => $height,
             'timestamp' => time(),
         );
     }
@@ -185,17 +187,27 @@ class DevHelper_Helper_ShippableHelper_ImageSize
             $attachments[$attachmentId] = $attachmentModel->getAttachmentById($attachmentId);
         }
 
+        $width = 0;
+        if (!empty($attachments[$attachmentId]['width'])) {
+            $width = intval($attachments[$attachmentId]['width']);
+        }
+
+        $height = 0;
+        if (!empty($attachments[$attachmentId]['height'])) {
+            $height = intval($attachments[$attachmentId]['height']);
+        }
+
         if (XenForo_Application::debugMode()) {
             $elapsedTime = microtime(true) - $startTime;
-            XenForo_Helper_File::log(__CLASS__, sprintf('$attachmentId=%d; $elapsedTime=%.6f',
-                $attachmentId, $elapsedTime));
+            XenForo_Helper_File::log(__CLASS__, sprintf('$uri=%s; $attachmentId=%d, $width=%d, $height=%d;'
+                . ' $elapsedTime=%.6f', $uri, $attachmentId, $width, $height, $elapsedTime));
         }
 
         return array(
             'uri' => $uri,
             'attachmentId' => $attachmentId,
-            'width' => ($attachments[$attachmentId] ? intval($attachments[$attachmentId]['width']) : 0),
-            'height' => ($attachments[$attachmentId] ? intval($attachments[$attachmentId]['height']) : 0),
+            'width' => $width,
+            'height' => $height,
             'timestamp' => time(),
         );
     }
@@ -274,11 +286,16 @@ class DevHelper_Helper_ShippableHelper_ImageSize
     private function getSize()
     {
         $this->pos = 0;
-        if ($this->getType()) {
-            return array_values($this->parseSize());
+        if (!$this->getType()) {
+            return array(0, 0);
         }
 
-        return false;
+        $size = $this->parseSize();
+        if (!is_array($size) || count($size) < 2) {
+            return array(0, 0);
+        }
+
+        return array_map('intval', array_values($size));
     }
 
     private function getType()
