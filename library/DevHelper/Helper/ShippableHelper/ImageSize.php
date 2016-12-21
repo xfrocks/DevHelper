@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_ImageSize
- * @version 11
+ * @version 12
  */
 class DevHelper_Helper_ShippableHelper_ImageSize
 {
@@ -12,6 +12,20 @@ class DevHelper_Helper_ShippableHelper_ImageSize
             && __CLASS__ !== 'bdImage_ShippableHelper_ImageSize'
         ) {
             return bdImage_ShippableHelper_ImageSize::calculate($uri, $ttl);
+        }
+
+        if (empty($uri)
+            // http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
+            || strlen($uri) > 2000
+            || strpos($uri, ' ') !== false
+            || strpos($uri, 'data:') === 0
+        ) {
+            return array(
+                'uri' => $uri,
+                'width' => 0,
+                'height' => 0,
+                'timestamp' => time(),
+            );
         }
 
         $cacheId = __CLASS__ . md5($uri);
