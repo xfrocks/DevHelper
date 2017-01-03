@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Html
- * @version 12
+ * @version 13
  */
 class DevHelper_Helper_ShippableHelper_Html
 {
@@ -59,7 +59,6 @@ class DevHelper_Helper_ShippableHelper_Html
     public static function snippet($string, $maxLength = 0, array $options = array())
     {
         $options = array_merge(array(
-            'blockTag' => array('div', 'ul', 'li'),
             'ellipsis' => '…',
             'fromStart' => true,
             'previewBreakBbCode' => 'prbreak',
@@ -239,36 +238,24 @@ class DevHelper_Helper_ShippableHelper_Html
             }
         }
 
-        // strip block level stack if left opened
-        foreach ($options['blockTag'] as $blockTag) {
-            if (count($stack) === 0) {
-                break;
-            }
-            $stack = array_values($stack);
-
-            $foundStackItemId = null;
-            $foundOffset = null;
-            foreach ($stack as $stackItemId => $stackItem) {
-                if ($stackItem['tag'] !== $blockTag) {
-                    continue;
-                }
-
-                $foundStackItemId = $stackItemId;
-                $foundOffset = $stackItem['offset'];
-                break;
-            }
-            if ($foundStackItemId === null) {
-                continue;
-            }
-
-            $stack = array_slice($stack, 0, $foundStackItemId);
-            $snippet = utf8_substr($snippet, 0, $foundOffset);
-        }
-
         // close any remaining tags
         while (!empty($stack)) {
             $stackItem = array_pop($stack);
+
+            self::snippetAppendEllipsis($snippet, $options);
             $snippet .= sprintf('</%s>', $stackItem['tag']);
+        }
+    }
+
+    public static function snippetAppendEllipsis(&$snippet, array &$options)
+    {
+        if (empty($options['ellipsis'])) {
+            return;
+        }
+
+        if (!preg_match('#<\/?(div|iframe|img|li|ol|p|script|ul)[^>]*>\z#', $snippet)) {
+            $snippet .= $options['ellipsis'];
+            $options['ellipsis'] = '';
         }
     }
 
@@ -292,10 +279,7 @@ class DevHelper_Helper_ShippableHelper_Html
         // restore line breaks
         $snippet = nl2br($snippet);
 
-        // append ellipsis
-        if (!preg_match('#<\/?(div|iframe|img|li|ol|p|script|ul)[^>]*>\z#', $snippet)) {
-            $snippet .= $options['ellipsis'];
-        }
+        self::snippetAppendEllipsis($snippet, $options);
 
         $snippet = utf8_trim($snippet);
     }
