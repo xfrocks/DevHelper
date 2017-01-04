@@ -2,14 +2,14 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Crypt
- * @version 1
+ * @version 2
  */
 class DevHelper_Helper_ShippableHelper_Crypt
 {
     const ALGO_AES_128 = 'aes128';
     const ALGO_AES_256 = 'aes256';
 
-    const OPENSSL_METHOD_AES128 = 'aes-128-cbc';
+    const OPENSSL_METHOD_AES128 = 'aes-128-ecb';
     const OPENSSL_METHOD_AES256 = 'aes-256-cbc';
 
     public static function encrypt($data, $key = null, $algo = null)
