@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Crypt
- * @version 2
+ * @version 3
  */
 class DevHelper_Helper_ShippableHelper_Crypt
 {
@@ -63,8 +63,7 @@ class DevHelper_Helper_ShippableHelper_Crypt
     {
         if (function_exists('openssl_encrypt')) {
             $key = md5($key, true);
-            $iv = str_repeat("\0", 16);
-            return openssl_encrypt($data, self::OPENSSL_METHOD_AES128, $key, OPENSSL_RAW_DATA, $iv);
+            return openssl_encrypt($data, self::OPENSSL_METHOD_AES128, $key, OPENSSL_RAW_DATA);
         }
 
         if (function_exists('mcrypt_encrypt')) {
@@ -90,8 +89,7 @@ class DevHelper_Helper_ShippableHelper_Crypt
     {
         if (function_exists('openssl_decrypt')) {
             $key = md5($key, true);
-            $iv = str_repeat("\0", 16);
-            return openssl_decrypt($data, self::OPENSSL_METHOD_AES128, $key, OPENSSL_RAW_DATA, $iv);
+            return openssl_decrypt($data, self::OPENSSL_METHOD_AES128, $key, OPENSSL_RAW_DATA);
         }
 
         if (function_exists('mcrypt_decrypt')) {
