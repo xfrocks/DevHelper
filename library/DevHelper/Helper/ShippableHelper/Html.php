@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Html
- * @version 13
+ * @version 14
  */
 class DevHelper_Helper_ShippableHelper_Html
 {
@@ -72,10 +72,16 @@ class DevHelper_Helper_ShippableHelper_Html
             'stripFrame' => false,
             'stripScript' => false,
             'stripSpacing' => true,
+
+            // WARNING: options below are for internal usage only
+            '_isPreview' => false,
         ), $options);
         $options['maxLength'] = $maxLength;
 
         self::snippetPreProcess($string, $options);
+        if (!empty($options['_isPreview'])) {
+            return $string;
+        }
 
         $snippet = self::snippetCallHelper($string, $options);
 
@@ -107,6 +113,8 @@ class DevHelper_Helper_ShippableHelper_Html
                 // preview text specified, use it directly
                 $string = $matches['preview'][0];
                 $options['maxLength'] = 0;
+                $options['_isPreview'] = true;
+                return $string;
             } else {
                 // use content before the found bbcode to continue
                 $string = substr($string, 0, $matches[0][1]);
