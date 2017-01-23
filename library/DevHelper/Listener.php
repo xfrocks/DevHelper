@@ -21,6 +21,7 @@ class DevHelper_Listener
             'XenForo_ControllerHelper_Editor',
 
             'XenForo_ControllerPublic_Forum',
+            'XenForo_ControllerPublic_Thread',
 
             'XenForo_DataWriter_AddOn',
             'XenForo_DataWriter_CodeEventListener',
