@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_TempFile
- * @version 7
+ * @version 8
  */
 class DevHelper_Helper_ShippableHelper_TempFile
 {
@@ -10,6 +10,12 @@ class DevHelper_Helper_ShippableHelper_TempFile
     protected static $_cached = array();
     protected static $_registeredShutdownFunction = false;
 
+    /**
+     * Downloads and put content into the specified temp file
+     *
+     * @param string $url
+     * @param string $tempFile
+     */
     public static function cache($url, $tempFile)
     {
         self::$_cached[$url] = $tempFile;
@@ -19,12 +25,25 @@ class DevHelper_Helper_ShippableHelper_TempFile
         }
     }
 
-    public static function create($contents)
+    /**
+     * Creates a new temp file with the given contents and prefix.
+     *
+     * @param string|null $contents if null, no contents will be written to file
+     * @param string|null $prefix if null, the default prefix will be used
+     * @return string
+     */
+    public static function create($contents = null, $prefix = null)
     {
-        $tempFile = tempnam(XenForo_Helper_File::getTempDir(), self::_getPrefix());
+        if ($prefix === null) {
+            $prefix = self::_getPrefix();
+        }
+
+        $tempFile = tempnam(XenForo_Helper_File::getTempDir(), $prefix);
         self::cache(sprintf('%s::%s', __METHOD__, md5($tempFile)), $tempFile);
 
-        file_put_contents($tempFile, $contents);
+        if ($contents !== null) {
+            file_put_contents($tempFile, $contents);
+        }
 
         return $tempFile;
     }
