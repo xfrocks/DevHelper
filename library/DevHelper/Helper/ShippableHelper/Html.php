@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Html
- * @version 14
+ * @version 15
  */
 class DevHelper_Helper_ShippableHelper_Html
 {
@@ -104,7 +104,7 @@ class DevHelper_Helper_ShippableHelper_Html
     public static function snippetPreProcess(&$string, array &$options)
     {
         if (!empty($options['previewBreakBbCode'])
-            && preg_match(sprintf('#\[%1$s\](?<' . 'preview>.*)\[/%1$s\]#',
+            && preg_match(sprintf('#\[%1$s\](?<' . 'preview>.*)\[/%1$s\]#si',
                 preg_quote($options['previewBreakBbCode'], '#')),
                 $string, $matches, PREG_OFFSET_CAPTURE)
         ) {
