@@ -2,10 +2,15 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Html
- * @version 15
+ * @version 16
  */
 class DevHelper_Helper_ShippableHelper_Html
 {
+    public static function viewSnippet($string, array $params)
+    {
+        return self::snippet($string, 0, $params);
+    }
+
     public static function preSnippet(array &$message, XenForo_BbCode_Parser $parser, array $options = array())
     {
         $options = array_merge(array(
@@ -59,6 +64,7 @@ class DevHelper_Helper_ShippableHelper_Html
     public static function snippet($string, $maxLength = 0, array $options = array())
     {
         $options = array_merge(array(
+            'context' => '',
             'ellipsis' => '…',
             'fromStart' => true,
             'previewBreakBbCode' => 'prbreak',
@@ -76,27 +82,30 @@ class DevHelper_Helper_ShippableHelper_Html
             // WARNING: options below are for internal usage only
             '_isPreview' => false,
         ), $options);
-        $options['maxLength'] = $maxLength;
+        if (!isset($options['maxLength'])) {
+            $options['maxLength'] = $maxLength;
+        }
 
         self::snippetPreProcess($string, $options);
         if (!empty($options['_isPreview'])) {
-            return $string;
+            $snippet = $string;
+        } else {
+            $snippet = self::snippetCallHelper($string, $options);
+            self::snippetFixBrokenHtml($snippet, $options);
         }
 
-        $snippet = self::snippetCallHelper($string, $options);
-
-        self::snippetFixBrokenHtml($snippet, $options);
-
-        self::snippetPostProcess($snippet, $options);
+        if (!empty($options['context'])) {
+            self::snippetOnContext($snippet, $options['context']);
+        }
 
         if ($snippet === '') {
             $plainTextString = utf8_trim(strip_tags($string));
             if ($plainTextString !== '') {
                 $snippet = self::snippetCallHelper($plainTextString, $options);
-            } else {
-                $snippet = $options['ellipsis'];
             }
         }
+
+        self::snippetPostProcess($snippet, $options);
 
         return $snippet;
     }
@@ -264,6 +273,17 @@ class DevHelper_Helper_ShippableHelper_Html
         if (!preg_match('#<\/?(div|iframe|img|li|ol|p|script|ul)[^>]*>\z#', $snippet)) {
             $snippet .= $options['ellipsis'];
             $options['ellipsis'] = '';
+        }
+    }
+
+    public static function snippetOnContext(&$snippet, $context)
+    {
+        switch ($context) {
+            case 'link':
+                if (strpos($snippet, '<a ') !== false) {
+                    $snippet = '';
+                }
+                break;
         }
     }
 
