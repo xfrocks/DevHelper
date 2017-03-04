@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_TempFile
- * @version 9
+ * @version 10
  */
 class DevHelper_Helper_ShippableHelper_TempFile
 {
@@ -63,19 +63,26 @@ class DevHelper_Helper_ShippableHelper_TempFile
         $managedTempFile = false;
         if (strlen($tempFile) === 0) {
             $tempFile = tempnam(XenForo_Helper_File::getTempDir(), self::_getPrefix());
-            self::cache($url, $tempFile);
             $managedTempFile = true;
+        }
+        if (strlen($tempFile) === 0) {
+            return false;
         }
 
         if (isset(self::$_cached[$url])
             && filesize(self::$_cached[$url]) > 0
         ) {
             if ($managedTempFile) {
+                unlink($tempFile);
                 return self::$_cached[$url];
             } else {
                 copy(self::$_cached[$url], $tempFile);
                 return $tempFile;
             }
+        }
+
+        if ($managedTempFile) {
+            self::cache($url, $tempFile);
         }
 
         self::$_maxDownloadSize = $options['maxDownloadSize'];
