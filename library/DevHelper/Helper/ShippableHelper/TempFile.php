@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_TempFile
- * @version 8
+ * @version 9
  */
 class DevHelper_Helper_ShippableHelper_TempFile
 {
@@ -111,16 +111,15 @@ class DevHelper_Helper_ShippableHelper_TempFile
         $downloaded = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE)) == 200;
 
         curl_close($ch);
-
         fclose($fh);
 
-        if (XenForo_Application::debugMode()) {
+        $fileSize = filesize($tempFile);
+        if ($downloaded && $fileSize === 0) {
+            clearstatcache();
             $fileSize = filesize($tempFile);
-            if ($downloaded && $fileSize === 0) {
-                clearstatcache();
-                $fileSize = filesize($tempFile);
-            }
+        }
 
+        if (XenForo_Application::debugMode()) {
             XenForo_Helper_File::log(__CLASS__, call_user_func_array('sprintf', array(
                 'download %s -> %s, %s, %d bytes%s',
                 $url,
