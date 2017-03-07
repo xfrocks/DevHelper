@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_TempFile
- * @version 10
+ * @version 11
  */
 class DevHelper_Helper_ShippableHelper_TempFile
 {
@@ -55,7 +55,7 @@ class DevHelper_Helper_ShippableHelper_TempFile
             'userAgent' => '',
             'timeOutInSeconds' => 0,
             'maxRedirect' => 3,
-            'maxDownloadSize' => 0,
+            'maxDownloadSize' => XenForo_Application::getOptions()->get('attachmentMaxFileSize') * 1024,
             'secured' => 0,
         );
 
