@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_ImageCore
- * @version 2
+ * @version 3
  */
 class DevHelper_Helper_ShippableHelper_ImageCore
 {
@@ -123,38 +123,32 @@ class DevHelper_Helper_ShippableHelper_ImageCore
 
     protected static function _getAccessiblePath($path)
     {
-        if (!!parse_url($path, PHP_URL_HOST)) {
-            $url = $path;
-
-            $boardUrl = XenForo_Application::getOptions()->get('boardUrl');
-            if (strpos($url, '..') === false
-                && strpos($url, $boardUrl) === 0
-            ) {
-                $localFilePath = self::_getLocalFilePath(substr($url, strlen($boardUrl)));
-                if (strlen($localFilePath) > 0
-                    && bdImage_Helper_File::existsAndNotEmpty($localFilePath)
-                ) {
-                    return $localFilePath;
-                }
-            }
-
-            if (preg_match('#attachments/(.+\.)*(?<id>\d+)/#', $url, $matches)) {
-                $fullIndex = XenForo_Link::buildPublicLink('full:index');
-                $canonicalIndex = XenForo_Link::buildPublicLink('canonical:index');
-                if (strpos($url, $fullIndex) === 0 || strpos($url, $canonicalIndex) === 0) {
-                    $attachmentDataFilePath = self::_getAttachmentDataFilePath($matches['id']);
-                    if (bdImage_Helper_File::existsAndNotEmpty($attachmentDataFilePath)) {
-                        return $attachmentDataFilePath;
-                    }
-                }
-            }
-
-            $tempPath = DevHelper_Helper_ShippableHelper_TempFile::download($url);
-        } else {
-            $tempPath = $path;
+        if (!parse_url($path, PHP_URL_HOST)) {
+            return $path;
         }
 
-        return $tempPath;
+        $boardUrl = XenForo_Application::getOptions()->get('boardUrl');
+        if (strpos($path, '..') === false
+            && strpos($path, $boardUrl) === 0
+        ) {
+            $localFilePath = self::_getLocalFilePath(substr($path, strlen($boardUrl)));
+            if (self::_imageExists($localFilePath)) {
+                return $localFilePath;
+            }
+        }
+
+        if (preg_match('#attachments/(.+\.)*(?<id>\d+)/#', $path, $matches)) {
+            $fullIndex = XenForo_Link::buildPublicLink('full:index');
+            $canonicalIndex = XenForo_Link::buildPublicLink('canonical:index');
+            if (strpos($path, $fullIndex) === 0 || strpos($path, $canonicalIndex) === 0) {
+                $attachmentDataFilePath = self::_getAttachmentDataFilePath($matches['id']);
+                if (self::_imageExists($attachmentDataFilePath)) {
+                    return $attachmentDataFilePath;
+                }
+            }
+        }
+
+        return DevHelper_Helper_ShippableHelper_TempFile::download($path);
     }
 
     protected static function _getLocalFilePath($path)
@@ -196,6 +190,25 @@ class DevHelper_Helper_ShippableHelper_ImageCore
         }
 
         return $attachmentModel->getAttachmentDataFilePath($attachments[$attachmentId]);
+    }
+
+    protected static function _imageExists($path)
+    {
+        if (!is_string($path) || strlen($path) === 0) {
+            // invalid path
+            return false;
+        }
+
+        $pathSize = @filesize($path);
+        if (!is_int($pathSize)) {
+            // file not exists
+            return false;
+        }
+
+        // according to many sources, no valid image can be smaller than 14 bytes
+        // http://garethrees.org/2007/11/14/pngcrush/
+        // https://github.com/mathiasbynens/small/blob/master/gif.gif
+        return $pathSize >= 14;
     }
 
     protected static function _getImageInfo($path)
