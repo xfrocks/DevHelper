@@ -9,6 +9,11 @@ $contents = str_replace(
     'class _XenForo_CodeEvent',
     $contents
 );
+$contents = str_replace(
+    '$return = call_user_func_array($callback, $args);',
+    '$return = static::DevHelper_measureCallbackTime($event, $callback, $args);',
+    $contents
+);
 $contents = str_replace('self::', 'static::', $contents);
 eval($contents);
 
@@ -57,6 +62,38 @@ abstract class DevHelper_XenForo_CodeEvent extends _XenForo_CodeEvent
         return parent::fire($event, $args, $hint);
     }
 
+    public static $measuredTime = array('events' => array(), 'callbacks' => array());
+
+    public static function DevHelper_measureCallbackTime($event, $callback, $args)
+    {
+        $startTime = microtime(true);
+        $result = call_user_func_array($callback, $args);
+        $elapsed = microtime(true) - $startTime;
+
+        if (!isset(self::$measuredTime['events'][$event])) {
+            self::$measuredTime['events'][$event] = array(
+                'count' => 0,
+                'elapsed' => 0,
+            );
+        }
+        self::$measuredTime['events'][$event]['count']++;
+        self::$measuredTime['events'][$event]['elapsed'] += $elapsed;
+
+        $callbackSafe = $callback;
+        if (!is_string($callbackSafe)) {
+            $callbackSafe = XenForo_Helper_Php::safeSerialize($callback);
+        }
+        if (!isset(self::$measuredTime['callbacks'][$callbackSafe])) {
+            self::$measuredTime['callbacks'][$callbackSafe] = array(
+                'count' => 0,
+                'elapsed' => 0,
+            );
+        }
+        self::$measuredTime['callbacks'][$callbackSafe]['count']++;
+        self::$measuredTime['callbacks'][$callbackSafe]['elapsed'] += $elapsed;
+
+        return $result;
+    }
 }
 
 eval('abstract class XenForo_CodeEvent extends DevHelper_XenForo_CodeEvent {}');
