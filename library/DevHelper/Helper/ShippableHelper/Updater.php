@@ -16,6 +16,9 @@ class DevHelper_Helper_ShippableHelper_Updater
      * 1. It has not been configured yet
      * 2. Or it has been enabled at some point
      *
+     * Tips:
+     * 1. Wrap this call within a `if (isset($data['routesAdmin'])) { ... }` for small performance boost
+     *
      * @param XenForo_Dependencies_Abstract $dependencies
      * @param string|null $apiUrl
      * @param string|null $addOnId

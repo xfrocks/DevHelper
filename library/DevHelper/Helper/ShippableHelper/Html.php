@@ -123,7 +123,6 @@ class DevHelper_Helper_ShippableHelper_Html
                 $string = $matches['preview'][0];
                 $options['maxLength'] = 0;
                 $options['_isPreview'] = true;
-                return $string;
             } else {
                 // use content before the found bbcode to continue
                 $string = substr($string, 0, $matches[0][1]);
@@ -131,8 +130,13 @@ class DevHelper_Helper_ShippableHelper_Html
             }
         }
 
+        $string = str_replace("\n", ' ', $string);
         $string = preg_replace('#<br\s?\/?>#', "\n", $string);
         $string = str_replace('&#8203;', '', $string);
+
+        if (!empty($options['_isPreview'])) {
+            return $string;
+        }
 
         $replacementsRef =& $options['replacements'];
         $replacementTags = array();
