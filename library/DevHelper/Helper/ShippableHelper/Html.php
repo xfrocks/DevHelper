@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Html
- * @version 16
+ * @version 17
  */
 class DevHelper_Helper_ShippableHelper_Html
 {
@@ -135,7 +135,7 @@ class DevHelper_Helper_ShippableHelper_Html
         $string = str_replace('&#8203;', '', $string);
 
         if (!empty($options['_isPreview'])) {
-            return $string;
+            return;
         }
 
         $replacementsRef =& $options['replacements'];
