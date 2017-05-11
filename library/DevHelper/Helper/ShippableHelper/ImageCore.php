@@ -6,6 +6,8 @@
  */
 class DevHelper_Helper_ShippableHelper_ImageCore
 {
+    public static $cropTopLeft = false;
+
     /**
      * @param string $path
      * @return array
@@ -71,46 +73,13 @@ class DevHelper_Helper_ShippableHelper_ImageCore
         }
 
         if (in_array($width, array('', 0), true) && $height > 0) {
-            // stretch width
-            $targetHeight = $height;
-            $targetWidth = $targetHeight / $image->getHeight() * $image->getWidth();
-            $image->thumbnail($targetWidth, $targetHeight);
+            self::_resizeStretchWidth($image, $height);
         } elseif (in_array($height, array('', 0), true) && $width > 0) {
-            // stretch height
-            $targetWidth = $width;
-            $targetHeight = $targetWidth / $image->getWidth() * $image->getHeight();
-            $image->thumbnail($targetWidth, $targetHeight);
+            self::_resizeStretchHeight($image, $width);
         } elseif ($width > 0 && $height > 0) {
-            // exact crop
-            $origRatio = $image->getWidth() / $image->getHeight();
-            $cropRatio = $width / $height;
-            if ($origRatio > $cropRatio) {
-                $thumbnailHeight = $height;
-                $thumbnailWidth = $height * $origRatio;
-            } else {
-                $thumbnailWidth = $width;
-                $thumbnailHeight = $width / $origRatio;
-            }
-
-            if ($thumbnailWidth <= $image->getWidth() && $thumbnailHeight <= $image->getHeight()) {
-                $image->thumbnail($thumbnailWidth, $thumbnailHeight);
-                /** @noinspection PhpParamsInspection */
-                $image->crop(0, 0, $width, $height);
-            } else {
-                // thumbnail requested is larger then the image size
-                if ($origRatio > $cropRatio) {
-                    /** @noinspection PhpParamsInspection */
-                    $image->crop(0, 0, $image->getHeight() * $cropRatio, $image->getHeight());
-                } else {
-                    /** @noinspection PhpParamsInspection */
-                    $image->crop(0, 0, $image->getWidth(), $image->getWidth() / $cropRatio);
-                }
-            }
+            self::_cropExact($image, $width, $height);
         } elseif ($width > 0) {
-            // square crop
-            $image->thumbnailFixedShorterSide($width);
-            /** @noinspection PhpParamsInspection */
-            $image->crop(0, 0, $width, $width);
+            self::_cropSquare($image, $width);
         }
 
         if ($imageInfo['typeInt'] === IMAGETYPE_JPEG) {
@@ -127,6 +96,90 @@ class DevHelper_Helper_ShippableHelper_ImageCore
             'image' => $image,
             'imageInfo' => $imageInfo,
         );
+    }
+
+    /**
+     * @param XenForo_Image_Abstract $imageObj
+     * @param int $targetHeight
+     */
+    protected static function _resizeStretchWidth(XenForo_Image_Abstract $imageObj, $targetHeight)
+    {
+        $targetWidth = $targetHeight / $imageObj->getHeight() * $imageObj->getWidth();
+        $imageObj->thumbnail($targetWidth, $targetHeight);
+    }
+
+    /**
+     * @param XenForo_Image_Abstract $imageObj
+     * @param int $targetWidth
+     */
+    protected static function _resizeStretchHeight(XenForo_Image_Abstract $imageObj, $targetWidth)
+    {
+        $targetHeight = $targetWidth / $imageObj->getWidth() * $imageObj->getHeight();
+        $imageObj->thumbnail($targetWidth, $targetHeight);
+    }
+
+    /**
+     * @param XenForo_Image_Abstract $imageObj
+     * @param int $targetWidth
+     * @param int $targetHeight
+     */
+    protected static function _cropExact(XenForo_Image_Abstract $imageObj, $targetWidth, $targetHeight)
+    {
+        $origRatio = $imageObj->getWidth() / $imageObj->getHeight();
+        $cropRatio = $targetWidth / $targetHeight;
+        if ($origRatio > $cropRatio) {
+            $thumbnailHeight = $targetHeight;
+            $thumbnailWidth = $thumbnailHeight * $origRatio;
+        } else {
+            $thumbnailWidth = $targetWidth;
+            $thumbnailHeight = $thumbnailWidth / $origRatio;
+        }
+
+        if ($thumbnailWidth <= $imageObj->getWidth()
+            && $thumbnailHeight <= $imageObj->getHeight()
+        ) {
+            $imageObj->thumbnail($thumbnailWidth, $thumbnailHeight);
+            self::_cropCenter($imageObj, $targetWidth, $targetHeight);
+        } else {
+            if ($origRatio > $cropRatio) {
+                self::_cropCenter($imageObj, $imageObj->getHeight() * $cropRatio, $imageObj->getHeight());
+            } else {
+                self::_cropCenter($imageObj, $imageObj->getWidth(), $imageObj->getWidth() / $cropRatio);
+            }
+        }
+    }
+
+    /**
+     * @param XenForo_Image_Abstract $imageObj
+     * @param int $target
+     */
+    protected static function _cropSquare(XenForo_Image_Abstract $imageObj, $target)
+    {
+        $imageObj->thumbnailFixedShorterSide($target);
+        self::_cropCenter($imageObj, $target, $target);
+    }
+
+    /**
+     * @param XenForo_Image_Abstract $imageObj
+     * @param int $cropWidth
+     * @param int $cropHeight
+     */
+    protected static function _cropCenter(XenForo_Image_Abstract $imageObj, $cropWidth, $cropHeight)
+    {
+        if (self::$cropTopLeft) {
+            // revert to top left cropping (old version behavior)
+            /** @noinspection PhpParamsInspection */
+            $imageObj->crop(0, 0, $cropWidth, $cropHeight);
+            return;
+        }
+
+        $width = $imageObj->getWidth();
+        $height = $imageObj->getHeight();
+        $x = floor(($width - $cropWidth) / 2);
+        $y = floor(($height - $cropHeight) / 2);
+
+        /** @noinspection PhpParamsInspection */
+        $imageObj->crop($x, $y, $cropWidth, $cropHeight);
     }
 
     protected static function _getAccessiblePath($path)
