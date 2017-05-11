@@ -16,7 +16,11 @@ class DevHelper_Helper_ShippableHelper_ImageCore
         $imageInfo = self::_getImageInfo($accessiblePath);
 
         $image = null;
-        if (!empty($imageInfo['typeInt'])) {
+        if (!empty($imageInfo['typeInt'])
+            && !empty($imageInfo['width'])
+            && !empty($imageInfo['height'])
+            && $imageInfo['width'] * $imageInfo['height'] < XenForo_Application::getConfig()->get('maxImageResizePixelCount')
+        ) {
             $image = XenForo_Image_Abstract::createFromFile($accessiblePath, $imageInfo['typeInt']);
         }
 
@@ -90,18 +94,22 @@ class DevHelper_Helper_ShippableHelper_ImageCore
 
             if ($thumbnailWidth <= $image->getWidth() && $thumbnailHeight <= $image->getHeight()) {
                 $image->thumbnail($thumbnailWidth, $thumbnailHeight);
+                /** @noinspection PhpParamsInspection */
                 $image->crop(0, 0, $width, $height);
             } else {
                 // thumbnail requested is larger then the image size
                 if ($origRatio > $cropRatio) {
+                    /** @noinspection PhpParamsInspection */
                     $image->crop(0, 0, $image->getHeight() * $cropRatio, $image->getHeight());
                 } else {
+                    /** @noinspection PhpParamsInspection */
                     $image->crop(0, 0, $image->getWidth(), $image->getWidth() / $cropRatio);
                 }
             }
         } elseif ($width > 0) {
             // square crop
             $image->thumbnailFixedShorterSide($width);
+            /** @noinspection PhpParamsInspection */
             $image->crop(0, 0, $width, $width);
         }
 
