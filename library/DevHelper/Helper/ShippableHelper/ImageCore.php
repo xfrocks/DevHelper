@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_ImageCore
- * @version 3
+ * @version 4
  */
 class DevHelper_Helper_ShippableHelper_ImageCore
 {
