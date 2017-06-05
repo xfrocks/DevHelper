@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Html
- * @version 17
+ * @version 18
  */
 class DevHelper_Helper_ShippableHelper_Html
 {
@@ -251,7 +251,7 @@ class DevHelper_Helper_ShippableHelper_Html
                         // do nothing
                     } else {
                         // is opening tag
-                        $stack[] = array('tag' => $tag, 'offset' => $startPos);
+                        $stack[] = array('tag' => $tag, 'offset' => $startPos, 'till' => $endPos);
                     }
                 }
             } else {
@@ -262,6 +262,11 @@ class DevHelper_Helper_ShippableHelper_Html
         // close any remaining tags
         while (!empty($stack)) {
             $stackItem = array_pop($stack);
+            if (utf8_strlen($snippet) === $stackItem['till'] + 1) {
+                // the latest tag is empty, delete it
+                $snippet = utf8_substr($snippet, 0, $stackItem['offset']);
+                continue;
+            }
 
             self::snippetAppendEllipsis($snippet, $options);
             $snippet .= sprintf('</%s>', $stackItem['tag']);
