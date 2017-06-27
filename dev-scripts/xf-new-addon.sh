@@ -16,11 +16,11 @@ if [ $# -ge 2 ]; then
         if [ -d "${PATH_TO_XENFORO}/src/addons/" ]; then
             XENFORO_VERSION=2
             echo "XenForo 2 detected"
-            RELATIVE_PATH_TO_ADDON_SRC="src/addons/${ADDON_ID}"
+            RELATIVE_PATH_TO_ADDON_SRC="src/addons/${ADDON_DIR}"
         else
             if [ -d "${PATH_TO_XENFORO}/library/" ]; then
                 echo "XenForo 1 detected"
-                RELATIVE_PATH_TO_ADDON_SRC="library/${ADDON_ID}"
+                RELATIVE_PATH_TO_ADDON_SRC="library/${ADDON_DIR}"
             else
                 echo "./library or ./src/addons" does not exists! Quit now...
                 exit 1
