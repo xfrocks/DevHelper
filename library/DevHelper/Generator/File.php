@@ -73,10 +73,15 @@ class DevHelper_Generator_File
         }
     }
 
-    public static function getLibraryPath(DevHelper_Config_Base $config)
+    public static function getAddOnIdPath(DevHelper_Config_Base $config)
     {
         $configClassPath = self::getClassPath(get_class($config));
-        $addOnIdPath = dirname(dirname($configClassPath));
+        return dirname(dirname($configClassPath));
+    }
+
+    public static function getLibraryPath(DevHelper_Config_Base $config)
+    {
+        $addOnIdPath = self::getAddOnIdPath($config);
         $path = $addOnIdPath;
 
         do {
@@ -88,7 +93,6 @@ class DevHelper_Generator_File
 
         return $path;
     }
-
 
     public static function getAddOnXmlPath(
         array $addOn,
@@ -504,8 +508,11 @@ class {$fileSumsClassName}
                 }
             }
 
-            if (basename($relativePath) === 'FileSums.php') {
-                return;
+            $baseName = basename($relativePath);
+            switch ($baseName) {
+                case 'FileSums.php':
+                case 'upload':
+                    return;
             }
         }
 

@@ -267,9 +267,12 @@ abstract class DevHelper_Config_Base
     {
         $path = $this->_exportPath;
 
-        if (is_string($path) && is_dir($path) && is_writable($path)) {
-            return $path;
-        } elseif (isset($_SERVER['DEVHELPER_ROUTER_PHP'])) {
+        if (!is_string($path)) {
+            $path = '';
+        }
+
+        if ($path === '' && isset($_SERVER['DEVHELPER_ROUTER_PHP'])) {
+            // Docker dev env support
             $libraryPath = DevHelper_Generator_File::getLibraryPath($this);
             $repoPath = dirname($libraryPath);
             $candidatePath = dirname($repoPath);
@@ -279,11 +282,20 @@ abstract class DevHelper_Config_Base
             $addonsPath = sprintf('%s/addons/', $routerPhpDir);
 
             if (strpos($candidatePath, $addonsPath) === 0) {
-                return $candidatePath;
+                $path = $candidatePath;
             }
         }
 
-        die(sprintf('Export path (%s) is not writable', $path));
+        if ($path === '') {
+            // fallback
+            $path = DevHelper_Generator_File::getAddOnIdPath($this);
+        }
+
+        if (!is_dir($path) || !is_writable($path)) {
+            die(sprintf('Export path (%s) is not writable', $path));
+        }
+
+        return $path;
     }
 
     public function getExportIncludes()
