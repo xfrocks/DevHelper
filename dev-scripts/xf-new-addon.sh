@@ -1,81 +1,75 @@
 #!/bin/bash
 
+set -e
+
 if [ $# -ge 2 ]; then
+    _addOnDirRelativePath="$1"
+    _xenforoRootDirPath="$2"
 
-    ADDON_ID="$1"
-    PATH_TO_XENFORO="$2"
-    XENFORO_VERSION=1
-    RELATIVE_PATH_TO_ADDON_SRC=""
+    _addOnDirRelativePath=$( echo $_addOnDirRelativePath | sed 's#_#/#' | sed 's#/$##' )
+    if [ -d "${_addOnDirRelativePath}/repo" ]; then
+        # legacy support
+        _repoDirRelativePath="${_addOnDirRelativePath}/repo"
+    else
+        _repoDirRelativePath="${_addOnDirRelativePath}"
+    fi
 
-    # get the addon directory by replace all "_" with "/"
-    # we will get a sub directory structure with this kind of subsitution
-    # the DevHelper add-on uses a similar structure...
-    ADDON_DIR=${ADDON_ID//_/\/}
-
-    if [ -d "${PATH_TO_XENFORO}" ]; then
-        if [ -d "${PATH_TO_XENFORO}/src/addons/" ]; then
-            XENFORO_VERSION=2
+    _xenforoMajorVersion=1
+    _phpRelativePath=""
+    _xenforoRootDirPath=$( echo $_xenforoRootDirPath | sed 's#/$##' )
+    if [ -d "${_xenforoRootDirPath}" ]; then
+        if [ -d "${_xenforoRootDirPath}/src/addons/" ]; then
+            _xenforoMajorVersion=2
             echo "XenForo 2 detected"
-            RELATIVE_PATH_TO_ADDON_SRC="src/addons/${ADDON_DIR}"
+            _phpRelativePath="src/addons/${_addOnDirRelativePath}"
         else
-            if [ -d "${PATH_TO_XENFORO}/library/" ]; then
+            if [ -d "${_xenforoRootDirPath}/library/" ]; then
                 echo "XenForo 1 detected"
-                RELATIVE_PATH_TO_ADDON_SRC="library/${ADDON_DIR}"
+                _phpRelativePath="library/${_addOnDirRelativePath}"
             else
-                echo "./library or ./src/addons" does not exists! Quit now...
+                echo './library or ./src/addons does not exists!' >&2
                 exit 1
             fi
         fi
     else
-        echo "${PATH_TO_XENFORO}" does not exists! Quit now...
+        echo "${_xenforoRootDirPath} does not exists!" >&2
         exit 1
     fi
 
-    if [ ! -d "${ADDON_DIR}" ]; then
-        echo Creating add-on directory, enter UNIX user password if asked...
-        sudo mkdir -p -m 0777 "${ADDON_DIR}"
-        sudo mkdir -p -m 0777 "${ADDON_DIR}/repo/${RELATIVE_PATH_TO_ADDON_SRC}"
-        sudo mkdir -p -m 0777 "${ADDON_DIR}/repo/js/${ADDON_DIR}"
-        sudo mkdir -p -m 0777 "${ADDON_DIR}/repo/styles/default/${ADDON_DIR}"
-        sudo chown -R $USER "${ADDON_DIR}"
-    fi
-    
-    if [ ! -d "${PATH_TO_XENFORO}/${RELATIVE_PATH_TO_ADDON_SRC}" ]; then
-        echo Creating add-on symbolic links in XenForo directories, enter UNIX user password if asked...
-        sudo ln -s "${PWD}/${ADDON_DIR}/repo/${RELATIVE_PATH_TO_ADDON_SRC}" "${PATH_TO_XENFORO}/${RELATIVE_PATH_TO_ADDON_SRC}"
-        sudo chown -h $USER "${PATH_TO_XENFORO}/${RELATIVE_PATH_TO_ADDON_SRC}"
-        if [ -f "${PATH_TO_XENFORO}/library/.gitignore" ]; then
-            sudo echo "${ADDON_DIR}" >> "${PATH_TO_XENFORO}/library/.gitignore"
-        fi
-    fi
+    _doSubPath() {
+        _subPath=$1
+        _path="${PWD}/${_repoDirRelativePath}/${_subPath}"
+        _gitignorePath="${_xenforoRootDirPath}/.gitignore"
+        _xenforoPath="${_xenforoRootDirPath}/${_subPath}"
 
-    if [ ! -d "${PATH_TO_XENFORO}/js/${ADDON_DIR}" ]; then
-        sudo ln -s "${PWD}/${ADDON_DIR}/repo/js/${ADDON_DIR}" "${PATH_TO_XENFORO}/js/${ADDON_DIR}"
-        sudo chown -h $USER "${PATH_TO_XENFORO}/js/${ADDON_DIR}"
-        if [ -f "${PATH_TO_XENFORO}/js/.gitignore" ]; then
-            sudo echo "${ADDON_DIR}" >> "${PATH_TO_XENFORO}/js/.gitignore"
+        if [ ! -d "${_path}" ]; then
+            mkdir -p "${_path}"
         fi
-    fi
 
-    if [ ! -d "${PATH_TO_XENFORO}/styles/default/${ADDON_DIR}" ]; then
-        sudo ln -s "${PWD}/${ADDON_DIR}/repo/styles/default/${ADDON_DIR}" "${PATH_TO_XENFORO}/styles/default/${ADDON_DIR}"
-        sudo chown -h $USER "${PATH_TO_XENFORO}/styles/default/${ADDON_DIR}"
-        if [ -f "${PATH_TO_XENFORO}/styles/default/.gitignore" ]; then
-            sudo echo "${ADDON_DIR}" >> "${PATH_TO_XENFORO}/styles/default/.gitignore"
+        if [ ! -e "${_xenforoPath}" ]; then
+            _xenforoPathDirPath="$( dirname "${_xenforoPath}" )"
+            if [ ! -d "${_xenforoPathDirPath}" ]; then
+                echo "mkdir ${_xenforoPathDirPath}..."
+                sudo mkdir -p "${_xenforoPathDirPath}"
+            fi
+
+            echo "ln ${_path} ${_xenforoPath}..."
+            sudo ln -s "${_path}" "${_xenforoPath}"
+            sudo chown -h $USER "${_xenforoPath}"
+            if [ -f "${_gitignorePath}" ]; then
+                echo "/${_subPath}" >> "${_gitignorePath}"
+            fi
         fi
-    fi
 
-    if [ ! -e "${ADDON_DIR}/repo/.gitignore" ]; then
-        echo Initializing git repo...
-        cd "${ADDON_DIR}/repo/"
-        git init
-        echo '.DS_Store' >> .gitignore
-        echo '*.devhelper' >> .gitignore
-        echo "FileSums.php" >> .gitignore
-        echo "library/${ADDON_DIR}/DevHelper/Generated" >> .gitignore
-        echo "library/${ADDON_DIR}/DevHelper/XFCP" >> .gitignore
-        git add .
-        git commit -m 'Initialized by xf-new-addon script'
+        echo "Sub path ${_subPath} ok"
+    }
+    _doSubPath "${_phpRelativePath}"
+    _doSubPath "js/${_addOnDirRelativePath}"
+    _doSubPath "styles/default/${_addOnDirRelativePath}"
+
+    if [ ! -e "${_repoDirRelativePath}/.git" ]; then
+        git init -- "${_repoDirRelativePath}"
+        echo "git init ${_repoDirRelativePath} ok"
     fi
 else
     echo USAGE: $0 [addOnId] [path/to/xenforo/root]
