@@ -1,8 +1,57 @@
 <?php
 
-class DevHelper_Autoloader extends XenForo_Autoloader
+class DevHelper_Autoloader
 {
-    protected static $_DevHelper_isSetup = null;
+    protected static $_instance;
+
+    protected $_rootDir = '.';
+    protected $_setup = false;
+
+    protected function __construct()
+    {
+    }
+
+    public function setupAutoloader($rootDir)
+    {
+        if ($this->_setup) {
+            return;
+        }
+
+        $this->_rootDir = $rootDir;
+        spl_autoload_register(array($this, 'autoload'));
+
+        $this->_setup = true;
+    }
+
+    public function autoload($class)
+    {
+        if (class_exists($class, false) || interface_exists($class, false)) {
+            return true;
+        }
+
+        if ($class == 'utf8_entity_decoder') {
+            return false;
+        }
+
+        if (substr($class, 0, 5) == 'XFCP_') {
+            return false;
+        }
+
+        $filename = $this->autoloaderClassToFile($class);
+        if (!$filename) {
+            return false;
+        }
+
+        if (file_exists($filename)) {
+            /** @noinspection PhpIncludeInspection */
+            require($filename);
+            if (class_exists($class, false) || interface_exists($class, false)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     public static function throwIfNotSetup()
     {
@@ -20,10 +69,22 @@ class DevHelper_Autoloader extends XenForo_Autoloader
 
         if (empty($_SERVER['DEVHELPER_ROUTER_PHP'])
             && in_array(file_get_contents($_SERVER['SCRIPT_FILENAME']), $candidates, true)
-            && !self::$_DevHelper_isSetup
+            && !self::$_instance
         ) {
-            throw new XenForo_Exception('DevHelper_Autoloader must be used instead of XenForo_Autoloader');
+            throw new XenForo_Exception('DevHelper_Autoloader must be setup');
         }
+
+        if (!class_exists('DevHelper_XenForo_Autoloader')) {
+            eval('class DevHelper_XenForo_Autoloader extends XenForo_Autoloader {
+                public static function setInstanceCarelessly($loader = null)
+                {
+                    self::$_instance = $loader;
+                }
+            }');
+        }
+
+        /** @noinspection PhpUndefinedClassInspection */
+        DevHelper_XenForo_Autoloader::setInstanceCarelessly(self::$_instance);
     }
 
     public static final function getDevHelperInstance()
@@ -47,7 +108,7 @@ class DevHelper_Autoloader extends XenForo_Autoloader
             $class = 'DevHelper_' . $class;
         }
 
-        $classFile = parent::autoloaderClassToFile($class);
+        $classFile = $this->_autoloaderClassToFile($class);
         $classFile = $this->_locateClassFile($classFile);
 
         $strPos = 0;
@@ -67,7 +128,7 @@ class DevHelper_Autoloader extends XenForo_Autoloader
             }
 
             $oursClass = 'DevHelper_Helper_' . substr($class, $strPos);
-            $oursFile = parent::autoloaderClassToFile($oursClass);
+            $oursFile = $this->_autoloaderClassToFile($oursClass);
             $oursFile = $this->_locateClassFile($oursFile);
             if (file_exists($oursFile)) {
                 $oursContents = file_get_contents($oursFile);
@@ -84,27 +145,26 @@ class DevHelper_Autoloader extends XenForo_Autoloader
                 if (!DevHelper_Helper_ShippableHelper::update($class, $classFile, $oursClass, $oursContents)) {
                     die('Add-on file could not be updated: ' . $classFile);
                 }
-
-                // die('Add-on file has been updated: ' . $classFile);
             }
         }
 
         return $classFile;
     }
 
+    protected function _autoloaderClassToFile($class)
+    {
+        if (preg_match('#[^a-zA-Z0-9_\\\\]#', $class)) {
+            return false;
+        }
+        return $this->_rootDir . '/' . str_replace(array('_', '\\'), '/', $class) . '.php';
+    }
+
     protected function _locateClassFile($classFile)
     {
         if (!empty($_SERVER['DEVHELPER_ROUTER_PHP'])) {
-            return DevHelper_Router::locate('library', $classFile);
+            return DevHelper_Router::locate($classFile);
         }
 
         return $classFile;
-    }
-
-    protected function _setupAutoloader()
-    {
-        parent::_setupAutoloader();
-
-        self::$_DevHelper_isSetup = true;
     }
 }

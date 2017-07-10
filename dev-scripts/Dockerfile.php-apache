@@ -1,3 +1,10 @@
-FROM xfrocks/docker-xenforo:php-apache
+FROM xfrocks/xenforo:php-apache-7.1.6
 
-RUN pear install pear/PHP_CodeSniffer
+RUN pear install pear/PHP_CodeSniffer \
+    && a2enmod rewrite
+
+COPY docker/* /usr/local/bin/
+RUN chmod +x /usr/local/bin/cmd.sh \
+    && chmod +x /usr/local/bin/find-addons.sh
+
+CMD ["/usr/local/bin/cmd.sh"]
