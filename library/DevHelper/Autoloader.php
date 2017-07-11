@@ -87,7 +87,7 @@ class DevHelper_Autoloader
         DevHelper_XenForo_Autoloader::setInstanceCarelessly(self::$_instance);
     }
 
-    public static final function getDevHelperInstance()
+    final public static function getDevHelperInstance()
     {
         if (!self::$_instance) {
             self::$_instance = new self();

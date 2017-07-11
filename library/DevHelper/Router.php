@@ -65,8 +65,11 @@ class DevHelper_Router
         $routerPhp = $_SERVER['DEVHELPER_ROUTER_PHP'];
         $routerPhpDir = dirname($routerPhp);
         $xenforoDir = sprintf('%s/xenforo', $routerPhpDir);
-        $shortened = preg_replace('#^' . preg_quote($xenforoDir, '#') . '#',
-            '', $fullPath);
+        $shortened = preg_replace(
+            '#^' . preg_quote($xenforoDir, '#') . '#',
+            '',
+            $fullPath
+        );
         $addOnPaths = file(sprintf('%s/internal_data/addons.txt', $xenforoDir));
 
         foreach ($addOnPaths as $addOnPath) {

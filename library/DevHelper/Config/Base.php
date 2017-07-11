@@ -271,19 +271,9 @@ abstract class DevHelper_Config_Base
             $path = '';
         }
 
-        if ($path === '' && isset($_SERVER['DEVHELPER_ROUTER_PHP'])) {
-            // Docker dev env support
-            $libraryPath = DevHelper_Generator_File::getLibraryPath($this);
-            $repoPath = dirname($libraryPath);
-            $candidatePath = dirname($repoPath);
-
-            $routerPhp = $_SERVER['DEVHELPER_ROUTER_PHP'];
-            $routerPhpDir = dirname($routerPhp);
-            $addonsPath = sprintf('%s/addons/', $routerPhpDir);
-
-            if (strpos($candidatePath, $addonsPath) === 0) {
-                $path = $candidatePath;
-            }
+        if (isset($_SERVER['DEVHELPER_ROUTER_PHP'])) {
+            $path = sprintf('%s/xenforo/data/%s', dirname($_SERVER['DEVHELPER_ROUTER_PHP']), $this->getPrefix());
+            XenForo_Helper_File::createDirectory($path);
         }
 
         if ($path === '') {

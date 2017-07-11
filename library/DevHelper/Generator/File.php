@@ -29,6 +29,9 @@ class DevHelper_Generator_File
         if (empty($classNames[$hash])) {
             if ($subClassName === 'DevHelper_Config') {
                 $className = XenForo_Application::getConfig()->get(sprintf('DevHelper_%sConfigClass', $addOnId));
+                if ($addOnId === 'devHelper') {
+                    $className = 'DevHelper_DevHelper_Config';
+                }
                 if (empty($className)) {
                     $className = sprintf('%s_DevHelper_Config', $addOnId);
                 }
@@ -451,9 +454,6 @@ class {$fileSumsClassName}
         // append phpcs=1 in file-export url to run phpcs instead
         if (!empty($_REQUEST['phpcbf'])) {
             $codingStandardBinary = exec('which phpcbf');
-            if (!empty($codingStandardBinary)) {
-                $codingStandardBinary .= ' --no-patch';
-            }
         } else {
             $codingStandardBinary = exec('which phpcs');
             if (!empty($codingStandardBinary)) {

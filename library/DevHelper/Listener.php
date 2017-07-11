@@ -77,8 +77,11 @@ class DevHelper_Listener
                     $templateText = file_get_contents($templateFile);
 
                     $properties = $propertyModel->keyPropertiesByName($propertyModel->getEffectiveStylePropertiesInStyle(0));
-                    $propertyChanges = $propertyModel->translateEditorPropertiesToArray($templateText, $templateText,
-                        $properties);
+                    $propertyChanges = $propertyModel->translateEditorPropertiesToArray(
+                        $templateText,
+                        $templateText,
+                        $properties
+                    );
 
                     /** @var XenForo_DataWriter_Template $dw */
                     $dw = XenForo_DataWriter::create('XenForo_DataWriter_Template');
@@ -125,8 +128,13 @@ class DevHelper_Listener
         $addOns = XenForo_Application::get('addOns');
 
         while (true) {
-            if (preg_match('/<option value="([^"]+)">[^<]+<\/option>/i', $html, $matches, PREG_OFFSET_CAPTURE,
-                $offset)) {
+            if (preg_match(
+                '/<option value="([^"]+)">[^<]+<\/option>/i',
+                $html,
+                $matches,
+                PREG_OFFSET_CAPTURE,
+                $offset
+            )) {
                 $offset = $matches[0][1] + 1;
                 $length = strlen($matches[0][0]);
                 $addOnId = $matches[1][0];
@@ -142,8 +150,13 @@ class DevHelper_Listener
 
         $groupOffset = 0;
         while (true) {
-            if (preg_match('/<optgroup label=".+">\s+<\/optgroup>/i', $html, $matches, PREG_OFFSET_CAPTURE,
-                $groupOffset)) {
+            if (preg_match(
+                '/<optgroup label=".+">\s+<\/optgroup>/i',
+                $html,
+                $matches,
+                PREG_OFFSET_CAPTURE,
+                $groupOffset
+            )) {
                 $groupOffset = $matches[0][1] + 1;
                 $length = strlen($matches[0][0]);
 

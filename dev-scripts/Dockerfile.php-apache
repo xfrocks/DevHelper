@@ -1,6 +1,6 @@
 FROM xfrocks/xenforo:php-apache-7.1.6
 
-RUN pear install pear/PHP_CodeSniffer \
+RUN pear install PHP_CodeSniffer \
     && a2enmod rewrite
 
 COPY docker/* /usr/local/bin/

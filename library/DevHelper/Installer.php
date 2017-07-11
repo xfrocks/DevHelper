@@ -103,5 +103,4 @@ class DevHelper_Installer
 
         return true;
     }
-
 }
