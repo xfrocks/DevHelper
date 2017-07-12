@@ -30,6 +30,10 @@ abstract class DevHelper_XenForo_CodeEvent extends _XenForo_CodeEvent
                 /** @var XenForo_Model_AddOn $addOnModel */
                 $addOnModel = XenForo_Model::create('XenForo_Model_AddOn');
 
+                if (isset($_SERVER['DEVHELPER_ROUTER_PHP'])) {
+                    DevHelper_Autoloader::getDevHelperInstance()->autoload('DevHelper_Installer');
+                }
+
                 $addOn = $addOnModel->getAddOnById('devHelper');
                 if (!empty($addOn)) {
                     /** @var XenForo_DataWriter_AddOn $addOnDw */
