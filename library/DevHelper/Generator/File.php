@@ -78,14 +78,17 @@ class DevHelper_Generator_File
 
     public static function getAddOnIdPath(DevHelper_Config_Base $config)
     {
-        $configClassPath = self::getClassPath(get_class($config));
-        return dirname(dirname($configClassPath));
+        $libraryPath = self::getLibraryPath($config);
+        $path = $libraryPath . DIRECTORY_SEPARATOR .
+            str_replace('_', DIRECTORY_SEPARATOR, $config->getClassPrefix());
+
+        return $path;
     }
 
     public static function getLibraryPath(DevHelper_Config_Base $config)
     {
-        $addOnIdPath = self::getAddOnIdPath($config);
-        $path = $addOnIdPath;
+        $configClassPath = self::getClassPath(get_class($config));
+        $path = $configClassPath;
 
         do {
             if (empty($path)) {
@@ -108,9 +111,7 @@ class DevHelper_Generator_File
             $config = $configModel->loadAddOnConfig($addOn);
         }
 
-        $configClassPath = self::getClassPath(get_class($config));
-        $addOnIdPath = dirname(dirname($configClassPath));
-
+        $addOnIdPath = self::getAddOnIdPath($config);
         $addOnId = (!empty($exportAddOn) ? $exportAddOn['addon_id'] : $addOn['addon_id']);
 
         return $addOnIdPath . '/addon-' . $addOnId . '.xml';
@@ -122,8 +123,7 @@ class DevHelper_Generator_File
         array $style,
         DevHelper_Config_Base $config
     ) {
-        $configClassPath = self::getClassPath(get_class($config));
-        $addOnIdPath = dirname(dirname($configClassPath));
+        $addOnIdPath = self::getAddOnIdPath($config);
 
         return $addOnIdPath . '/style-' . $style['title'] . '.xml';
     }
@@ -296,13 +296,10 @@ class {$fileSumsClassName}
 
         $classPrefix = $config->getClassPrefix();
 
-        $configClassPath = self::getClassPath(get_class($config));
-        $addOnIdPath = dirname(dirname($configClassPath));
-
         $libraryPath = self::getLibraryPath($config);
         $rootPath = dirname($libraryPath);
 
-        $list['library'] = $addOnIdPath;
+        $list['library'] = self::getAddOnIdPath($config);
         if (empty($list['library'])) {
             throw new XenForo_Exception(sprintf('`library` not found for %s', $addOn['addon_id']));
         }
