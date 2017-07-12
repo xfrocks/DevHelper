@@ -23,5 +23,4 @@ class DevHelper_XenForo_ControllerAdmin_RoutePrefix extends XFCP_DevHelper_XenFo
 
         return $response;
     }
-
 }

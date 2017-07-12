@@ -40,8 +40,11 @@ class DevHelper_Generator_Code_DataWriter extends DevHelper_Generator_Code_Commo
         }
         $tableFields = DevHelper_Generator_File::varExport($tableFields, 1);
         $primaryKey = DevHelper_Generator_File::varExport($this->_dataClass['primaryKey']);
-        $modelClassName = DevHelper_Generator_Code_Model::getClassName($this->_addOn, $this->_config,
-            $this->_dataClass);
+        $modelClassName = DevHelper_Generator_Code_Model::getClassName(
+            $this->_addOn,
+            $this->_config,
+            $this->_dataClass
+        );
 
         $this->_setClassName($className);
         $this->_setBaseClass('XenForo_DataWriter');
@@ -106,8 +109,11 @@ return \$this->getModelFromCache('$modelClassName');
             return false;
         }
 
-        $modelClassName = DevHelper_Generator_Code_Model::getClassName($this->_addOn, $this->_config,
-            $this->_dataClass);
+        $modelClassName = DevHelper_Generator_Code_Model::getClassName(
+            $this->_addOn,
+            $this->_config,
+            $this->_dataClass
+        );
 
         $this->_addConstant('DATA_IMAGE_PREPARED', '\'imagePrepared\'');
         $this->_addConstant('IMAGE_SIZE_ORIGINAL', '-1');
@@ -244,19 +250,32 @@ return array(
     {
         if (!empty($this->_dataClass['phrases'])) {
             if (count($this->_dataClass['primaryKey']) > 1) {
-                throw new XenForo_Exception(sprintf('Cannot generate phrases code for %s: too many fields in primary key',
-                    $this->_getClassName()));
+                throw new XenForo_Exception(sprintf(
+                    'Cannot generate phrases code for %s: too many fields in primary key',
+                    $this->_getClassName()
+                ));
             }
             $idField = reset($this->_dataClass['primaryKey']);
 
             foreach ($this->_dataClass['phrases'] as $phraseType) {
                 $camelCase = ucwords(str_replace('_', ' ', $phraseType));
-                $constantName = self::generateDataPhraseConstant($this->_addOn, $this->_config, $this->_dataClass,
-                    $phraseType);
-                $modelClassName = DevHelper_Generator_Code_Model::getClassName($this->_addOn, $this->_config,
-                    $this->_dataClass);
-                $getPhraseTitleFunction = DevHelper_Generator_Code_Model::generateGetPhraseTitleFunctionName($this->_addOn,
-                    $this->_config, $this->_dataClass, $phraseType);
+                $constantName = self::generateDataPhraseConstant(
+                    $this->_addOn,
+                    $this->_config,
+                    $this->_dataClass,
+                    $phraseType
+                );
+                $modelClassName = DevHelper_Generator_Code_Model::getClassName(
+                    $this->_addOn,
+                    $this->_config,
+                    $this->_dataClass
+                );
+                $getPhraseTitleFunction = DevHelper_Generator_Code_Model::generateGetPhraseTitleFunctionName(
+                    $this->_addOn,
+                    $this->_config,
+                    $this->_dataClass,
+                    $phraseType
+                );
 
                 $this->_addConstant($constantName, "'phrase{$camelCase}'");
 
@@ -307,8 +326,11 @@ if (\$phrase{$camelCase} !== null) {
         }
 
         $tableName = DevHelper_Generator_Db::getTableName($this->_config, $this->_dataClass['name']);
-        $rebuildStructureFunctionName = DevHelper_Generator_Code_Model::generateRebuildStructureFunctionName($this->_addOn,
-            $this->_config, $this->_dataClass);
+        $rebuildStructureFunctionName = DevHelper_Generator_Code_Model::generateRebuildStructureFunctionName(
+            $this->_addOn,
+            $this->_config,
+            $this->_dataClass
+        );
 
         $titleFieldPostSaveConditions = '';
         if (!empty($this->_dataClass['title_field']) AND !is_array($this->_dataClass['title_field'])) {
@@ -355,8 +377,11 @@ if (\$this->isInsert()
 
     public static function getClassName(array $addOn, DevHelper_Config_Base $config, array $dataClass)
     {
-        return DevHelper_Generator_File::getClassName($addOn['addon_id'], 'DataWriter_' . $dataClass['camelCase'],
-            $config);
+        return DevHelper_Generator_File::getClassName(
+            $addOn['addon_id'],
+            'DataWriter_' . $dataClass['camelCase'],
+            $config
+        );
     }
 
     public static function generateDataPhraseConstant(
@@ -367,5 +392,4 @@ if (\$this->isInsert()
     ) {
         return 'DATA_PHRASE_' . strtoupper($phraseType);
     }
-
 }

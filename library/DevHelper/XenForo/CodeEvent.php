@@ -51,11 +51,13 @@ abstract class DevHelper_XenForo_CodeEvent extends _XenForo_CodeEvent
                 $fc = $args[0];
                 $redirect = $fc->getRequest()->getRequestUri();
 
-                die(sprintf('<' . 'script>alert(%s);window.location = %s;</script>',
+                die(sprintf(
+                    '<scr' . 'ipt>alert(%s);window.location = %s;</scr' . 'ipt>',
                     json_encode($message),
                     json_encode(XenForo_Link::buildAdminLink('full:tools/run-deferred', null, array(
                         'redirect' => $redirect,
-                    )))));
+                    )))
+                ));
             }
         }
 
@@ -97,3 +99,9 @@ abstract class DevHelper_XenForo_CodeEvent extends _XenForo_CodeEvent
 }
 
 eval('abstract class XenForo_CodeEvent extends DevHelper_XenForo_CodeEvent {}');
+
+if (false) {
+    class _XenForo_CodeEvent extends XenForo_CodeEvent
+    {
+    }
+}

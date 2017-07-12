@@ -297,7 +297,9 @@ EOF;
                 break;
         }
 
-        return $dbType . (!empty($field['required']) ? ' NOT NULL' : '') . (isset($field['default']) ? " DEFAULT '{$field['default']}'" : '') . (!empty($field['autoIncrement']) ? ' AUTO_INCREMENT' : '');
+        return $dbType . (!empty($field['required']) ? ' NOT NULL' : '') .
+            (isset($field['default']) ? " DEFAULT '{$field['default']}'" : '') .
+            (!empty($field['autoIncrement']) ? ' AUTO_INCREMENT' : '');
     }
 
     public static function getIndexTypes()
@@ -320,5 +322,4 @@ EOF;
 
         return $definition;
     }
-
 }

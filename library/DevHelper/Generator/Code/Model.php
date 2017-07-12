@@ -44,23 +44,32 @@ class DevHelper_Generator_Code_Model extends DevHelper_Generator_Code_Common
             'array &$data',
             'array $fetchOptions',
         ));
-        $this->_addCustomizableMethod("_prepare{$this->_dataClass['camelCase']}ConditionsCustomized", 'protected',
+        $this->_addCustomizableMethod(
+            "_prepare{$this->_dataClass['camelCase']}ConditionsCustomized",
+            'protected',
             array(
                 'array &$sqlConditions',
                 'array $conditions',
                 'array $fetchOptions',
-            ));
-        $this->_addCustomizableMethod("_prepare{$this->_dataClass['camelCase']}FetchOptionsCustomized", 'protected',
+            )
+        );
+        $this->_addCustomizableMethod(
+            "_prepare{$this->_dataClass['camelCase']}FetchOptionsCustomized",
+            'protected',
             array(
                 '&$selectFields',
                 '&$joinTables',
                 'array $fetchOptions',
-            ));
-        $this->_addCustomizableMethod("_prepare{$this->_dataClass['camelCase']}OrderOptionsCustomized", 'protected',
+            )
+        );
+        $this->_addCustomizableMethod(
+            "_prepare{$this->_dataClass['camelCase']}OrderOptionsCustomized",
+            'protected',
             array(
                 'array &$choices',
                 'array &$fetchOptions',
-            ));
+            )
+        );
 
         if (!empty($idField)) {
             $this->_addMethod('getList', 'public', array(
@@ -72,7 +81,15 @@ class DevHelper_Generator_Code_Model extends DevHelper_Generator_Code_Common
 \$list = array();
 
 foreach (\${$variableNamePlural} as \$id => \${$variableName}) {
-    \$list[\$id] = \${$variableName}" . (empty($this->_dataClass['title_field']) ? ("['{$idField}']") : ((is_array($this->_dataClass['title_field']) ? ("['{$this->_dataClass['title_field'][0]}']['{$this->_dataClass['title_field'][1]}']") : ("['{$this->_dataClass['title_field']}']")))) . ";
+    \$list[\$id] = \${$variableName}" . (
+            empty($this->_dataClass['title_field']) ?
+            ("['{$idField}']") :
+            (
+                is_array($this->_dataClass['title_field']) ?
+                    ("['{$this->_dataClass['title_field'][0]}']['{$this->_dataClass['title_field'][1]}']") :
+                    ("['{$this->_dataClass['title_field']}']")
+            )
+            ) . ";
 }
 
 return \$list;
@@ -196,8 +213,11 @@ return \$this->getConditionsForClause(\$sqlConditions);
 
         ");
 
-        $this->_addMethod("prepare{$this->_dataClass['camelCase']}FetchOptions", 'public',
-            array('$fetchOptions' => 'array $fetchOptions = array()'), "
+        $this->_addMethod(
+            "prepare{$this->_dataClass['camelCase']}FetchOptions",
+            'public',
+            array('$fetchOptions' => 'array $fetchOptions = array()'),
+            "
 
 \$selectFields = '';
 \$joinTables = '';
@@ -209,7 +229,8 @@ return array(
     'joinTables' => \$joinTables
 );
 
-        ");
+        "
+        );
 
         $orderChoices = array();
         if (isset($this->_dataClass['fields']['display_order'])) {
@@ -251,16 +272,21 @@ return \$this->getOrderByClause(\$choices, \$fetchOptions, \$defaultOrderSql);
         }
 
         if (count($this->_dataClass['primaryKey']) > 1) {
-            throw new XenForo_Exception(sprintf('Cannot generate image code for %s: too many fields in primary key',
-                $this->_getClassName()));
+            throw new XenForo_Exception(sprintf(
+                'Cannot generate image code for %s: too many fields in primary key',
+                $this->_getClassName()
+            ));
         }
         $idField = reset($this->_dataClass['primaryKey']);
 
         $getFunctionName = self::generateGetDataFunctionName($this->_addOn, $this->_config, $this->_dataClass);
         $variableName = self::getVariableName($this->_addOn, $this->_config, $this->_dataClass);
         $variableNamePlural = self::getVariableNamePlural($this->_addOn, $this->_config, $this->_dataClass);
-        $dwClassName = DevHelper_Generator_Code_DataWriter::getClassName($this->_addOn, $this->_config,
-            $this->_dataClass);
+        $dwClassName = DevHelper_Generator_Code_DataWriter::getClassName(
+            $this->_addOn,
+            $this->_config,
+            $this->_dataClass
+        );
         $configPrefix = $this->_config->getPrefix();
         $imagePath = "{$configPrefix}/{$this->_dataClass['camelCase']}";
         $imagePath = strtolower($imagePath);
@@ -333,18 +359,28 @@ return '/{$imagePath}/' . \${$variableName}['{$idField}'] . '_' . \${$variableNa
 
         if (!empty($this->_dataClass['phrases'])) {
             if (count($this->_dataClass['primaryKey']) > 1) {
-                throw new XenForo_Exception(sprintf('Cannot generate phrases code for %s: too many fields in primary key',
-                    $this->_getClassName()));
+                throw new XenForo_Exception(sprintf(
+                    'Cannot generate phrases code for %s: too many fields in primary key',
+                    $this->_getClassName()
+                ));
             }
             $idField = reset($this->_dataClass['primaryKey']);
 
             $statements = '';
 
             foreach ($this->_dataClass['phrases'] as $phraseType) {
-                $getPhraseTitleFunction = self::generateGetPhraseTitleFunctionName($this->_addOn, $this->_config,
-                    $this->_dataClass, $phraseType);
-                $phraseTitlePrefix = DevHelper_Generator_Phrase::getPhraseName($this->_addOn, $this->_config,
-                        $this->_dataClass, $this->_dataClass['name']) . '_';
+                $getPhraseTitleFunction = self::generateGetPhraseTitleFunctionName(
+                    $this->_addOn,
+                    $this->_config,
+                    $this->_dataClass,
+                    $phraseType
+                );
+                $phraseTitlePrefix = DevHelper_Generator_Phrase::getPhraseName(
+                    $this->_addOn,
+                    $this->_config,
+                    $this->_dataClass,
+                    $this->_dataClass['name']
+                ) . '_';
 
                 $this->_addMethod($getPhraseTitleFunction, 'public static', array('$id'), "
 
@@ -404,8 +440,10 @@ foreach (\${$variableNamePlural} as &\${$variableName}) {
         }
 
         if (count($this->_dataClass['primaryKey']) > 1) {
-            throw new XenForo_Exception(sprintf('Cannot generate parent code for %s: too many fields in primary key',
-                $this->_getClassName()));
+            throw new XenForo_Exception(sprintf(
+                'Cannot generate parent code for %s: too many fields in primary key',
+                $this->_getClassName()
+            ));
         }
         $idField = reset($this->_dataClass['primaryKey']);
 
@@ -413,8 +451,11 @@ foreach (\${$variableNamePlural} as &\${$variableName}) {
         $depthField = false;
         $lftField = false;
         $rgtField = false;
-        $breadcrumbField = DevHelper_Generator_Db::getBreadcrumbField($this->_dataClass['name'],
-            $this->_dataClass['fields']);;
+        $breadcrumbField = DevHelper_Generator_Db::getBreadcrumbField(
+            $this->_dataClass['name'],
+            $this->_dataClass['fields']
+        );
+        ;
         foreach ($this->_dataClass['fields'] as $field) {
             if ($field['name'] == 'display_order') {
                 $displayOrderField = $field['name'];
@@ -436,11 +477,17 @@ foreach (\${$variableNamePlural} as &\${$variableName}) {
         $variableName = self::getVariableName($this->_addOn, $this->_config, $this->_dataClass);
         $variableNamePlural = self::getVariableNamePlural($this->_addOn, $this->_config, $this->_dataClass);
 
-        $rebuildStructureFunctionName = self::generateRebuildStructureFunctionName($this->_addOn, $this->_config,
-            $this->_dataClass);
+        $rebuildStructureFunctionName = self::generateRebuildStructureFunctionName(
+            $this->_addOn,
+            $this->_config,
+            $this->_dataClass
+        );
         $getStructureChangesFunctionName = '_getStructureChanges';
-        $groupByParentsFunctionName = self::generateGroupByParentsFunctionName($this->_addOn, $this->_config,
-            $this->_dataClass);
+        $groupByParentsFunctionName = self::generateGroupByParentsFunctionName(
+            $this->_addOn,
+            $this->_config,
+            $this->_dataClass
+        );
 
         $this->_addMethod($rebuildStructureFunctionName, 'public', array(), "
 
@@ -462,7 +509,8 @@ return \$changes;
 
         $titleFieldBreadcrumb = '';
         if (!empty($this->_dataClass['title_field']) AND !is_array($this->_dataClass['title_field'])) {
-            $titleFieldBreadcrumb = "\n                '{$this->_dataClass['title_field']}' => \${$variableName}['{$this->_dataClass['title_field']}'],";
+            $titleFieldBreadcrumb = "\n                '{$this->_dataClass['title_field']}' => " .
+                "\${$variableName}['{$this->_dataClass['title_field']}'],";
         }
 
         $breadcrumbStatements = '';
@@ -532,8 +580,11 @@ return \$changes;
 
         ");
 
-        $this->_addMethod($groupByParentsFunctionName, 'public',
-            array(sprintf('$%s', $variableNamePlural) => sprintf('array $%s', $variableNamePlural)), "
+        $this->_addMethod(
+            $groupByParentsFunctionName,
+            'public',
+            array(sprintf('$%s', $variableNamePlural) => sprintf('array $%s', $variableNamePlural)),
+            "
 
 \$grouped = array();
 foreach (\${$variableNamePlural} AS \${$variableName}) {
@@ -542,7 +593,8 @@ foreach (\${$variableNamePlural} AS \${$variableName}) {
 
 return \$grouped;
 
-        ");
+        "
+        );
     }
 
     protected function _getClassName()
@@ -619,5 +671,4 @@ return \$grouped;
         $camelCase = ucwords(str_replace('_', ' ', $phraseType));
         return 'getPhraseTitleFor' . $camelCase;
     }
-
 }

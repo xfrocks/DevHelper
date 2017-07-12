@@ -26,11 +26,17 @@ abstract class DevHelper_XenForo_Debug extends _XenForo_Debug
         return $html;
     }
 
-    protected static function _DevHelper_formatMeasuredTime(array $data) {
+    protected static function _DevHelper_formatMeasuredTime(array $data)
+    {
         $rows = array();
 
         foreach ($data as $label => $oneData) {
-            $rows[] = sprintf('<tr><td>%s</td><td>%d</td><td>%.6f</td></tr>', $label, $oneData['count'], $oneData['elapsed']);
+            $rows[] = sprintf(
+                '<tr><td>%s</td><td>%d</td><td>%.6f</td></tr>',
+                $label,
+                $oneData['count'],
+                $oneData['elapsed']
+            );
         }
 
         return sprintf('<table><tbody>%s</tbody></table>', implode('', $rows));
@@ -38,3 +44,9 @@ abstract class DevHelper_XenForo_Debug extends _XenForo_Debug
 }
 
 eval('abstract class XenForo_Debug extends DevHelper_XenForo_Debug {}');
+
+if (false) {
+    class _XenForo_Debug extends XenForo_Debug
+    {
+    }
+}

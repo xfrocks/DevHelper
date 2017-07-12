@@ -25,5 +25,4 @@ class DevHelper_XenForo_ControllerAdmin_Phrase extends XFCP_DevHelper_XenForo_Co
 
         return parent::actionEdit();
     }
-
 }

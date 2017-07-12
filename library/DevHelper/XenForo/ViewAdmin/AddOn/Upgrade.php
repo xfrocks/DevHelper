@@ -11,5 +11,10 @@ class DevHelper_XenForo_ViewAdmin_AddOn_Upgrade extends XFCP_DevHelper_XenForo_V
 
         parent::prepareParams();
     }
+}
 
+if (false) {
+    class XFCP_DevHelper_XenForo_ViewAdmin_AddOn_Upgrade extends XenForo_ViewAdmin_Base
+    {
+    }
 }

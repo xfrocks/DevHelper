@@ -3,6 +3,7 @@
 if (!class_exists('XenForo_Application')) {
     // being called directly? Try to install itself
     $fileDir = getcwd();
+    /** @noinspection PhpIncludeInspection */
     require($fileDir . '/library/XenForo/Autoloader.php');
     XenForo_Autoloader::getInstance()->setupAutoloader($fileDir . '/library');
     XenForo_Application::initialize($fileDir . '/library', $fileDir);

@@ -19,5 +19,4 @@ class DevHelper_XenForo_Route_PrefixAdmin_Templates extends XFCP_DevHelper_XenFo
 
         return $routeMatch;
     }
-
 }

@@ -31,5 +31,4 @@ class DevHelper_XenForo_Model_AddOn extends XFCP_DevHelper_XenForo_Model_AddOn
 
         return $options;
     }
-
 }

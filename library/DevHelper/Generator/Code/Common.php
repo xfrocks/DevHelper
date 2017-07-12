@@ -230,5 +230,4 @@ class DevHelper_Generator_Code_Common
             $methods[$name]['params'][$paramName] = $paramDeclare;
         }
     }
-
 }

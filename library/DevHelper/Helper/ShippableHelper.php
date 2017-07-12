@@ -8,10 +8,13 @@ class DevHelper_Helper_ShippableHelper
             return filemtime($path);
         }
 
-        if (preg_match('#/\*\*.+?Class '
+        if (preg_match(
+            '#/\*\*.+?Class '
             . preg_quote($class, '#')
             . '.+?@version (?<version>\d+)\s.+?\*/#s',
-            $contents, $matches)) {
+            $contents,
+            $matches
+        )) {
             return intval($matches['version']);
         } else {
             return false;
@@ -32,8 +35,13 @@ class DevHelper_Helper_ShippableHelper
         $classPrefix = substr($targetClass, 0, strpos($targetClass, 'ShippableHelper_'));
         $offset = 0;
         while (true) {
-            if (!preg_match('#DevHelper_Helper_ShippableHelper_[a-zA-Z_]+#',
-                $targetContents, $matches, PREG_OFFSET_CAPTURE, $offset)
+            if (!preg_match(
+                '#DevHelper_Helper_ShippableHelper_[a-zA-Z_]+#',
+                $targetContents,
+                $matches,
+                PREG_OFFSET_CAPTURE,
+                $offset
+            )
             ) {
                 break;
             }
@@ -41,16 +49,25 @@ class DevHelper_Helper_ShippableHelper
             $siblingSourceClass = $matches[0][0];
             $offset = $matches[0][1];
             $siblingTargetClass = str_replace('DevHelper_Helper_', $classPrefix, $siblingSourceClass);
-            $targetContents = substr_replace($targetContents, $siblingTargetClass, $offset,
-                strlen($siblingSourceClass));
+            $targetContents = substr_replace(
+                $targetContents,
+                $siblingTargetClass,
+                $offset,
+                strlen($siblingSourceClass)
+            );
 
             class_exists($siblingTargetClass);
 
             $offset += 1;
         }
 
-        $targetContents = preg_replace('#\* @version \d+\s*\n#', '$0 * @see ' . $sourceClass . "\n",
-            $targetContents, -1, $count);
+        $targetContents = preg_replace(
+            '#\* @version \d+\s*\n#',
+            '$0 * @see ' . $sourceClass . "\n",
+            $targetContents,
+            -1,
+            $count
+        );
 
         return DevHelper_Generator_File::filePutContents($targetPath, $targetContents);
     }

@@ -13,8 +13,10 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
         $response = parent::actionIndex();
 
         if ($response instanceof XenForo_ControllerResponse_View) {
-            uasort($response->params['addOns'], create_function('$a, $b',
-                'if ($a["active"] == $b["active"]) { return strcmp($a["title"], $b["title"]); } else { if ($a["active"]) return -1; else return 1; }'));
+            uasort($response->params['addOns'], create_function(
+                '$a, $b',
+                'if ($a["active"] == $b["active"]) { return strcmp($a["title"], $b["title"]); } else { if ($a["active"]) return -1; else return 1; }'
+            ));
         }
 
         return $response;
@@ -28,8 +30,10 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
 
         if ($response instanceof XenForo_ControllerResponse_Redirect) {
             if (!empty($this->_DevHelper_actionSave_addOnIdChanged)) {
-                return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS,
-                    XenForo_Link::buildAdminLink('add-ons/file-export', $this->_DevHelper_actionSave_addOnIdChanged));
+                return $this->responseRedirect(
+                    XenForo_ControllerResponse_Redirect::SUCCESS,
+                    XenForo_Link::buildAdminLink('add-ons/file-export', $this->_DevHelper_actionSave_addOnIdChanged)
+                );
             }
         }
 
@@ -106,8 +110,11 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
 
         return $this->responseRedirect(
             XenForo_ControllerResponse_Redirect::RESOURCE_CREATED,
-            XenForo_Link::buildAdminLink('add-ons/data-manager',
-                $addOn, array('dataClass' => $dataClass['name']))
+            XenForo_Link::buildAdminLink(
+                'add-ons/data-manager',
+                $addOn,
+                array('dataClass' => $dataClass['name'])
+            )
         );
     }
 
@@ -121,8 +128,11 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
 
         return $this->responseRedirect(
             XenForo_ControllerResponse_Redirect::RESOURCE_CREATED,
-            XenForo_Link::buildAdminLink('add-ons/data-manager',
-                $addOn, array('dataClass' => $dataClass['name']))
+            XenForo_Link::buildAdminLink(
+                'add-ons/data-manager',
+                $addOn,
+                array('dataClass' => $dataClass['name'])
+            )
         );
     }
 
@@ -136,10 +146,16 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
             $viewParams = array(
                 'addOn' => $addOn,
                 'dataClass' => $dataClass,
-                'routePrefix' => $routePrefix ? $routePrefix : DevHelper_Generator_Code_RoutePrefixAdmin::getRoutePrefix($addOn,
-                    $config, $dataClass),
-                'controller' => $controller ? $controller : DevHelper_Generator_Code_ControllerAdmin::getClassName($addOn,
-                    $config, $dataClass),
+                'routePrefix' => $routePrefix ?: DevHelper_Generator_Code_RoutePrefixAdmin::getRoutePrefix(
+                    $addOn,
+                    $config,
+                    $dataClass
+                ),
+                'controller' => $controller ?: DevHelper_Generator_Code_ControllerAdmin::getClassName(
+                    $addOn,
+                    $config,
+                    $dataClass
+                ),
                 'majorSection' => $majorSection,
             );
 
@@ -149,12 +165,16 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
                 $viewParams
             );
         } else {
-            list($className, $contents) = DevHelper_Generator_Code_RoutePrefixAdmin::generate($addOn, $config,
-                $dataClass, array(
+            list($className, $contents) = DevHelper_Generator_Code_RoutePrefixAdmin::generate(
+                $addOn,
+                $config,
+                $dataClass,
+                array(
                     'routePrefix' => $routePrefix,
                     'controller' => $controller,
                     'majorSection' => $majorSection,
-                ));
+                )
+            );
             $path = DevHelper_Generator_File::writeClass($className, $contents);
 
             $config->updateDataClassFile($dataClass['name'], 'route_prefix_admin', $className, $path);
@@ -162,8 +182,11 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
 
             return $this->responseRedirect(
                 XenForo_ControllerResponse_Redirect::RESOURCE_CREATED,
-                XenForo_Link::buildAdminLink('add-ons/data-manager',
-                    $addOn, array('dataClass' => $dataClass['name']))
+                XenForo_Link::buildAdminLink(
+                    'add-ons/data-manager',
+                    $addOn,
+                    array('dataClass' => $dataClass['name'])
+                )
             );
         }
     }
@@ -177,20 +200,33 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
             $viewParams = array(
                 'addOn' => $addOn,
                 'dataClass' => $dataClass,
-                'routePrefix' => $routePrefix ? $routePrefix : DevHelper_Generator_Code_RoutePrefixAdmin::getRoutePrefix($addOn,
-                    $config, $dataClass),
-                'controller' => $controller ? $controller : DevHelper_Generator_Code_ControllerAdmin::getClassName($addOn,
-                    $config, $dataClass),
+                'routePrefix' => $routePrefix ?: DevHelper_Generator_Code_RoutePrefixAdmin::getRoutePrefix(
+                    $addOn,
+                    $config,
+                    $dataClass
+                ),
+                'controller' => $controller ?: DevHelper_Generator_Code_ControllerAdmin::getClassName(
+                    $addOn,
+                    $config,
+                    $dataClass
+                ),
             );
 
-            return $this->responseView('DevHelper_ViewAdmin_AddOn_GenerateControllerAdmin',
-                'devhelper_addon_generate_controller_admin', $viewParams);
+            return $this->responseView(
+                'DevHelper_ViewAdmin_AddOn_GenerateControllerAdmin',
+                'devhelper_addon_generate_controller_admin',
+                $viewParams
+            );
         } else {
-            list($className, $contents) = DevHelper_Generator_Code_ControllerAdmin::generate($addOn, $config,
-                $dataClass, array(
+            list($className, $contents) = DevHelper_Generator_Code_ControllerAdmin::generate(
+                $addOn,
+                $config,
+                $dataClass,
+                array(
                     'routePrefix' => $routePrefix,
                     'controller' => $controller,
-                ));
+                )
+            );
             $path = DevHelper_Generator_File::writeClass($className, $contents);
 
             $config->updateDataClassFile($dataClass['name'], 'controller_admin', $className, $path);
@@ -198,8 +234,11 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
 
             return $this->responseRedirect(
                 XenForo_ControllerResponse_Redirect::RESOURCE_CREATED,
-                XenForo_Link::buildAdminLink('add-ons/data-manager',
-                    $addOn, array('dataClass' => $dataClass['name']))
+                XenForo_Link::buildAdminLink(
+                    'add-ons/data-manager',
+                    $addOn,
+                    array('dataClass' => $dataClass['name'])
+                )
             );
         }
     }
@@ -330,7 +369,7 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
      */
     protected function _getConfigModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('DevHelper_Model_Config');
     }
-
 }

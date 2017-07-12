@@ -63,3 +63,9 @@ class DevHelper_XenForo_ViewRenderer_Json extends _XenForo_ViewRenderer_Json
 }
 
 eval('class XenForo_ViewRenderer_Json extends DevHelper_XenForo_ViewRenderer_Json {}');
+
+if (false) {
+    class _XenForo_ViewRenderer_Json extends XenForo_ViewRenderer_Json
+    {
+    }
+}

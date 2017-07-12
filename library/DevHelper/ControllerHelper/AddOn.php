@@ -62,5 +62,4 @@ class DevHelper_ControllerHelper_AddOn extends XenForo_ControllerHelper_Abstract
 
         return $removedCount;
     }
-
 }

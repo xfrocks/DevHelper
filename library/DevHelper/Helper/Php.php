@@ -47,9 +47,14 @@ class DevHelper_Helper_Php
 
         $offset = 0;
         while (true) {
-            if (preg_match('#(public|protected|private|static|\s)*'
+            if (preg_match(
+                '#(public|protected|private|static|\s)*'
                 . 'function\s+(?<method>[a-zA-Z0-9_]+)\s*\([^\)]*\)\s*{#',
-                $php, $matches, PREG_OFFSET_CAPTURE, $offset)) {
+                $php,
+                $matches,
+                PREG_OFFSET_CAPTURE,
+                $offset
+            )) {
                 $methods[] = $matches['method'][0];
                 $offset = $matches[0][1] + strlen($matches[0][0]);
             } else {

@@ -28,10 +28,14 @@ class DevHelper_Helper_Js
 
             /** @var XenForo_Application $application */
             $application = XenForo_Application::getInstance();
-            $fullPath = sprintf('%s/%s/full/%s', $application->getRootDir(),
-                dirname($path), preg_replace('#\.min\.js$#', '.js', basename($path)));
+            $fullPath = sprintf(
+                '%s/%s/full/%s',
+                $application->getRootDir(),
+                dirname($path),
+                preg_replace('#\.min\.js$#', '.js', basename($path))
+            );
             if (!empty($_SERVER['DEVHELPER_ROUTER_PHP'])) {
-                $fullPath = DevHelper_Router::locate('js', $fullPath);
+                $fullPath = DevHelper_Router::locate($fullPath);
             }
 
             $minPath = sprintf('%s/%s', dirname(dirname($fullPath)), basename($path));

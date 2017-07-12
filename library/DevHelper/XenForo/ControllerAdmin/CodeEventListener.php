@@ -49,7 +49,6 @@ class DevHelper_XenForo_ControllerAdmin_CodeEventListener extends XFCP_DevHelper
             if (strpos($dwInput['event_id'], 'load_class') === 0) {
                 $classPath = DevHelper_Generator_File::getClassPath($dwInput['hint']);
                 if (is_file($classPath)) {
-
                     $method = DevHelper_Generator_Code_Listener::generateLoadClass($dwInput['hint'], $addOn, $config);
                     if ($method) {
                         $clazz = DevHelper_Generator_Code_Listener::getClassName($addOn, $config);

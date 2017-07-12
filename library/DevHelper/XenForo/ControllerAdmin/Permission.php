@@ -38,5 +38,4 @@ class DevHelper_XenForo_ControllerAdmin_Permission extends XFCP_DevHelper_XenFor
 
         return $response;
     }
-
 }

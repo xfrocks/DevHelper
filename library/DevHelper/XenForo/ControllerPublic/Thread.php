@@ -11,8 +11,11 @@ class DevHelper_XenForo_ControllerPublic_Thread extends XFCP_DevHelper_XenForo_C
 
         $limit = $this->_input->filterSingle('limit', XenForo_Input::UINT, array('default' => 10));
         for ($i = 0; $i < $limit; $i++) {
-            $this->_request->setParam('message', sprintf('Post Body %d-%d',
-                XenForo_Application::$time, $i));
+            $this->_request->setParam('message', sprintf(
+                'Post Body %d-%d',
+                XenForo_Application::$time,
+                $i
+            ));
 
             try {
                 $response = $this->actionAddReply();

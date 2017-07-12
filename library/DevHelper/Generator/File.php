@@ -37,8 +37,11 @@ class DevHelper_Generator_File
                 }
             } else {
                 if ($config === null) {
-                    throw new XenForo_Exception(sprintf('%s requires $config when $subClassName=%s', __METHOD__,
-                        $subClassName));
+                    throw new XenForo_Exception(sprintf(
+                        '%s requires $config when $subClassName=%s',
+                        __METHOD__,
+                        $subClassName
+                    ));
                 }
 
                 $className = rtrim(sprintf('%s_%s', $config->getClassPrefix(), $subClassName), '_');
@@ -118,7 +121,6 @@ class DevHelper_Generator_File
     }
 
     public static function getStyleXmlPath(
-        /** @noinspection PhpUnusedParameterInspection */
         array $addOn,
         array $style,
         DevHelper_Config_Base $config
@@ -309,8 +311,11 @@ class {$fileSumsClassName}
             $list['js'] = $jsPath;
         }
 
-        $stylesDefaultPath = sprintf('%s/styles/default/%s', $rootPath,
-            str_replace('_', DIRECTORY_SEPARATOR, $classPrefix));
+        $stylesDefaultPath = sprintf(
+            '%s/styles/default/%s',
+            $rootPath,
+            str_replace('_', DIRECTORY_SEPARATOR, $classPrefix)
+        );
         if (is_dir($stylesDefaultPath)) {
             $list['styles_default'] = $stylesDefaultPath;
         }
@@ -377,8 +382,11 @@ class {$fileSumsClassName}
             }
 
             if (!is_callable(array($addOnEventListener['callback_class'], $addOnEventListener['callback_method']))) {
-                die(sprintf("Callback is not callable %s::%s\n", $addOnEventListener['callback_class'],
-                    $addOnEventListener['callback_method']));
+                die(sprintf(
+                    "Callback is not callable %s::%s\n",
+                    $addOnEventListener['callback_class'],
+                    $addOnEventListener['callback_method']
+                ));
             }
         }
         if (!$fileHealthCheckFound) {
@@ -460,7 +468,8 @@ class {$fileSumsClassName}
         $phpcsOutput = array();
         foreach ($list as $type => $entry) {
             if (!empty($codingStandardBinary)) {
-                exec(sprintf('%1$s --standard=%3$s %2$s',
+                exec(sprintf(
+                    '%1$s --standard=%3$s %2$s',
                     $codingStandardBinary,
                     escapeshellarg($entry),
                     escapeshellarg(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'phpcs.xml')
@@ -559,8 +568,11 @@ class {$fileSumsClassName}
                             if ($options['type'] === 'js'
                                 && preg_match('#\.min\.js$#', $entry)
                             ) {
-                                $fullEntry = sprintf('%s/full/%s', dirname($entry),
-                                    preg_replace('#\.min\.js$#', '.js', basename($entry)));
+                                $fullEntry = sprintf(
+                                    '%s/full/%s',
+                                    dirname($entry),
+                                    preg_replace('#\.min\.js$#', '.js', basename($entry))
+                                );
                                 if (self::fileGetContents($fullEntry)) {
                                     $contents = '';
                                 }
@@ -582,8 +594,11 @@ class {$fileSumsClassName}
                                     && basename(dirname($entry)) === 'full'
                                     && !preg_match('#\.min\.js$#', $entry)
                                 ) {
-                                    $minifiedExportPath = sprintf('%s/%s', dirname(dirname($entryExportPath)),
-                                        preg_replace('#\.js$#', '.min.js', basename($entryExportPath)));
+                                    $minifiedExportPath = sprintf(
+                                        '%s/%s',
+                                        dirname(dirname($entryExportPath)),
+                                        preg_replace('#\.js$#', '.min.js', basename($entryExportPath))
+                                    );
                                     $minifiedContents = DevHelper_Helper_Js::minify($contents);
                                     if (self::writeFile($minifiedExportPath, $minifiedContents, false, false)) {
                                         echo "Minifying      {$relativePath} OK\n";
@@ -703,21 +718,19 @@ class {$fileSumsClassName}
 
         return $value;
     }
-
 }
 
 class _DevHelper_Generator_File_Constant
 {
     protected $_str = '';
 
-    function __construct($str)
+    public function __construct($str)
     {
         $this->_str = $str;
     }
 
-    function __toString()
+    public function __toString()
     {
         return $this->_str;
     }
-
 }

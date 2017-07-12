@@ -18,5 +18,4 @@ class DevHelper_XenForo_ControllerAdmin_AdminTemplateModification extends XFCP_D
 
         return $response;
     }
-
 }

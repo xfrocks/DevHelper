@@ -129,5 +129,4 @@ EOF;
     {
         return DevHelper_Generator_File::getClassName($addOn['addon_id'], 'Installer', $config);
     }
-
 }

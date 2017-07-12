@@ -28,7 +28,8 @@ class DevHelper_Generator_Template
         try {
             $writer->save();
         } catch (Exception $ex) {
-            throw new XenForo_Exception("Exception creating template $title: " . $ex->getMessage() . '<br/><pre>' . htmlentities($template) . '</pre>');
+            throw new XenForo_Exception("Exception creating template $title: " .
+                $ex->getMessage() . '<br/><pre>' . htmlentities($template) . '</pre>');
         }
 
         $propertyModel->saveStylePropertiesInStyleFromTemplate(-1, $propertyChanges, $properties);
@@ -48,6 +49,7 @@ class DevHelper_Generator_Template
      */
     protected static function _getAdminTemplateModel()
     {
+        /** @var XenForo_Model_AdminTemplate $model */
         static $model = null;
 
         if ($model === null) {
@@ -62,7 +64,7 @@ class DevHelper_Generator_Template
      */
     protected static function _getStylePropertyModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return self::_getAdminTemplateModel()->getModelFromCache('XenForo_Model_StyleProperty');
     }
-
 }

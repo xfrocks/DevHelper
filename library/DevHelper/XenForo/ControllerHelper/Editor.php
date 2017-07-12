@@ -23,5 +23,4 @@ class DevHelper_XenForo_ControllerHelper_Editor extends XFCP_DevHelper_XenForo_C
 
         return $messageText;
     }
-
 }

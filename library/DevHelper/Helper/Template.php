@@ -53,5 +53,4 @@ class DevHelper_Helper_Template
 
         return intval($lastPart);
     }
-
 }

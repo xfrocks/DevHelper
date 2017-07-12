@@ -18,31 +18,51 @@ class DevHelper_Generator_Code_ControllerAdmin extends DevHelper_Generator_Code_
     protected function _generate()
     {
         if (count($this->_dataClass['primaryKey']) > 1) {
-            throw new XenForo_Exception(sprintf('Cannot generate %s: too many fields in primary key',
-                $this->_info['controller']));
+            throw new XenForo_Exception(sprintf(
+                'Cannot generate %s: too many fields in primary key',
+                $this->_info['controller']
+            ));
         }
         $idField = reset($this->_dataClass['primaryKey']);
 
-        $variableName = DevHelper_Generator_Code_Model::getVariableName($this->_addOn, $this->_config,
-            $this->_dataClass);
-        $variableNamePlural = DevHelper_Generator_Code_Model::getVariableNamePlural($this->_addOn, $this->_config,
-            $this->_dataClass);
+        $variableName = DevHelper_Generator_Code_Model::getVariableName(
+            $this->_addOn,
+            $this->_config,
+            $this->_dataClass
+        );
+        $variableNamePlural = DevHelper_Generator_Code_Model::getVariableNamePlural(
+            $this->_addOn,
+            $this->_config,
+            $this->_dataClass
+        );
 
-        $modelClassName = DevHelper_Generator_Code_Model::getClassName($this->_addOn, $this->_config,
-            $this->_dataClass);
-        $modelGetFunctionName = DevHelper_Generator_Code_Model::generateGetDataFunctionName($this->_addOn,
-            $this->_config, $this->_dataClass);
+        $modelClassName = DevHelper_Generator_Code_Model::getClassName(
+            $this->_addOn,
+            $this->_config,
+            $this->_dataClass
+        );
+        $modelGetFunctionName = DevHelper_Generator_Code_Model::generateGetDataFunctionName(
+            $this->_addOn,
+            $this->_config,
+            $this->_dataClass
+        );
 
-        $dataWriterClassName = DevHelper_Generator_Code_DataWriter::getClassName($this->_addOn, $this->_config,
-            $this->_dataClass);
+        $dataWriterClassName = DevHelper_Generator_Code_DataWriter::getClassName(
+            $this->_addOn,
+            $this->_config,
+            $this->_dataClass
+        );
 
         $viewListClassName = $this->_getViewClassName('list');
         $viewEditClassName = $this->_getViewClassName('edit');
         $viewDeleteClassName = $this->_getViewClassName('delete');
 
         $imageField = DevHelper_Generator_Db::getImageField($this->_dataClass['fields']);
-        list($templateList, $templateEdit, $templateDelete) = $this->_generateTemplates($variableName,
-            $variableNamePlural, $imageField);
+        list($templateList, $templateEdit, $templateDelete) = $this->_generateTemplates(
+            $variableName,
+            $variableNamePlural,
+            $imageField
+        );
 
         $this->_setClassName($this->_info['controller']);
         $this->_setBaseClass('XenForo_ControllerAdmin_Abstract');
@@ -180,8 +200,11 @@ return XenForo_DataWriter::create('$dataWriterClassName');
 
         ");
 
-        $this->_addCustomizableMethod('_prepareDwBeforeSaving', 'protected',
-            array('$dw' => "$dataWriterClassName \$dw"));
+        $this->_addCustomizableMethod(
+            '_prepareDwBeforeSaving',
+            'protected',
+            array('$dw' => "$dataWriterClassName \$dw")
+        );
 
         return parent::_generate();
     }
@@ -189,8 +212,10 @@ return XenForo_DataWriter::create('$dataWriterClassName');
     protected function _generateTemplates($variableName, $variableNamePlural, $imageField)
     {
         if (count($this->_dataClass['primaryKey']) > 1) {
-            throw new XenForo_Exception(sprintf('Cannot generate %s: too many fields in primary key',
-                $this->_info['controller']));
+            throw new XenForo_Exception(sprintf(
+                'Cannot generate %s: too many fields in primary key',
+                $this->_info['controller']
+            ));
         }
         $idField = reset($this->_dataClass['primaryKey']);
 
@@ -227,12 +252,18 @@ return XenForo_DataWriter::create('$dataWriterClassName');
         $this->_generatePhrase($phraseDelete, 'Delete ' . $this->_dataClass['camelCaseWSpace']);
         $this->_generatePhrase($phraseSave, 'Save ' . $this->_dataClass['camelCaseWSpace']);
         $this->_generatePhrase($phraseConfirmDeletion, 'Confirm Deletion of ' . $this->_dataClass['camelCaseWSpace']);
-        $this->_generatePhrase($phrasePleaseConfirm,
-            'Please confirm that you want to delete the following ' . strtolower($this->_dataClass['camelCaseWSpace']));
-        $this->_generatePhrase($phraseNotFound,
-            'The requested ' . strtolower($this->_dataClass['camelCaseWSpace']) . ' could not be found');
-        $this->_generatePhrase($phraseNoResults,
-            'No ' . strtolower($this->_dataClass['camelCaseWSpace']) . ' could be found...');
+        $this->_generatePhrase(
+            $phrasePleaseConfirm,
+            'Please confirm that you want to delete the following ' . strtolower($this->_dataClass['camelCaseWSpace'])
+        );
+        $this->_generatePhrase(
+            $phraseNotFound,
+            'The requested ' . strtolower($this->_dataClass['camelCaseWSpace']) . ' could not be found'
+        );
+        $this->_generatePhrase(
+            $phraseNoResults,
+            'No ' . strtolower($this->_dataClass['camelCaseWSpace']) . ' could be found...'
+        );
         // finished creating pharses
 
         $templateList = $this->_getTemplateTitle('_list');
@@ -284,7 +315,12 @@ EOF;
 			<xen:include template="{$templateListItems}" />
 		</ol>
 
-		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:count \${$variableNamePlural}}</span>', 'total={xen:count \${$variableNamePlural}}'}</p>
+		<p class="sectionFooter">
+			{xen:phrase showing_x_of_y_items,
+				'count=<span class="FilterListCount">{xen:count \${$variableNamePlural}}</span>',
+				'total={xen:count \${$variableNamePlural}}'
+			}
+		</p>
 	<xen:else />
 		<div class="noResults">{xen:phrase $phraseNoResults}</div>
 	</xen:if>
@@ -300,8 +336,12 @@ EOF;
 
         if (!empty($this->_dataClass['phrases'])) {
             foreach ($this->_dataClass['phrases'] as $phraseType) {
-                $fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle($this->_addOn,
-                    $this->_config, $this->_dataClass, $this->_dataClass['name'] . '_' . $phraseType);
+                $fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle(
+                    $this->_addOn,
+                    $this->_config,
+                    $this->_dataClass,
+                    $this->_dataClass['name'] . '_' . $phraseType
+                );
 
                 $templateEditFields .= <<<EOF
 
@@ -327,13 +367,18 @@ EOF;
             $filterParams[$field['name']] = $field['type'];
 
             if ($field['name'] == $this->_dataClass['title_field']) {
-                $fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle($this->_addOn,
-                    $this->_config, $this->_dataClass, $field['name']);
+                $fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle(
+                    $this->_addOn,
+                    $this->_config,
+                    $this->_dataClass,
+                    $field['name']
+                );
                 $templateEditFields .= <<<EOF
 
-	<xen:textboxunit label="{xen:phrase $fieldPhraseName}:" name="{$field['name']}" value="{\${$variableName}.{$field['name']}}" data-liveTitleTemplate="{xen:if {\${$variableName}.{$idField}},
-		'{xen:phrase $phraseEdit}: <em>%s</em>',
-		'{xen:phrase $phraseAdd}: <em>%s</em>'}" />
+	<xen:textboxunit label="{xen:phrase $fieldPhraseName}:" name="{$field['name']}" value="{\${$variableName}.{$field['name']}}"
+		data-liveTitleTemplate="{xen:if {\${$variableName}.{$idField}},
+			'{xen:phrase $phraseEdit}: <em>%s</em>',
+			'{xen:phrase $phraseAdd}: <em>%s</em>'}" />
 EOF;
                 continue;
             }
@@ -344,8 +389,12 @@ EOF;
                 if ($this->_config->checkDataClassExists($other)) {
                     // yeah!
                     $otherDataClass = $this->_config->getDataClass($other);
-                    $fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle($this->_addOn,
-                        $this->_config, $otherDataClass, $otherDataClass['name']);
+                    $fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle(
+                        $this->_addOn,
+                        $this->_config,
+                        $otherDataClass,
+                        $otherDataClass['name']
+                    );
                     $templateEditFields .= <<<EOF
 
 	<xen:selectunit label="{xen:phrase $fieldPhraseName}:" name="{$field['name']}" value="{\${$variableName}.{$field['name']}}">
@@ -353,14 +402,23 @@ EOF;
 		<xen:options source="\$list{$otherDataClass['camelCase']}" />
 	</xen:selectunit>
 EOF;
-                    $otherDataClassModelClassName = DevHelper_Generator_Code_Model::getClassName($this->_addOn,
-                        $this->_config, $otherDataClass);
-                    $extraViewParamsForTemplateEdit["list{$otherDataClass['camelCase']}"] = "\$viewParams['list{$otherDataClass['camelCase']}'] = \$this->getModelFromCache('{$otherDataClassModelClassName}')->getList();";
+                    $otherDataClassModelClassName = DevHelper_Generator_Code_Model::getClassName(
+                        $this->_addOn,
+                        $this->_config,
+                        $otherDataClass
+                    );
+                    $extraViewParamsForTemplateEdit["list{$otherDataClass['camelCase']}"] =
+                        "\$viewParams['list{$otherDataClass['camelCase']}'] = " .
+                        "\$this->getModelFromCache('{$otherDataClassModelClassName}')->getList();";
                     continue;
                 } elseif ($other === $this->_dataClass['name'] . '_parent') {
                     // just a parent of this same class
-                    $fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle($this->_addOn,
-                        $this->_config, $this->_dataClass, $other);
+                    $fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle(
+                        $this->_addOn,
+                        $this->_config,
+                        $this->_dataClass,
+                        $other
+                    );
                     $templateEditFields .= <<<EOF
 
 	<xen:selectunit label="{xen:phrase $fieldPhraseName}:" name="{$field['name']}" value="{\${$variableName}.{$field['name']}}">
@@ -368,9 +426,14 @@ EOF;
 		<xen:options source="\$list{$this->_dataClass['camelCase']}" />
 	</xen:selectunit>
 EOF;
-                    $thisDataClassModelClassName = DevHelper_Generator_Code_Model::getClassName($this->_addOn,
-                        $this->_config, $this->_dataClass);
-                    $extraViewParamsForTemplateEdit["list{$this->_dataClass['camelCase']}"] = "\$viewParams['list{$this->_dataClass['camelCase']}'] = \$this->getModelFromCache('{$thisDataClassModelClassName}')->getList();";
+                    $thisDataClassModelClassName = DevHelper_Generator_Code_Model::getClassName(
+                        $this->_addOn,
+                        $this->_config,
+                        $this->_dataClass
+                    );
+                    $extraViewParamsForTemplateEdit["list{$this->_dataClass['camelCase']}"] =
+                        "\$viewParams['list{$this->_dataClass['camelCase']}'] = " .
+                        "\$this->getModelFromCache('{$thisDataClassModelClassName}')->getList();";
                     continue;
                 }
             }
@@ -386,8 +449,12 @@ EOF;
 
             if ($field['type'] == 'string' && !empty($field['allowedValues'])) {
                 // render field with enum type as a list of selections
-                $fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle($this->_addOn,
-                    $this->_config, $this->_dataClass, $field['name']);
+                $fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle(
+                    $this->_addOn,
+                    $this->_config,
+                    $this->_dataClass,
+                    $field['name']
+                );
 
                 $templateEditFields .= <<<EOF
 
@@ -396,8 +463,12 @@ EOF;
 EOF;
 
                 foreach ($field['allowedValues'] as $allowedValue) {
-                    $allowedValuePhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle($this->_addOn,
-                        $this->_config, $this->_dataClass, $field['name'] . '_' . $allowedValue);
+                    $allowedValuePhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle(
+                        $this->_addOn,
+                        $this->_config,
+                        $this->_dataClass,
+                        $field['name'] . '_' . $allowedValue
+                    );
 
                     $templateEditFields .= <<<EOF
 		<xen:option value="{$allowedValue}">{xen:phrase $allowedValuePhraseName}</xen:option>
@@ -413,8 +484,12 @@ EOF;
 
             if ($field['type'] == 'uint' AND substr($field['name'], 0, 3) === 'is_') {
                 // special case with boolean fields
-                $fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle($this->_addOn,
-                    $this->_config, $this->_dataClass, $field['name']);
+                $fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle(
+                    $this->_addOn,
+                    $this->_config,
+                    $this->_dataClass,
+                    $field['name']
+                );
 
                 $templateEditFields .= <<<EOF
 	<xen:checkboxunit label="">
@@ -425,8 +500,12 @@ EOF;
                 continue;
             }
 
-            $fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle($this->_addOn,
-                $this->_config, $this->_dataClass, $field['name']);
+            $fieldPhraseName = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle(
+                $this->_addOn,
+                $this->_config,
+                $this->_dataClass,
+                $field['name']
+            );
             $extra = '';
             if ($field['type'] == XenForo_DataWriter::TYPE_STRING AND (empty($field['length']) OR $field['length'] > 255)) {
                 $extra .= ' rows="5"';
@@ -438,8 +517,12 @@ EOF;
         }
 
         if ($imageField !== false) {
-            $fieldPhraseImage = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle($this->_addOn,
-                $this->_config, $this->_dataClass, 'image');
+            $fieldPhraseImage = DevHelper_Generator_Phrase::generatePhraseAutoCamelCaseStyle(
+                $this->_addOn,
+                $this->_config,
+                $this->_dataClass,
+                'image'
+            );
             $templateEditFormExtra = 'enctype="multipart/form-data"';
 
             $templateEditFields .= <<<EOF
@@ -486,10 +569,17 @@ EOF;
         if (!empty($this->_dataClass['phrases'])) {
             $phraseCode = "\$phrases = \$this->_input->filterSingle('_phrases', XenForo_Input::ARRAY_SIMPLE);\n";
             foreach ($this->_dataClass['phrases'] as $phraseType) {
-                $dataWriterClassName = DevHelper_Generator_Code_DataWriter::getClassName($this->_addOn, $this->_config,
-                    $this->_dataClass);
-                $dataPhraseConstantName = DevHelper_Generator_Code_DataWriter::generateDataPhraseConstant($this->_addOn,
-                    $this->_config, $this->_dataClass, $phraseType);
+                $dataWriterClassName = DevHelper_Generator_Code_DataWriter::getClassName(
+                    $this->_addOn,
+                    $this->_config,
+                    $this->_dataClass
+                );
+                $dataPhraseConstantName = DevHelper_Generator_Code_DataWriter::generateDataPhraseConstant(
+                    $this->_addOn,
+                    $this->_config,
+                    $this->_dataClass,
+                    $phraseType
+                );
 
                 $phraseCode .= "if (isset(\$phrases['{$phraseType}']))\n{\n";
                 $phraseCode .= "    \$dw->setExtraData({$dataWriterClassName}::{$dataPhraseConstantName}, \$phrases['{$phraseType}']);\n";
@@ -562,8 +652,12 @@ EOF;
 
     protected function _getPhraseName($suffix)
     {
-        return DevHelper_Generator_Phrase::getPhraseName($this->_addOn, $this->_config, $this->_dataClass,
-            $this->_dataClass['name'] . $suffix);
+        return DevHelper_Generator_Phrase::getPhraseName(
+            $this->_addOn,
+            $this->_config,
+            $this->_dataClass,
+            $this->_dataClass['name'] . $suffix
+        );
     }
 
     protected function _getPhrasePluralName()
@@ -584,8 +678,12 @@ EOF;
 
     protected function _getTemplateTitle($suffix)
     {
-        return DevHelper_Generator_Template::getTemplateTitle($this->_addOn, $this->_config, $this->_dataClass,
-            $this->_dataClass['name'] . $suffix);
+        return DevHelper_Generator_Template::getTemplateTitle(
+            $this->_addOn,
+            $this->_config,
+            $this->_dataClass,
+            $this->_dataClass['name'] . $suffix
+        );
     }
 
     protected function _generateAdminTemplate($templateTitle, $templateHtml)
@@ -617,8 +715,10 @@ EOF;
 
     public static function getClassName(array $addOn, DevHelper_Config_Base $config, array $dataClass)
     {
-        return DevHelper_Generator_File::getClassName($addOn['addon_id'], 'ControllerAdmin_' . $dataClass['camelCase'],
-            $config);
+        return DevHelper_Generator_File::getClassName(
+            $addOn['addon_id'],
+            'ControllerAdmin_' . $dataClass['camelCase'],
+            $config
+        );
     }
-
 }

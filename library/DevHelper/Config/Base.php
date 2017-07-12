@@ -105,8 +105,11 @@ abstract class DevHelper_Config_Base
             $field['type'] = XenForo_DataWriter::TYPE_SERIALIZED;
         }
 
-        if (empty($this->_dataClasses[$name]['title_field']) AND in_array($field['type'],
-                array(XenForo_DataWriter::TYPE_STRING))
+        if (empty($this->_dataClasses[$name]['title_field'])
+            && in_array(
+                $field['type'],
+                array(XenForo_DataWriter::TYPE_STRING)
+            )
         ) {
             $this->_dataClasses[$name]['title_field'] = $field['name'];
         }
@@ -405,5 +408,4 @@ EOF;
     {
         return preg_replace('/[^a-zA-Z_]/', '', $name);
     }
-
 }

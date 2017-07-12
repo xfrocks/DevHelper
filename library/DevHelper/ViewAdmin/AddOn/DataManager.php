@@ -15,5 +15,4 @@ class DevHelper_ViewAdmin_AddOn_DataManager extends XenForo_ViewAdmin_Base
             );
         }
     }
-
 }

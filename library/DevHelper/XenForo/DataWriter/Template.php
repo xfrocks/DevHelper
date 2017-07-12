@@ -21,5 +21,4 @@ class DevHelper_XenForo_DataWriter_Template extends XFCP_DevHelper_XenForo_DataW
 
         parent::_postSaveAfterTransaction();
     }
-
 }

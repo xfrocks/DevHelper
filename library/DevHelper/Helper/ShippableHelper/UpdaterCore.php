@@ -265,9 +265,7 @@ var match = hash.match(regex);
 if (match) {
     var accessToken = match[1];
     var downloadLink = $downloadLinkJson;
-    var redirect = downloadLink + '&' + $accessTokenParamJson + '=' + encodeURIComponent(accessToken);
-
-    window.location = redirect;
+    window.location = downloadLink + '&' + $accessTokenParamJson + '=' + encodeURIComponent(accessToken);
 }
 </script>
 EOF;

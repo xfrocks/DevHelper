@@ -26,5 +26,4 @@ class DevHelper_XenForo_DataWriter_CodeEventListener extends XFCP_DevHelper_XenF
     {
         self::$_DevHelper_generatedCallbacks[] = array($clazz, $method);
     }
-
 }

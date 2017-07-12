@@ -52,6 +52,7 @@ class DevHelper_Generator_Phrase
      */
     protected static function _getPhraseModel()
     {
+        /** @var XenForo_Model_Phrase $model */
         static $model = null;
 
         if ($model === null) {
@@ -60,5 +61,4 @@ class DevHelper_Generator_Phrase
 
         return $model;
     }
-
 }

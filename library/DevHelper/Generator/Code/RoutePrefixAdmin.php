@@ -104,8 +104,11 @@ if (is_array(\$data)) {
 
     public static function getClassName(array $addOn, DevHelper_Config_Base $config, array $dataClass)
     {
-        return DevHelper_Generator_File::getClassName($addOn['addon_id'],
-            'Route_PrefixAdmin_' . $dataClass['camelCase'], $config);
+        return DevHelper_Generator_File::getClassName(
+            $addOn['addon_id'],
+            'Route_PrefixAdmin_' . $dataClass['camelCase'],
+            $config
+        );
     }
 
     public static function getRoutePrefix(array $addOn, DevHelper_Config_Base $config, array $dataClass)
@@ -125,5 +128,4 @@ if (is_array(\$data)) {
 
         return strtolower($addOn['addon_id'] . '-' . $dataClass['name']);
     }
-
 }
