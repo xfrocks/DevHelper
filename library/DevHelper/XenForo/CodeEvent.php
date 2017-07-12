@@ -21,7 +21,9 @@ abstract class DevHelper_XenForo_CodeEvent extends _XenForo_CodeEvent
 {
     public static function fire($event, array $args = array(), $hint = null)
     {
-        if ($event === 'front_controller_pre_route') {
+        if ($event === 'front_controller_pre_route'
+            && XenForo_Application::isRegistered('addOns')
+        ) {
             $addOns = XenForo_Application::get('addOns');
             if (!isset($addOns['devHelper'])) {
                 // looks like our add-on hasn't been installed (or disabled)
