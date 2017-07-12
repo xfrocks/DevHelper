@@ -4,13 +4,16 @@ class DevHelper_Helper_Php
 {
     public static function extractString($php, &$offset)
     {
-        $operator = substr($php, $offset, 1);
         $phpLength = strlen($php);
+        do {
+            $operator = substr($php, $offset, 1);
+            $offset++;
+        } while (preg_match('/\s/', $operator) && $offset < $phpLength);
 
         switch ($operator) {
             case '"':
             case "'":
-                $innerOffset = $offset + 1;
+                $innerOffset = $offset;
                 $string = '';
                 while (true) {
                     $next = substr($php, $innerOffset, 1);
