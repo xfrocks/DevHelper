@@ -4,6 +4,7 @@ class DevHelper_Router
 {
     public static function route($routerPhpPath)
     {
+        $_SERVER['DEVHELPER_ROUTER_PHP'] = $routerPhpPath;
         $fileDir = dirname($routerPhpPath);
         $xenforoDir = sprintf('%s/xenforo', $fileDir);
 
@@ -17,17 +18,15 @@ class DevHelper_Router
             }
         }
 
-        $_SERVER['DEVHELPER_ROUTER_PHP'] = $routerPhpPath;
+        $target = self::locate($target);
+        if (!is_file($target)) {
+            $target = $xenforoDir . '/index.php';
+        }
+
         $_SERVER['SCRIPT_FILENAME'] = $target;
         $_SERVER['SCRIPT_NAME'] = preg_replace(sprintf('#^%s#', preg_quote($xenforoDir, '#')), '', $target);
         unset($_SERVER['PHP_SELF']);
         unset($_SERVER['ORIG_SCRIPT_NAME']);
-
-        $target = self::locate($target);
-        if (!is_file($target)) {
-            header('HTTP/1.0 404 Not Found');
-            exit;
-        }
 
         $extension = strtolower(substr(strrchr($target, '.'), 1));
         if ($extension === 'php') {
