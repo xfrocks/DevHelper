@@ -248,8 +248,15 @@ EOF;
                 $dbType = 'TINYINT(4) UNSIGNED';
                 break;
             case XenForo_DataWriter::TYPE_STRING:
-                if ((empty($field['length']) OR $field['length'] > 255) AND empty($field['allowedValues'])) {
+                if (!isset($field['length']) || $field['length'] > 255) {
                     $dbType = 'TEXT';
+                    if (isset($field['length'])) {
+                        if ($field['length'] >= 4294967295) {
+                            $dbType = 'LONGTEXT';
+                        } elseif ($field['length'] >= 16777215) {
+                            $dbType = 'MEDIUMTEXT';
+                        }
+                    }
                     if (isset($field['default'])) {
                         // BLOB/TEXT column can't have a default value
                         unset($field['default']);
@@ -264,8 +271,15 @@ EOF;
                 }
                 break;
             case XenForo_DataWriter::TYPE_BINARY:
-                if ($field['length'] > 255) {
+                if (!isset($field['length']) || $field['length'] > 255) {
                     $dbType = 'BLOB';
+                    if (isset($field['length'])) {
+                        if ($field['length'] >= 4294967295) {
+                            $dbType = 'LONGBLOB';
+                        } elseif ($field['length'] >= 16777215) {
+                            $dbType = 'MEDIUMBLOB';
+                        }
+                    }
                 } else {
                     $dbType = 'VARBINARY(' . $field['length'] . ')';
                 }
@@ -276,6 +290,11 @@ EOF;
                 break;
             case XenForo_DataWriter::TYPE_INT:
                 $dbType = 'INT(11)';
+                if (isset($field['length'])) {
+                    if ($field['length'] == 4) {
+                        $dbType = 'TINYINT(' . $field['length'] . ')';
+                    }
+                }
                 break;
             case XenForo_DataWriter::TYPE_UINT:
             case XenForo_DataWriter::TYPE_UINT_FORCED:
