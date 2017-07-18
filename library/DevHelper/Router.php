@@ -38,9 +38,22 @@ class DevHelper_Router
             exit;
         }
 
-        if (function_exists('mime_content_type')) {
-            header('Content-Type: ' . mime_content_type($target));
+        $contentType = null;
+        switch ($extension) {
+            case 'css':
+                $contentType = 'text/css';
+                break;
+            case 'js':
+                $contentType = 'application/javascript';
+                break;
         }
+        if ($contentType === null && function_exists('mime_content_type')) {
+            $contentType = mime_content_type($target);
+        }
+        if (!empty($contentType)) {
+            header('Content-Type: ' . $contentType);
+        }
+
 
         header('Content-Length: ' . filesize($target));
         $fp = fopen($target, 'rb');
