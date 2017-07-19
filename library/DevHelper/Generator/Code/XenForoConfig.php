@@ -9,8 +9,9 @@ class DevHelper_Generator_Code_XenForoConfig
         $path = $app->getRootDir() . '/library/config.php';
         $originalContents = file_get_contents($path);
 
-        $varNamePattern = '#(\n|^)(?<' . 'varName>\\$config';
-        foreach (explode('.', $key) as $i => $keyPart) {
+        $keyParts = explode('.', $key);
+        $varNamePattern = '#(\n|^)(\\$config';
+        foreach ($keyParts as $i => $keyPart) {
             // try to match the quote
             $varNamePattern .= '\\[([\'"]?)'
                 // then the key
@@ -31,18 +32,22 @@ class DevHelper_Generator_Code_XenForoConfig
             $candidates[] = $matches;
         }
 
-        if (count($candidates) !== 1) {
-            XenForo_Helper_File::log(__METHOD__, sprintf('count($candidates) = %d', count($candidates)));
-            return;
+        if (count($candidates) > 1) {
+            throw new XenForo_Exception(sprintf('count($candidates) = %d', count($candidates)));
         }
 
-        $matches = reset($candidates);
+        $phpStatement = sprintf('$config["%s"] = %s;',
+            implode('"]["', $keyParts),
+            var_export($value, true)
+        );
+        if (count($candidates) === 1) {
+            $matches = reset($candidates);
 
-        $replacement = $matches[1][0]
-            . $matches['varName'][0]
-            . ' = ' . var_export($value, true) . ';'
-            . $matches[5][0];
-        $contents = substr_replace($originalContents, $replacement, $matches[0][1], strlen($matches[0][0]));
+            $replacement = $matches[1][0] . $phpStatement . $matches[5][0];
+            $contents = substr_replace($originalContents, $replacement, $matches[0][1], strlen($matches[0][0]));
+        } else {
+            $contents = $originalContents . "\n\n" . $phpStatement;
+        }
 
         DevHelper_Generator_File::writeFile($path, $contents, true, false);
     }
