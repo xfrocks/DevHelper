@@ -5,9 +5,25 @@ class DevHelper_Generator_Db
     public static function createTable(DevHelper_Config_Base $config, array $dataClass)
     {
         $tableName = self::getTableName($config, $dataClass['name']);
+        $fieldConfigs = $dataClass['fields'];
+        $indexConfigs = $dataClass['indeces'];
+
+        foreach ($config->getDataPatches() as $patchTableName => $patchTablePatches) {
+            if ($patchTableName !== $tableName) {
+                continue;
+            }
+
+            foreach ($patchTablePatches as $dataPatch) {
+                if (!empty($dataPatch['index'])) {
+                    $indexConfigs[$dataPatch['name']] = $dataPatch;
+                } else {
+                    $fieldConfigs[$dataPatch['name']] = $dataPatch;
+                }
+            }
+        }
 
         $fields = array();
-        foreach ($dataClass['fields'] as $field) {
+        foreach ($fieldConfigs as $field) {
             $fields[] = "`$field[name]` " . self::_getFieldDefinition($field);
         }
         $fields = implode("\n    ,", $fields);
@@ -19,7 +35,7 @@ class DevHelper_Generator_Db
         }
 
         $indeces = array();
-        foreach ($dataClass['indeces'] as $index) {
+        foreach ($indexConfigs as $index) {
             $indeces[] = self::_getIndexDefinition($index);
         }
         $indeces = implode("\n    ,", $indeces);
