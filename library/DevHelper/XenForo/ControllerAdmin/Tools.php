@@ -86,15 +86,9 @@ class DevHelper_XenForo_ControllerAdmin_Tools extends XFCP_DevHelper_XenForo_Con
                 }
             }
 
-            if (count($matchedPaths) <= 3) {
-                foreach ($matchedPaths as $matchedPath) {
-                    if (is_dir($matchedPath)) {
-                        $xmlPaths = glob(sprintf('%s/addon-*.xml', rtrim($matchedPath, '/')));
-                        foreach ($xmlPaths as $xmlPath) {
-                            array_unshift($matchedPaths, $xmlPath);
-                        }
-                    }
-                }
+            $xmlPath = DevHelper_Helper_File::findXml($matchedPaths);
+            if (!empty($xmlPath)) {
+                array_unshift($matchedPaths, $xmlPath);
             }
         }
 
