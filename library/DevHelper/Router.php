@@ -18,13 +18,15 @@ class DevHelper_Router
             }
         }
 
+        $targetOriginal = $target;
         $target = self::locate($target);
         if (!is_file($target)) {
             $target = $xenforoDir . '/index.php';
+            $targetOriginal = $target;
         }
 
-        $_SERVER['SCRIPT_FILENAME'] = $target;
-        $_SERVER['SCRIPT_NAME'] = preg_replace(sprintf('#^%s#', preg_quote($xenforoDir, '#')), '', $target);
+        $_SERVER['SCRIPT_FILENAME'] = $targetOriginal;
+        $_SERVER['SCRIPT_NAME'] = preg_replace(sprintf('#^%s#', preg_quote($xenforoDir, '#')), '', $targetOriginal);
         unset($_SERVER['PHP_SELF']);
         unset($_SERVER['ORIG_SCRIPT_NAME']);
 
