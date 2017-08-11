@@ -73,7 +73,7 @@ class $className
             \$existed = \$db->fetchOne(\$patch['checkQuery']);
             if (empty(\$existed)) {
                 \$db->query(\$patch['addQuery']);
-            } else {
+            } elseif (!empty(\$patch['modifyQuery'])) {
                 \$db->query(\$patch['modifyQuery']);
             }
         }
@@ -117,6 +117,7 @@ class $className
     }
 
 }
+
 EOF;
 
         return array(

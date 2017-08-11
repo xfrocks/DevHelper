@@ -77,7 +77,7 @@ class DevHelper_Generator_Code_Common
         $output .= "\n";
 
         // class ClassName {
-        $output .= "}";
+        $output .= "}\n";
 
         return $output;
     }

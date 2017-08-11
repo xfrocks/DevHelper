@@ -94,6 +94,7 @@ EOF;
 
 class {$className}
 {}
+
 EOF;
         }
 

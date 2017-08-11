@@ -275,7 +275,11 @@ abstract class DevHelper_Config_Base
         }
 
         if (isset($_SERVER['DEVHELPER_ROUTER_PHP'])) {
-            $path = sprintf('%s/xenforo/data/%s', dirname($_SERVER['DEVHELPER_ROUTER_PHP']), $this->getPrefix());
+            $path = sprintf(
+                '%s/xenforo/data/exported/%s',
+                dirname($_SERVER['DEVHELPER_ROUTER_PHP']),
+                str_replace('_', DIRECTORY_SEPARATOR, $this->getClassPrefix())
+            );
             XenForo_Helper_File::createDirectory($path);
         }
 
