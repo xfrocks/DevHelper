@@ -156,7 +156,7 @@
 <xen:require js="js/DevHelper/CodeMirror/addon/scroll/annotatescrollbar.js" />
 <xen:require js="js/DevHelper/CodeMirror/addon/search/matchesonscrollbar.js" />
 <xen:require js="js/DevHelper/CodeMirror/addon/search/jump-to-line.js" />
-<xen:require js="js/DevHelper/template_edit.js" />
+<xen:require js="js/DevHelper/template_edit.min.js" />
 
 <xen:require css="devhelper_admin.css" />
 <xen:container var="$head.DevHelper_CodeMirrorCSS">

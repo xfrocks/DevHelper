@@ -1,10 +1,10 @@
 /** @param {jQuery} $ jQuery Object */
-!function ($, window, document, _undefined) {
+!function ($) {
 
     var defaultExtraKeys = {};
     defaultExtraKeys['Tab'] = 'indentMore';
     defaultExtraKeys['Shift-Tab'] = 'indentLess';
-    
+
     var defaultConfig = {
         mode: 'htmlmixed',
         lineNumbers: 1,
@@ -18,7 +18,7 @@
     if (XenForo.TemplateEditor) {
         var targetPrototype = XenForo.TemplateEditor.prototype;
 
-        targetPrototype.DevHelper_extraKeysSave = function (cm) {
+        targetPrototype.DevHelper_extraKeysSave = function () {
             $('#saveReloadButton').trigger('click');
         };
 
@@ -28,7 +28,7 @@
 
             // default to use the mixed HTML mode
             var cmMode = 'htmlmixed';
-            if (editor.$title.val().indexOf('.css') != -1) {
+            if (editor.$title.val().indexOf('.css') !== -1) {
                 // we are editing a CSS template
                 // switch to CSS mode
                 cmMode = 'css';
@@ -41,11 +41,12 @@
             config.extraKeys['Cmd-S'] = $.context(this, 'DevHelper_extraKeysSave');
             config.extraKeys['Ctrl-S'] = $.context(this, 'DevHelper_extraKeysSave');
 
-            var theCM = CodeMirror(function () {}, config);
+            var theCM = CodeMirror(function () {
+            }, config);
             theCM.on('change', function (cm) {
                 $textarea.val(cm.getValue());
             });
-            
+
             var $wrapper = $(theCM.getWrapperElement());
             $wrapper.width($textareaWrapper.parent().width());
 
@@ -117,16 +118,15 @@
             config.extraKeys['Ctrl-S'] = functionSave;
 
             var theCM = CodeMirror.fromTextArea(this, defaultConfig);
-            
+
             theCM.on('change', function (cm) {
                 $textarea.val(cm.getValue());
             });
             $(theCM.getWrapperElement()).addClass('DevHelper_CodeMirror_TextArea');
         });
     };
-    
+
     // support template modification `find` textarea
     XenForo.register('textarea#ctrl_find.code', 'XenForo.DevHelper_CodeMirror_TextArea');
     XenForo.register('textarea#ctrl_replace.code', 'XenForo.DevHelper_CodeMirror_TextArea');
-}
-(jQuery, this, document);
+}(jQuery);
