@@ -36,7 +36,8 @@ class DevHelper_Generator_Code_XenForoConfig
             throw new XenForo_Exception(sprintf('count($candidates) = %d', count($candidates)));
         }
 
-        $phpStatement = sprintf('$config["%s"] = %s;',
+        $phpStatement = sprintf(
+            '$config["%s"] = %s;',
             implode('"]["', $keyParts),
             var_export($value, true)
         );
