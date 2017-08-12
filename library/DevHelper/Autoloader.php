@@ -151,6 +151,11 @@ class DevHelper_Autoloader
         return $classFile;
     }
 
+    public function getRootDir()
+    {
+        return $this->_rootDir;
+    }
+
     protected function _autoloaderClassToFile($class)
     {
         if (preg_match('#[^a-zA-Z0-9_\\\\]#', $class)) {
