@@ -2,6 +2,44 @@
 
 class DevHelper_Helper_Js
 {
+    public static function minifyPath($fullPath)
+    {
+        $fullDirName = dirname($fullPath);
+        if (basename($fullDirName) !== 'full') {
+            throw new XenForo_Exception($fullPath . ' is not a full.js file');
+        }
+
+        $minFileName = preg_replace('#\.js$#', '.min.js', basename($fullPath));
+        $minPath = sprintf('%s/%s', dirname($fullDirName), $minFileName);
+
+        if (file_exists($minPath)) {
+            if (filemtime($fullPath) < filemtime($minPath)) {
+                return $minPath;
+            } else {
+                unlink($minPath);
+            }
+        }
+
+        exec(
+            sprintf(
+                'nodejs /usr/local/bin/uglifyjs --compress --mangle'
+                . ' --output %2$s --source-map root=full,base="%3$s",url=%4$s.map -- %1$s',
+                escapeshellarg($fullPath),
+                escapeshellarg($minPath),
+                escapeshellarg(dirname($fullPath)),
+                escapeshellarg(basename($minPath))
+            ),
+            $uglifyOutput,
+            $uglifyResult
+        );
+
+        if (!file_exists($minPath) || $uglifyResult !== 0) {
+            throw new XenForo_Exception($uglifyResult . implode(', ', $uglifyOutput));
+        }
+
+        return $minPath;
+    }
+
     public static function processJsFiles(array $jsFiles)
     {
         foreach ($jsFiles as $path) {
@@ -32,31 +70,8 @@ class DevHelper_Helper_Js
                 $fullPath = DevHelper_Router::locate($fullPath);
             }
 
-            $minPath = sprintf('%s/%s', dirname(dirname($fullPath)), basename($path));
-
-            if (file_exists($fullPath)
-                && (!file_exists($path)
-                    || (filemtime($fullPath) > filemtime($path)))
-            ) {
-                @unlink($minPath);
-
-                exec(
-                    sprintf(
-                        'nodejs /usr/local/bin/uglifyjs --compress --mangle'
-                        . ' --output %2$s --source-map root=full,base="%4$s",url=%5$s.map -- %1$s',
-                        escapeshellarg($fullPath),
-                        escapeshellarg($minPath),
-                        escapeshellarg(dirname($path)),
-                        escapeshellarg(dirname($fullPath)),
-                        escapeshellarg(basename($minPath))
-                    ),
-                    $uglifyOutput,
-                    $uglifyResult
-                );
-
-                if (!file_exists($minPath) || $uglifyResult !== 0) {
-                    throw new XenForo_Exception($uglifyResult . var_export($uglifyOutput, true));
-                }
+            if (file_exists($fullPath)) {
+                static::minifyPath($fullPath);
             }
         }
     }

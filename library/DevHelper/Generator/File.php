@@ -523,7 +523,7 @@ class {$fileSumsClassName}
         }
 
         if (is_dir($entry)) {
-            echo "<span style='color: #ddd'>Browsing       $relativePath</span>\n";
+            echo "<span style='color: #eee'>Browsing       $relativePath</span>\n";
 
             $children = array();
 
@@ -561,6 +561,7 @@ class {$fileSumsClassName}
 
                 if (!$isDevHelper) {
                     $entryExportPath = $exportPath . '/' . $relativePath;
+                    $entryExportPathOriginal = $entryExportPath;
                     $contents = null;
 
                     switch ($ext) {
@@ -594,15 +595,13 @@ class {$fileSumsClassName}
                                     && basename(dirname($entry)) === 'full'
                                     && !preg_match('#\.min\.js$#', $entry)
                                 ) {
-                                    $minifiedExportPath = sprintf(
+                                    $entryExportPath = sprintf(
                                         '%s/%s',
-                                        dirname(dirname($entryExportPath)),
-                                        preg_replace('#\.js$#', '.min.js', basename($entryExportPath))
+                                        dirname(dirname($entryExportPathOriginal)),
+                                        preg_replace('#\.js$#', '.min.js', basename($entry))
                                     );
-                                    $minifiedContents = DevHelper_Helper_Js::minify($contents);
-                                    if (self::writeFile($minifiedExportPath, $minifiedContents, false, false)) {
-                                        echo "Minifying      {$relativePath} OK\n";
-                                    }
+                                    $minPath = DevHelper_Helper_Js::minifyPath($entry);
+                                    $contents = self::fileGetContents($minPath);
                                 }
                                 break;
                             case 'php':
@@ -612,12 +611,24 @@ class {$fileSumsClassName}
                         }
 
                         $result = self::writeFile($entryExportPath, $contents, false, false);
+                    } else {
+                        $result = 'empty';
+                    }
 
-                        if ($result === true) {
-                            echo "Exporting      {$relativePath} OK\n";
-                        } elseif ($result === 'skip') {
-                            echo "<span style='color: #ddd'>Exporting      {$relativePath} SKIPPED</span>\n";
+                    if ($result === true) {
+                        $result = 'OK';
+                        if ($entryExportPath !== $entryExportPathOriginal) {
+                            $result = preg_replace(
+                                '#^' . preg_quote($exportPath, '#') . '/#',
+                                '',
+                                $entryExportPath
+                            );
+                            $result = '-> ' . $result;
                         }
+
+                        echo "Exporting      {$relativePath} $result\n";
+                    } else {
+                        echo "<span style='color: #ddd'>Exporting      {$relativePath} $result</span>\n";
                     }
                 }
             }
