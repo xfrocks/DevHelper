@@ -2,12 +2,6 @@
 
 class DevHelper_Helper_Js
 {
-    public static function minify($js)
-    {
-        require_once(dirname(__FILE__) . '/../Lib/jsmin-php/jsmin.php');
-        return JSMin::minify($js);
-    }
-
     public static function processJsFiles(array $jsFiles)
     {
         foreach ($jsFiles as $path) {
@@ -44,16 +38,25 @@ class DevHelper_Helper_Js
                 && (!file_exists($path)
                     || (filemtime($fullPath) > filemtime($path)))
             ) {
-                $fullContents = file_get_contents($fullPath);
+                @unlink($minPath);
 
-                if (strpos($fullContents, '/* no minify */') === false) {
-                    $minified = self::minify($fullContents);
-                } else {
-                    // the file requested not to be minify... (debugging?)
-                    $minified = $fullContents;
+                exec(
+                    sprintf(
+                        'nodejs /usr/local/bin/uglifyjs --compress --mangle'
+                        . ' --output %2$s --source-map root=full,base="%4$s",url=%5$s.map -- %1$s',
+                        escapeshellarg($fullPath),
+                        escapeshellarg($minPath),
+                        escapeshellarg(dirname($path)),
+                        escapeshellarg(dirname($fullPath)),
+                        escapeshellarg(basename($minPath))
+                    ),
+                    $uglifyOutput,
+                    $uglifyResult
+                );
+
+                if (!file_exists($minPath) || $uglifyResult !== 0) {
+                    throw new XenForo_Exception($uglifyResult . var_export($uglifyOutput, true));
                 }
-
-                DevHelper_Generator_File::writeFile($minPath, $minified, false, false);
             }
         }
     }

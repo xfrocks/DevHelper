@@ -1,7 +1,11 @@
-FROM xfrocks/xenforo:php-apache-7.1.6
+FROM xfrocks/xenforo:php-apache-7.1.8
 
-RUN pear install PHP_CodeSniffer \
-    && a2enmod rewrite
+RUN apt-get update && apt-get install -y \
+        npm \
+    && a2enmod rewrite \
+    && npm install uglify-js -g \
+    && pear install PHP_CodeSniffer \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY docker/* /usr/local/bin/
 RUN chmod +x /usr/local/bin/cmd.sh \
