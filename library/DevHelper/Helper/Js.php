@@ -20,21 +20,26 @@ class DevHelper_Helper_Js
             }
         }
 
-        exec(
-            sprintf(
-                'nodejs /usr/local/bin/uglifyjs --compress --mangle'
-                . ' --output %2$s --source-map root=full,base="%3$s",url=%4$s.map -- %1$s',
-                escapeshellarg($fullPath),
-                escapeshellarg($minPath),
-                escapeshellarg(dirname($fullPath)),
-                escapeshellarg(basename($minPath))
-            ),
-            $uglifyOutput,
-            $uglifyResult
+        XenForo_Helper_File::createDirectory(dirname($minPath));
+
+        $command = sprintf(
+            'nodejs /usr/local/bin/uglifyjs --compress --mangle'
+            . ' --output %2$s --source-map %3$s -- %1$s 2>&1',
+            escapeshellarg($fullPath),
+            escapeshellarg($minPath),
+            escapeshellarg(sprintf(
+                'root=full,base="%1$s",url=%2$s.map',
+                dirname($fullPath),
+                basename($minPath)
+            ))
         );
 
+        exec($command, $uglifyOutput, $uglifyResult);
+
         if (!file_exists($minPath) || $uglifyResult !== 0) {
-            throw new XenForo_Exception($uglifyResult . implode(', ', $uglifyOutput));
+            echo(sprintf("%s: %s\n%s -> %d<br />\n", __METHOD__, $fullPath, $command, $uglifyResult));
+            var_export($uglifyOutput);
+            exit($uglifyResult);
         }
 
         return $minPath;
