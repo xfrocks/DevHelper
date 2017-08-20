@@ -22,6 +22,17 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
         return $response;
     }
 
+    public function actionInstall()
+    {
+        if (!$this->isConfirmedPost()
+            && !empty($_SERVER['DEVHELPER_ROUTER_PHP'])
+        ) {
+            exec('/usr/local/bin/find-addons.sh');
+        }
+
+        return parent::actionInstall();
+    }
+
     public function actionSave()
     {
         $GLOBALS[DevHelper_Listener::XENFORO_CONTROLLERADMIN_ADDON_SAVE] = $this;

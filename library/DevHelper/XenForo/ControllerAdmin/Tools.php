@@ -36,6 +36,7 @@ class DevHelper_XenForo_ControllerAdmin_Tools extends XFCP_DevHelper_XenForo_Con
             && strpos($q, '.') === false
         ) {
             if (strlen($q) < 7) {
+                $originalQuery = $q;
                 $q = 'library/';
                 $matchedPaths[] = 'library';
 
@@ -43,6 +44,13 @@ class DevHelper_XenForo_ControllerAdmin_Tools extends XFCP_DevHelper_XenForo_Con
                     $routerPhp = $_SERVER['DEVHELPER_ROUTER_PHP'];
                     $routerPhpDir = dirname($routerPhp);
                     $matchedPaths[] = sprintf('%s/addons', $routerPhpDir);
+
+                    list(, $addOnPaths) = DevHelper_Router::getLocatePaths();
+                    foreach ($addOnPaths as $addOnPath) {
+                        if (stripos($addOnPath, $originalQuery) !== false) {
+                            array_unshift($matchedPaths, $addOnPath);
+                        }
+                    }
                 }
             }
 

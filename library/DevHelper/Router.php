@@ -76,24 +76,50 @@ class DevHelper_Router
             return $fullPath;
         }
 
-        $routerPhp = $_SERVER['DEVHELPER_ROUTER_PHP'];
-        $routerPhpDir = dirname($routerPhp);
-        $xenforoDir = sprintf('%s/xenforo', $routerPhpDir);
+        list($xenforoDir, $addOnPaths) = static::getLocatePaths();
         $shortened = preg_replace(
             '#^' . preg_quote($xenforoDir, '#') . '#',
             '',
             $fullPath
         );
-        $addOnPaths = file(sprintf('%s/internal_data/addons.txt', $xenforoDir));
 
         foreach ($addOnPaths as $addOnPath) {
-            $candidatePath = sprintf('%s/%s%s', $routerPhpDir, trim($addOnPath), $shortened);
-            $candidatePath = str_replace('/addons/DevHelper/', '/', $candidatePath);
+            $candidatePath = $addOnPath . $shortened;
             if (file_exists($candidatePath)) {
                 return $candidatePath;
             }
         }
 
         return $fullPath;
+    }
+
+    public static function getLocatePaths()
+    {
+        static $xenforoDir = null;
+        static $addOnPaths = null;
+
+        if ($addOnPaths === null) {
+            $routerPhp = $_SERVER['DEVHELPER_ROUTER_PHP'];
+            $routerPhpDir = dirname($routerPhp);
+            $xenforoDir = sprintf('%s/xenforo', $routerPhpDir);
+            $addOnPaths = array($routerPhpDir);
+
+            $txtPath = sprintf('%s/internal_data/addons.txt', $xenforoDir);
+            $lines = array();
+            if (file_exists($txtPath)) {
+                $lines = file($txtPath);
+            }
+
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if (strlen($line) === 0) {
+                    continue;
+                }
+
+                $addOnPaths[] = sprintf('%s/%s', $routerPhpDir, $line);
+            }
+        }
+
+        return array($xenforoDir, $addOnPaths);
     }
 }
