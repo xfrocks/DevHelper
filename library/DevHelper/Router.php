@@ -70,9 +70,37 @@ class DevHelper_Router
         DevHelper_Autoloader::getDevHelperInstance()->setupAutoloader($fileDir . '/xenforo/library');
     }
 
-    public static function locate($fullPath)
+    public static function locateCached($fullPath)
+    {
+        $key = basename($fullPath) . md5($fullPath);
+        $cached = apcu_fetch($key);
+        $located = null;
+        $success = false;
+        if (is_array($cached)
+            && $cached['fullPath'] === $fullPath) {
+            $located = $cached['located'];
+        }
+
+        if (empty($located)) {
+            $located = static::locate($fullPath, $success);
+        }
+
+        if ($success) {
+            $cacheEntry = array(
+                'fullPath' => $fullPath,
+                'located' => $located,
+            );
+
+            apcu_store($key, $cacheEntry);
+        }
+
+        return $located;
+    }
+
+    public static function locate($fullPath, &$success = null)
     {
         if (file_exists($fullPath)) {
+            $success = true;
             return $fullPath;
         }
 
@@ -86,6 +114,7 @@ class DevHelper_Router
         foreach ($addOnPaths as $addOnPath) {
             $candidatePath = $addOnPath . $shortened;
             if (file_exists($candidatePath)) {
+                $success = true;
                 return $candidatePath;
             }
         }

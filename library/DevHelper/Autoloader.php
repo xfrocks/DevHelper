@@ -167,7 +167,7 @@ class DevHelper_Autoloader
     protected function _locateClassFile($classFile)
     {
         if (!empty($_SERVER['DEVHELPER_ROUTER_PHP'])) {
-            return DevHelper_Router::locate($classFile);
+            return DevHelper_Router::locateCached($classFile);
         }
 
         return $classFile;

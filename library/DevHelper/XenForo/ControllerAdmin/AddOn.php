@@ -28,6 +28,7 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
             && !empty($_SERVER['DEVHELPER_ROUTER_PHP'])
         ) {
             exec('/usr/local/bin/find-addons.sh');
+            apcu_clear_cache();
         }
 
         return parent::actionInstall();

@@ -7,6 +7,9 @@ RUN apt-get update && apt-get install -y \
     && pear install PHP_CodeSniffer \
     && rm -rf /var/lib/apt/lists/*
 
+RUN pecl install apcu \
+    && docker-php-ext-enable apcu
+
 COPY docker/* /usr/local/bin/
 RUN chmod +x /usr/local/bin/cmd.sh \
     && chmod +x /usr/local/bin/find-addons.sh
