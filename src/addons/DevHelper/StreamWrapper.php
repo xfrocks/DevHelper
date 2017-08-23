@@ -111,7 +111,7 @@ class StreamWrapper
             return false;
         }
 
-        return rmdir($path);
+        return rmdir($located);
     }
 
     /**
