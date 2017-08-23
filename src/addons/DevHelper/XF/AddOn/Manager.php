@@ -33,6 +33,15 @@ class Manager extends XFCP_Manager
         return Router::locateCached($addOnPath);
     }
 
+    protected function loadAddOnClass($addOnOrId, array $jsonInfo = null)
+    {
+        $addOn = parent::loadAddOnClass($addOnOrId, $jsonInfo);
+
+        $class = \XF::app()->extendClass('XF\AddOn\AddOn');
+
+        return new $class($addOnOrId ?: $addOn->getAddOnId());
+    }
+
     private function DevHelper_getAvailableAddOnIds()
     {
         $addOnIds = [];

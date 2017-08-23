@@ -7,13 +7,6 @@ use XF\Util\File;
 
 class ReleaseBuilder extends XFCP_ReleaseBuilder
 {
-    protected function prepareDirectories()
-    {
-        parent::prepareDirectories();
-
-        $this->buildRoot = '/var/www/html/xenforo/internal_data/builds/' . $this->addOn->getAddOnId();
-    }
-
     protected function prepareFilesToCopy()
     {
         parent::prepareFilesToCopy();
@@ -67,18 +60,11 @@ class ReleaseBuilder extends XFCP_ReleaseBuilder
 
     public function finalizeRelease()
     {
-        $addOnId = $this->addOn->prepareAddOnIdForFilename();
-        $versionString = $this->addOn->prepareVersionForFilename();
-        $releasePath = sprintf(
-            '/var/www/html/xenforo/internal_data/releases/%1$s/%1$s-%2$s.zip',
-            $addOnId,
-            $versionString
-        );
+        $oopsPath = $this->buildRoot . '/oops';
+        File::createDirectory($oopsPath, false);
+        $this->buildRoot = $oopsPath;
 
-        File::createDirectory(dirname($releasePath), false);
-        File::renameFile($this->tempFile, $releasePath, false);
-
-        // intentionally do not call parent
+        parent::finalizeRelease();
     }
 }
 

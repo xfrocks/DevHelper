@@ -14,16 +14,12 @@ class Extension extends \XF\_Extension
         XF::setSourceDirectory(StreamWrapper::PROTOCOL . '://src');
 
         $classes = [
+            'XF\AddOn\AddOn',
             'XF\AddOn\Manager',
             'XF\Service\AddOn\ReleaseBuilder',
         ];
         foreach ($classes as $class) {
             $this->addClassExtension($class, 'DevHelper\\' . $class);
         }
-    }
-
-    public function extendClass($class, $fakeBaseClass = null)
-    {
-        return parent::extendClass($class, $fakeBaseClass);
     }
 }
