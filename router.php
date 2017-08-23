@@ -1,4 +1,4 @@
 <?php
 
-require('./library/DevHelper/Router.php');
-DevHelper_Router::route(__FILE__);
+require('./src/addons/DevHelper/Router.php');
+\DevHelper\Router::route(__FILE__);

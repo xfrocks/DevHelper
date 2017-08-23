@@ -12,6 +12,6 @@ RUN pecl install apcu \
 
 COPY docker/* /usr/local/bin/
 RUN chmod +x /usr/local/bin/cmd.sh \
-    && chmod +x /usr/local/bin/find-addons.sh
+    && chmod +x /usr/local/bin/find-addons2.sh
 
 CMD ["/usr/local/bin/cmd.sh"]

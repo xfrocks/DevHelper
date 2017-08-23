@@ -2,6 +2,6 @@
 
 set -e
 
-find-addons.sh
+find-addons2.sh
 
 exec apache2-foreground
