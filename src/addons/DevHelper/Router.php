@@ -10,13 +10,17 @@ class Router
         $fileDir = dirname($routerPhpPath);
         $xenforoDir = sprintf('%s/xenforo', $fileDir);
 
-        $requestUri = $_SERVER['REQUEST_URI'];
-        $requestUriParsed = parse_url($requestUri);
-        $target = sprintf('%s/index.php', $xenforoDir);
-        if (isset($requestUriParsed['path'])) {
-            $target = sprintf('%s%s', $xenforoDir, $requestUriParsed['path']);
-            if (is_dir($target)) {
-                $target = rtrim($target, '/') . '/index.php';
+        if (defined('DEVHELPER_CMD_PHP')) {
+            $target = sprintf('%s/cmd.php', $xenforoDir);
+        } else {
+            $requestUri = $_SERVER['REQUEST_URI'];
+            $requestUriParsed = parse_url($requestUri);
+            $target = sprintf('%s/index.php', $xenforoDir);
+            if (isset($requestUriParsed['path'])) {
+                $target = sprintf('%s%s', $xenforoDir, $requestUriParsed['path']);
+                if (is_dir($target)) {
+                    $target = rtrim($target, '/') . '/index.php';
+                }
             }
         }
 
