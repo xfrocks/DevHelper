@@ -39,7 +39,7 @@ class StreamWrapper
      */
     public function dir_opendir($path, $options)
     {
-        $located = $this->locate($path);
+        $located = static::locate($path);
         if (!file_exists($located)) {
             return false;
         }
@@ -88,15 +88,30 @@ class StreamWrapper
      */
     public function mkdir($path, $mode, $options)
     {
-        $located = $this->locate($path);
+        $located = static::locate($path);
         if (!file_exists($located)) {
-            $locatedDir = $this->locate(dirname($path));
+            $locatedDir = static::locate(dirname($path));
             if (is_dir($locatedDir)) {
                 $located = $locatedDir . DIRECTORY_SEPARATOR . basename($path);
             }
         }
 
         return mkdir($located, $mode, $options);
+    }
+
+    /**
+     * @param string $path
+     * @param int $options
+     * @return bool
+     */
+    public function rmdir($path, $options)
+    {
+        $located = static::locate($path);
+        if (!file_exists($located)) {
+            return false;
+        }
+
+        return rmdir($path);
     }
 
     /**
@@ -170,7 +185,7 @@ class StreamWrapper
     {
         switch ($option) {
             case STREAM_META_ACCESS:
-                $located = $this->locate($path);
+                $located = static::locate($path);
                 return chmod($located, $value);
         }
 
@@ -204,9 +219,9 @@ class StreamWrapper
             $needCreate = true;
         }
 
-        $located = $this->locate($path);
+        $located = static::locate($path);
         if ($needCreate && !file_exists($located)) {
-            $locatedDir = $this->locate(dirname($path));
+            $locatedDir = static::locate(dirname($path));
             if (is_dir($locatedDir)) {
                 $located = $locatedDir . DIRECTORY_SEPARATOR . basename($path);
             }
@@ -281,7 +296,7 @@ class StreamWrapper
      */
     public function unlink($path)
     {
-        $located = $this->locate($path);
+        $located = static::locate($path);
         if (!file_exists($located)) {
             return false;
         }
@@ -298,12 +313,14 @@ class StreamWrapper
      */
     public function url_stat($path, $flags)
     {
-        $located = $this->locate($path);
+        $located = static::locate($path);
         if (!file_exists($located)) {
             return false;
         }
 
-        return stat($located);
+        $stat = stat($located);
+
+        return $stat;
     }
 
     /**
@@ -311,7 +328,7 @@ class StreamWrapper
      * @return string
      * @throws \Exception
      */
-    private function locate($path)
+    public static function locate($path)
     {
         $protocolLength = strlen(static::PROTOCOL);
         if (substr($path, 0, $protocolLength) !== static::PROTOCOL) {
