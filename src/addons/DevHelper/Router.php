@@ -116,11 +116,23 @@ class Router
             $fullPath
         );
 
-        foreach ($addOnPaths as $addOnPath) {
-            $candidatePath = $addOnPath . $shortened;
-            if (file_exists($candidatePath)) {
-                $success = true;
-                return $candidatePath;
+        foreach ($addOnPaths as $addOnPathSuffix => $addOnPath) {
+            $candidatePaths = [];
+
+            if (strpos($shortened, '/src/addons/') === 0) {
+                $relativeRegex = '#^.+?' . preg_quote($addOnPathSuffix, '#') . '#';
+                $relativePath = preg_replace($relativeRegex, '', $shortened, -1, $count);
+                if ($count === 1) {
+                    $candidatePaths[] = $addOnPath . $shortened;
+                    $candidatePaths[] = $addOnPath . $relativePath;
+                }
+            }
+
+            foreach ($candidatePaths as $candidatePath) {
+                if (file_exists($candidatePath)) {
+                    $success = true;
+                    return $candidatePath;
+                }
             }
         }
 
@@ -156,10 +168,18 @@ class Router
                     continue;
                 }
 
-                $addOnPaths[] = sprintf('%s/%s', $routerPhpDir, $line);
+                $addOnPath = sprintf('%s/%s', $routerPhpDir, $line);
+                $addOnPathSuffix = trim(preg_replace('#^.+addons#', '', $addOnPath), '/');
+                $addOnPaths[$addOnPathSuffix] = $addOnPath;
             }
         }
 
         return array($xenforoDir, $addOnPaths);
+    }
+
+    public static function locateReset()
+    {
+        apcu_clear_cache();
+        exec('/usr/local/bin/find-addons2.sh');
     }
 }

@@ -8,6 +8,7 @@ class StreamWrapper
 
     private $_dirPath;
     private $_dirHandle;
+    private $_dirSecondHandle;
     private $_streamPath;
     private $_streamHandle;
 
@@ -24,8 +25,13 @@ class StreamWrapper
 
         closedir($this->_dirHandle);
 
+        if (!empty($this->_dirSecondHandle)) {
+            closedir($this->_dirSecondHandle);
+        }
+
         $this->_dirPath = null;
         $this->_dirHandle = null;
+        $this->_dirSecondHandle = null;
 
         return true;
     }
@@ -47,6 +53,10 @@ class StreamWrapper
         $this->_dirPath = $path;
         $this->_dirHandle = opendir($located);
 
+        if ($located === '/var/www/html/xenforo/src/addons') {
+            $this->_dirSecondHandle = opendir('/var/www/html/addons');
+        }
+
         return true;
     }
 
@@ -61,7 +71,22 @@ class StreamWrapper
             return false;
         }
 
-        return readdir($this->_dirHandle);
+        $read = readdir($this->_dirHandle);
+
+        if ($read === false && !empty($this->_dirSecondHandle)) {
+            while (true) {
+                $secondRead = readdir($this->_dirSecondHandle);
+                switch ($secondRead) {
+                    case '.':
+                    case '..':
+                        continue;
+                }
+
+                return $secondRead;
+            }
+        }
+
+        return $read;
     }
 
     /**
@@ -75,7 +100,13 @@ class StreamWrapper
             return false;
         }
 
-        return rewinddir($this->_dirHandle);
+        $bool = rewinddir($this->_dirHandle);
+
+        if (!empty($this->_dirSecondHandle)) {
+            rewind($this->_dirSecondHandle);
+        }
+
+        return $bool;
     }
 
     /**
@@ -314,6 +345,7 @@ class StreamWrapper
     public function url_stat($path, $flags)
     {
         $located = static::locate($path);
+
         if (!file_exists($located)) {
             return false;
         }
