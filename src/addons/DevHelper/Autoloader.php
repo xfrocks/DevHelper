@@ -23,11 +23,17 @@ class Autoloader
         $autoLoader = require('/var/www/html/xenforo/src/vendor/autoload.php');
 
         list(, $addOnPaths) = Router::getLocatePaths();
-        foreach ($addOnPaths as $addOnPath) {
+        foreach ($addOnPaths as $addOnPathSuffix => $addOnPath) {
             $globPattern = $addOnPath . '/src/addons/*';
-            foreach (glob($globPattern) as $rootPath) {
+            $rootPaths = glob($globPattern);
+            foreach ($rootPaths as $rootPath) {
                 $rootNamespace = basename($rootPath);
                 $autoLoader->setPsr4($rootNamespace . '\\', $rootPath);
+            }
+
+            if (count($rootPaths) === 0) {
+                $rootNamespace = str_replace(DIRECTORY_SEPARATOR, '\\', $addOnPathSuffix);
+                $autoLoader->setPsr4($rootNamespace . '\\', $addOnPath);
             }
         }
 
