@@ -151,10 +151,10 @@ class Router
             $addOnPaths = array();
 
             $txtPath = sprintf('%s/internal_data/addons2.txt', $xenforoDir);
-            $lines = array();
-            if (file_exists($txtPath)) {
-                $lines = file($txtPath);
+            if (!file_exists($txtPath)) {
+                exec('/usr/local/bin/find-addons2.sh');
             }
+            $lines = file($txtPath);
             $prefix = 'addons';
             $prefixLength = strlen($prefix);
 
