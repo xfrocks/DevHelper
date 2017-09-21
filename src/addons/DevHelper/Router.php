@@ -4,6 +4,8 @@ namespace DevHelper;
 
 class Router
 {
+    const PATH_SLASH_SRC_ADDONS_SLASH = '/src/addons/';
+
     public static function route($routerPhpPath)
     {
         $_SERVER['DEVHELPER_ROUTER_PHP'] = $routerPhpPath;
@@ -119,12 +121,16 @@ class Router
         foreach ($addOnPaths as $addOnPathSuffix => $addOnPath) {
             $candidatePaths = [];
 
-            if (strpos($shortened, '/src/addons/') === 0) {
-                $relativeRegex = '#^.+?' . preg_quote($addOnPathSuffix, '#') . '#';
-                $relativePath = preg_replace($relativeRegex, '', $shortened, -1, $count);
-                if ($count === 1) {
-                    $candidatePaths[] = $addOnPath . $shortened;
-                    $candidatePaths[] = $addOnPath . $relativePath;
+            if (strpos($shortened, static::PATH_SLASH_SRC_ADDONS_SLASH) === 0) {
+                $relativePath = substr($shortened, strlen(static::PATH_SLASH_SRC_ADDONS_SLASH));
+                if (strpos($relativePath, $addOnPathSuffix) === 0) {
+                    $candidatePaths[] = $addOnPath . '/' . substr($relativePath, strlen($addOnPathSuffix));
+                } elseif (strpos($addOnPathSuffix, $relativePath) === 0) {
+                    $parentPathSuffix = dirname($addOnPathSuffix);
+                    $parentPath = dirname($addOnPath);
+                    if (strpos($relativePath, $parentPathSuffix) === 0) {
+                        $candidatePaths[] = $parentPath;
+                    }
                 }
             }
 
