@@ -264,7 +264,10 @@ EOF;
                 $dbType = 'TINYINT(4) UNSIGNED';
                 break;
             case XenForo_DataWriter::TYPE_STRING:
-                if (!isset($field['length']) || $field['length'] > 255) {
+                if (!empty($field['allowedValues'])) {
+                    // ENUM
+                    $dbType = 'ENUM (\'' . implode('\',\'', $field['allowedValues']) . '\')';
+                } elseif (!isset($field['length']) || $field['length'] > 255) {
                     $dbType = 'TEXT';
                     if (isset($field['length'])) {
                         if ($field['length'] >= 4294967295) {
@@ -278,12 +281,7 @@ EOF;
                         unset($field['default']);
                     }
                 } else {
-                    if (!empty($field['allowedValues'])) {
-                        // ENUM
-                        $dbType = 'ENUM (\'' . implode('\',\'', $field['allowedValues']) . '\')';
-                    } else {
-                        $dbType = 'VARCHAR(' . $field['length'] . ')';
-                    }
+                    $dbType = 'VARCHAR(' . $field['length'] . ')';
                 }
                 break;
             case XenForo_DataWriter::TYPE_BINARY:
