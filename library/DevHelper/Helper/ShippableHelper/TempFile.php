@@ -2,12 +2,13 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_TempFile
- * @version 12
+ * @version 13
  */
 class DevHelper_Helper_ShippableHelper_TempFile
 {
-    protected static $_maxDownloadSize = 0;
     protected static $_cached = array();
+    protected static $_latestDownloadHeaders = array();
+    protected static $_maxDownloadSize = 0;
     protected static $_registeredShutdownFunction = false;
 
     /**
@@ -50,6 +51,8 @@ class DevHelper_Helper_ShippableHelper_TempFile
 
     public static function download($url, array $options = array())
     {
+        self::$_latestDownloadHeaders = array();
+
         $options += array(
             'tempFile' => '',
             'userAgent' => '',
@@ -92,6 +95,7 @@ class DevHelper_Helper_ShippableHelper_TempFile
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_FILE, $fh);
         curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_HEADERFUNCTION, array(__CLASS__, 'download_curlHeaderFunction'));
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_NOPROGRESS, 0);
         curl_setopt($ch, CURLOPT_PROGRESSFUNCTION, array(__CLASS__, 'download_curlProgressFunction'));
@@ -168,6 +172,13 @@ class DevHelper_Helper_ShippableHelper_TempFile
         }
     }
 
+    public static function download_curlHeaderFunction($curl, $header)
+    {
+        self::$_latestDownloadHeaders[] = $header;
+
+        return strlen($header);
+    }
+
     public static function download_curlProgressFunction($downloadSize, $downloaded)
     {
         return ((self::$_maxDownloadSize > 0
@@ -197,6 +208,11 @@ class DevHelper_Helper_ShippableHelper_TempFile
         }
 
         self::$_cached = array();
+    }
+
+    public static function getLatestDownloadHeaders()
+    {
+        return self::$_latestDownloadHeaders;
     }
 
     protected static function _getPrefix()
