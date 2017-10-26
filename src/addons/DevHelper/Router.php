@@ -132,6 +132,18 @@ class Router
                         $candidatePaths[] = $parentPath;
                     }
                 }
+            } else {
+                // for non-PHP files, we support 2 types of add-on files structure
+                $fullSuffix = '/src/addons/' . $addOnPathSuffix;
+                if (substr($addOnPath, -strlen($fullSuffix)) === $fullSuffix) {
+                    // `full` type has js files in addons/AddOnId/js/
+                    // and `addon.json` is at addons/AddOnId/src/addons/AddOnId/addon.json
+                    $candidatePaths[] = substr($addOnPath, 0, -strlen($fullSuffix)) . $shortened;
+                } else {
+                    // `repo` type  has js files in addons/AddOnId/_files/js/
+                    // and `addon.json` is at addons/AddOnId/addon.json
+                    $candidatePaths[] = $addOnPath . '/_files' . $shortened;
+                }
             }
 
             foreach ($candidatePaths as $candidatePath) {

@@ -15,6 +15,11 @@ class AddOn extends XFCP_AddOn
         /** @noinspection PhpUndefinedFieldInspection */
         $this->releasesDir = '/var/www/html/xenforo/internal_data/releases/' . $addOnId;
     }
+
+    public function passesHealthCheck(&$missing = [], &$inconsistent = [])
+    {
+        return;
+    }
 }
 
 if (false) {
