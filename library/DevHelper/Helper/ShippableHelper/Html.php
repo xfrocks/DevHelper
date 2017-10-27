@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Html
- * @version 18
+ * @version 19
  */
 class DevHelper_Helper_ShippableHelper_Html
 {
@@ -209,7 +209,7 @@ class DevHelper_Helper_ShippableHelper_Html
                 $endPos = utf8_strpos($snippet, '>', $startPos);
                 if ($endPos === false) {
                     // we found a partial open tag, best to delete the whole thing
-                    $snippet = utf8_substr($snippet, 0, $startPos);
+                    $snippet = utf8_rtrim(utf8_substr($snippet, 0, $startPos));
                     break;
                 }
 
