@@ -11,7 +11,12 @@ RUN pecl install apcu \
     && docker-php-ext-enable apcu
 
 COPY docker/* /usr/local/bin/
-RUN chmod +x /usr/local/bin/cmd.sh \
-    && chmod +x /usr/local/bin/find-addons2.sh
+RUN chmod +x /usr/local/bin/*.sh
+
+RUN mv /usr/local/bin/ssl-cert-snakeoil.key /etc/ssl/private/ssl-cert-snakeoil.key \
+    && chmod 0640 /etc/ssl/private/ssl-cert-snakeoil.key \
+    && mv /usr/local/bin/ssl-cert-snakeoil.pem /etc/ssl/certs/ssl-cert-snakeoil.pem \
+    && chmod 0644 /etc/ssl/certs/ssl-cert-snakeoil.pem \
+    && a2enmod ssl && a2ensite default-ssl
 
 CMD ["/usr/local/bin/cmd.sh"]
