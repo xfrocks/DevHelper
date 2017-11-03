@@ -121,8 +121,11 @@ class StreamWrapper
     {
         $located = static::locate($path);
         if (!file_exists($located)) {
+            list($xenforoDir, , $addonsDir) = Router::getLocatePaths();
             $locatedDir = static::locate(dirname($path));
-            if (is_dir($locatedDir)) {
+            if ($locatedDir === $xenforoDir . '/src/addons') {
+                $located = $addonsDir . DIRECTORY_SEPARATOR . basename($path);
+            } elseif (is_dir($locatedDir)) {
                 $located = $locatedDir . DIRECTORY_SEPARATOR . basename($path);
             }
         }
@@ -170,6 +173,10 @@ class StreamWrapper
         }
 
         fclose($this->_streamHandle);
+
+        if (basename($this->_streamPath) === 'addon.json') {
+            Router::locateReset();
+        }
 
         $this->_streamPath = null;
         $this->_streamHandle = null;
@@ -368,7 +375,7 @@ class StreamWrapper
         }
 
         $pathWithoutProtocol = substr($path, $protocolLength + 3);
-        list($xenforoDir,) = Router::getLocatePaths();
+        list($xenforoDir) = Router::getLocatePaths();
         $pathFromRoot = $xenforoDir . DIRECTORY_SEPARATOR . $pathWithoutProtocol;
 
         return Router::locateCached($pathFromRoot);

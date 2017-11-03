@@ -118,17 +118,21 @@ class Router
             $fullPath
         );
 
+        $srcAddOnsPath = null;
+        if (strpos($shortened, static::PATH_SLASH_SRC_ADDONS_SLASH) === 0) {
+            $srcAddOnsPath = substr($shortened, strlen(static::PATH_SLASH_SRC_ADDONS_SLASH));
+        }
+
         foreach ($addOnPaths as $addOnPathSuffix => $addOnPath) {
             $candidatePaths = [];
 
-            if (strpos($shortened, static::PATH_SLASH_SRC_ADDONS_SLASH) === 0) {
-                $relativePath = substr($shortened, strlen(static::PATH_SLASH_SRC_ADDONS_SLASH));
-                if (strpos($relativePath, $addOnPathSuffix) === 0) {
-                    $candidatePaths[] = $addOnPath . '/' . substr($relativePath, strlen($addOnPathSuffix));
-                } elseif (strpos($addOnPathSuffix, $relativePath) === 0) {
+            if ($srcAddOnsPath !== null) {
+                if (strpos($srcAddOnsPath, $addOnPathSuffix) === 0) {
+                    $candidatePaths[] = $addOnPath . '/' . substr($srcAddOnsPath, strlen($addOnPathSuffix));
+                } elseif (strpos($addOnPathSuffix, $srcAddOnsPath) === 0) {
                     $parentPathSuffix = dirname($addOnPathSuffix);
                     $parentPath = dirname($addOnPath);
-                    if (strpos($relativePath, $parentPathSuffix) === 0) {
+                    if (strpos($srcAddOnsPath, $parentPathSuffix) === 0) {
                         $candidatePaths[] = $parentPath;
                     }
                 }
@@ -154,6 +158,14 @@ class Router
             }
         }
 
+        if (!$success && $srcAddOnsPath !== null) {
+            $candidatePath = '/var/www/html/addons/' . $srcAddOnsPath;
+            if (file_exists($candidatePath)) {
+                $success = true;
+                return $candidatePath;
+            }
+        }
+
         return $fullPath;
     }
 
@@ -161,11 +173,13 @@ class Router
     {
         static $xenforoDir = null;
         static $addOnPaths = null;
+        static $addonsDir = null;
 
         if ($addOnPaths === null) {
             $routerPhp = $_SERVER['DEVHELPER_ROUTER_PHP'];
             $routerPhpDir = dirname($routerPhp);
             $xenforoDir = sprintf('%s/xenforo', $routerPhpDir);
+            $addonsDir = sprintf('%s/addons', $routerPhpDir);
             $addOnPaths = array();
 
             $txtPath = sprintf('%s/internal_data/addons2.txt', $xenforoDir);
@@ -186,13 +200,18 @@ class Router
                     continue;
                 }
 
-                $addOnPath = sprintf('%s/%s', $routerPhpDir, $line);
+                $lineWithoutAddOnJson = preg_replace('#/addon.json$#', '', $line, -1, $count);
+                if ($count !== 1) {
+                    continue;
+                }
+
+                $addOnPath = sprintf('%s/%s', $routerPhpDir, $lineWithoutAddOnJson);
                 $addOnPathSuffix = trim(preg_replace('#^.+addons#', '', $addOnPath), '/');
                 $addOnPaths[$addOnPathSuffix] = $addOnPath;
             }
         }
 
-        return array($xenforoDir, $addOnPaths);
+        return array($xenforoDir, $addOnPaths, $addonsDir);
     }
 
     public static function locateReset()
