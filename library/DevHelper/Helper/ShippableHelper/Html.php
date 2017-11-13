@@ -2,10 +2,52 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Html
- * @version 19
+ * @version 20
  */
 class DevHelper_Helper_ShippableHelper_Html
 {
+    public static function getDomElement($html, array $params)
+    {
+        if (empty($params['prefix']) ||
+            empty($params['tag'])) {
+            return '';
+        }
+
+        $offset = strpos($html, $params['prefix']);
+        if ($offset === false) {
+            return '';
+        }
+        $resultOffset = $offset;
+        $maxOffset = strlen($html);
+
+        $offset += strlen($params['prefix']);
+        $depth = 1;
+        while ($offset < $maxOffset) {
+            $nextOpen = strpos($html, '<' . $params['tag'], $offset);
+            $nextClose = strpos($html, '</' . $params['tag'], $offset);
+
+            if ($nextClose === false) {
+                // unbalanced
+                return '';
+            }
+            if ($nextOpen === false) {
+                $nextOpen = $maxOffset + 1;
+            }
+
+            if ($nextOpen < $nextClose) {
+                $depth++;
+            } else {
+                $depth--;
+
+                if ($depth === 0) {
+                    return substr($html, $resultOffset, $nextClose - $resultOffset) .
+                        sprintf('</%s>', $params['tag']);
+                }
+            }
+            $offset = min($nextOpen, $nextClose) + 1;
+        }
+    }
+
     public static function viewSnippet($string, array $params)
     {
         return self::snippet($string, 0, $params);
