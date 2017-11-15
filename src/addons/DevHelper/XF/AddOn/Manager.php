@@ -6,12 +6,6 @@ use DevHelper\Router;
 
 class Manager extends XFCP_Manager
 {
-    protected function getAllJsonInfo()
-    {
-        Router::locateReset();
-        return parent::getAllJsonInfo();
-    }
-
     public function getAddOnPath($addOnId)
     {
         $addOnPath = parent::getAddOnPath($addOnId);
