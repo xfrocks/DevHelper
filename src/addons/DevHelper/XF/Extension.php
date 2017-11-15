@@ -20,6 +20,18 @@ class Extension extends \XF\_Extension
     {
         parent::__construct($listeners, $classExtensions);
 
+        $this->initDevHelper();
+    }
+
+    private function initDevHelper()
+    {
+        static $initOk = false;
+        if ($initOk) {
+            return;
+        }
+        $initOk = true;
+
+        require(dirname(__DIR__) . '/StreamWrapper.php');
         stream_wrapper_register(StreamWrapper::PROTOCOL, StreamWrapper::class);
         XF::setSourceDirectory(StreamWrapper::PROTOCOL . '://src');
 

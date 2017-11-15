@@ -22,6 +22,8 @@ class Autoloader
         /** @noinspection PhpIncludeInspection */
         $autoLoader = require('/var/www/html/xenforo/src/vendor/autoload.php');
 
+        $autoLoader->setPsr4('DevHelper\\', __DIR__);
+
         list(, $addOnPaths) = Router::getLocatePaths();
         foreach ($addOnPaths as $addOnPathSuffix => $addOnPath) {
             $globPattern = $addOnPath . '/src/addons/*';
