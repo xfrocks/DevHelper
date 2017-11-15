@@ -11,6 +11,7 @@ class StreamWrapper
     private $_dirSecondHandle;
     private $_streamPath;
     private $_streamHandle;
+    private $_streamWritten;
 
     /**
      * Close directory handle
@@ -174,12 +175,13 @@ class StreamWrapper
 
         fclose($this->_streamHandle);
 
-        if (basename($this->_streamPath) === 'addon.json') {
+        if (basename($this->_streamPath) === 'addon.json' && $this->_streamWritten > 0) {
             Router::locateReset();
         }
 
         $this->_streamPath = null;
         $this->_streamHandle = null;
+        $this->_streamWritten = null;
     }
 
     /**
@@ -267,6 +269,7 @@ class StreamWrapper
 
         $this->_streamPath = $path;
         $this->_streamHandle = fopen($located, $mode);
+        $this->_streamWritten = 0;
 
         return true;
     }
@@ -322,6 +325,7 @@ class StreamWrapper
         }
 
         $written = fwrite($this->_streamHandle, $data);
+        $this->_streamWritten += $written;
 
         return $written;
     }
