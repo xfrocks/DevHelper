@@ -4,7 +4,7 @@ RUN pear install PHP_CodeSniffer; \
     pecl install apcu; \
     docker-php-ext-enable apcu
 
-ENV DEVHELPER_PHP_APACHE_VERSION_ID 2017110301
+ENV DEVHELPER_PHP_APACHE_VERSION_ID 2017112201
 
 COPY docker/* /usr/local/bin/
 RUN chmod +x /usr/local/bin/*.sh
@@ -16,4 +16,24 @@ RUN echo 'PassEnv DEVHELPER_PHP_APACHE_VERSION_ID' >> /etc/apache2/mods-availabl
     chmod 0644 /etc/ssl/certs/ssl-cert-snakeoil.pem; \
     a2enmod env rewrite ssl && a2ensite default-ssl
 
+RUN for verb in build-release \
+      bump-version \
+      create \
+      disable \
+      enable \
+      export \
+      install \
+      install-step \
+      rebuild \
+      sync-json \
+      uninstall \
+      uninstall-step \
+      upgrade \
+      upgrade-step \
+      validate-json \
+      ; do \
+        printf -- "%b" "#!/bin/bash\nphp /var/www/html/cmd.php xf-addon:${verb} \"\$@\"" >/usr/local/bin/xf-addon--${verb} && chmod +x /usr/local/bin/xf-addon--${verb} \
+    ; done
+
+WORKDIR "/var/www/html/addons"
 CMD ["/usr/local/bin/cmd.sh"]
