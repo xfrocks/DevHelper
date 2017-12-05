@@ -89,7 +89,11 @@ abstract class DevHelper_XenForo_CodeEvent extends _XenForo_CodeEvent
 
         $callbackSafe = $callback;
         if (!is_string($callbackSafe)) {
-            $callbackSafe = XenForo_Helper_Php::safeSerialize($callback);
+            if (is_array($callback)) {
+                $callbackSafe = XenForo_Helper_Php::safeSerialize($callback);
+            } else {
+                $callbackSafe = 'N/A';
+            }
         }
         if (!isset(self::$measuredTime['callbacks'][$callbackSafe])) {
             self::$measuredTime['callbacks'][$callbackSafe] = array(
