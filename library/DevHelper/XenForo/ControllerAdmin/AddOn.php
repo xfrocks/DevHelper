@@ -13,10 +13,17 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
         $response = parent::actionIndex();
 
         if ($response instanceof XenForo_ControllerResponse_View) {
-            uasort($response->params['addOns'], create_function(
-                '$a, $b',
-                'if ($a["active"] == $b["active"]) { return strcmp($a["title"], $b["title"]); } else { if ($a["active"]) return -1; else return 1; }'
-            ));
+            uasort($response->params['addOns'], function ($a, $b) {
+                if ($a['active'] == $b['active']) {
+                    return strcmp($a['title'], $b['title']);
+                } else {
+                    if ($a['active']) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                }
+            });
         }
 
         return $response;

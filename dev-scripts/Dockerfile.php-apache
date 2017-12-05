@@ -1,7 +1,9 @@
-FROM xfrocks/xenforo:php-apache-7.1.8
+FROM xfrocks/xenforo:php-apache-7.2.0
 
-RUN apt-get update && apt-get install -y \
-        npm \
+RUN apt-get update \
+    && apt-get install -y gnupg \
+    && curl -sL https://deb.nodesource.com/setup_9.x | bash - \
+    && apt-get install -y npm \
     && a2enmod rewrite \
     && npm install uglify-js -g \
     && pear install PHP_CodeSniffer \
@@ -10,8 +12,16 @@ RUN apt-get update && apt-get install -y \
 RUN pecl install apcu \
     && docker-php-ext-enable apcu
 
+ENV DEVHELPER_PHP_APACHE_VERSION_ID 2017120601
+
 COPY docker/* /usr/local/bin/
-RUN chmod +x /usr/local/bin/cmd.sh \
-    && chmod +x /usr/local/bin/find-addons.sh
+RUN chmod +x /usr/local/bin/*.sh
+
+RUN echo 'PassEnv DEVHELPER_PHP_APACHE_VERSION_ID' >> /etc/apache2/mods-available/env.conf; \
+    mv /usr/local/bin/ssl-cert-snakeoil.key /etc/ssl/private/ssl-cert-snakeoil.key; \
+    chmod 0640 /etc/ssl/private/ssl-cert-snakeoil.key; \
+    mv /usr/local/bin/ssl-cert-snakeoil.pem /etc/ssl/certs/ssl-cert-snakeoil.pem; \
+    chmod 0644 /etc/ssl/certs/ssl-cert-snakeoil.pem; \
+    a2enmod env rewrite ssl && a2ensite default-ssl
 
 CMD ["/usr/local/bin/cmd.sh"]
