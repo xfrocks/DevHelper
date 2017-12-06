@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Crypt
- * @version 3
+ * @version 4
  */
 class DevHelper_Helper_ShippableHelper_Crypt
 {
@@ -11,6 +11,7 @@ class DevHelper_Helper_ShippableHelper_Crypt
 
     const OPENSSL_METHOD_AES128 = 'aes-128-ecb';
     const OPENSSL_METHOD_AES256 = 'aes-256-cbc';
+    const OPENSSL_OPT_RAW_DATA = 1;
 
     public static function encrypt($data, $key = null, $algo = null)
     {
@@ -63,7 +64,7 @@ class DevHelper_Helper_ShippableHelper_Crypt
     {
         if (function_exists('openssl_encrypt')) {
             $key = md5($key, true);
-            return openssl_encrypt($data, self::OPENSSL_METHOD_AES128, $key, OPENSSL_RAW_DATA);
+            return openssl_encrypt($data, self::OPENSSL_METHOD_AES128, $key, self::OPENSSL_OPT_RAW_DATA);
         }
 
         if (function_exists('mcrypt_encrypt')) {
@@ -74,7 +75,7 @@ class DevHelper_Helper_ShippableHelper_Crypt
             return mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_ECB);
         }
 
-        return $data;
+        throw new RuntimeException('Cannot encrypt data');
     }
 
     /**
@@ -90,7 +91,7 @@ class DevHelper_Helper_ShippableHelper_Crypt
     {
         if (function_exists('openssl_decrypt')) {
             $key = md5($key, true);
-            return openssl_decrypt($data, self::OPENSSL_METHOD_AES128, $key, OPENSSL_RAW_DATA);
+            return openssl_decrypt($data, self::OPENSSL_METHOD_AES128, $key, self::OPENSSL_OPT_RAW_DATA);
         }
 
         if (function_exists('mcrypt_decrypt')) {
@@ -101,7 +102,7 @@ class DevHelper_Helper_ShippableHelper_Crypt
             return substr($data, 0, -$padding);
         }
 
-        return $data;
+        throw new RuntimeException('Cannot decrypt data');
     }
 
     /**
@@ -117,12 +118,12 @@ class DevHelper_Helper_ShippableHelper_Crypt
         if (function_exists('mb_substr') && function_exists('openssl_encrypt')) {
             $ivLength = openssl_cipher_iv_length(self::OPENSSL_METHOD_AES256);
             $iv = openssl_random_pseudo_bytes($ivLength);
-            $encrypted = openssl_encrypt($data, self::OPENSSL_METHOD_AES256, $key, OPENSSL_RAW_DATA, $iv);
+            $encrypted = openssl_encrypt($data, self::OPENSSL_METHOD_AES256, $key, self::OPENSSL_OPT_RAW_DATA, $iv);
 
             return self::ALGO_AES_256 . $iv . $encrypted;
         }
 
-        return $data;
+        throw new RuntimeException('Cannot encrypt data');
     }
 
     /**
@@ -143,11 +144,11 @@ class DevHelper_Helper_ShippableHelper_Crypt
                 $iv = mb_substr($data, $prefixLength, $ivLength, '8bit');
                 $encrypted = mb_substr($data, $prefixLength + $ivLength, null, '8bit');
 
-                return openssl_decrypt($encrypted, self::OPENSSL_METHOD_AES256, $key, OPENSSL_RAW_DATA, $iv);
+                return openssl_decrypt($encrypted, self::OPENSSL_METHOD_AES256, $key, self::OPENSSL_OPT_RAW_DATA, $iv);
             }
         }
 
-        return $data;
+        throw new RuntimeException('Cannot decrypt data');
     }
 
 }
