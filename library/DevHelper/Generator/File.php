@@ -473,7 +473,11 @@ class {$fileSumsClassName}
                     $codingStandardBinary,
                     escapeshellarg($entry),
                     escapeshellarg(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'phpcs.xml')
-                ), $phpcsOutput);
+                ), $phpcsOutput, $phpcsReturnVal);
+
+                if ($phpcsReturnVal !== 0) {
+                    die(sprintf("\$phpcsReturnVal=%d\n%s", $phpcsReturnVal, implode("\n", $phpcsOutput)));
+                }
             }
 
             self::_fileExport($entry, $exportPath, $rootPath, array_merge($options, array('type' => $type)));
