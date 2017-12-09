@@ -4,7 +4,14 @@ RUN pear install PHP_CodeSniffer; \
     pecl install apcu; \
     docker-php-ext-enable apcu
 
-ENV DEVHELPER_PHP_APACHE_VERSION_ID 2017120901
+ENV PHP_COMPATIBILITY_VERSION 8.0.1
+RUN curl -Lo /tmp/PHPCompatibility.tar.gz "https://github.com/wimg/PHPCompatibility/archive/${PHP_COMPATIBILITY_VERSION}.tar.gz" \
+    && tar -xzf /tmp/PHPCompatibility.tar.gz -C /usr/local/share/ \
+    && phpcs --config-set installed_paths "/usr/local/share/PHPCompatibility-${PHP_COMPATIBILITY_VERSION}" \
+    && phpcs -i | grep PHPCompatibility \
+    && rm -rf /tmp/*
+
+ENV DEVHELPER_PHP_APACHE_VERSION_ID 2017120902
 
 COPY docker/* /usr/local/bin/
 RUN chmod +x /usr/local/bin/*.sh

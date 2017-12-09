@@ -4,7 +4,6 @@ for _verb in build-release \
   bump-version \
   disable \
   enable \
-  export \
   install \
   install-step \
   rebuild \
