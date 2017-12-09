@@ -9,9 +9,11 @@ if [ -z "${_verb}" ]; then
 fi
 
 _addOnId="${2%/}"
-if [ -z "${_verb}" ]; then
+if [ -z "${_addOnId}" ]; then
   echo 'Add-on ID is missing' >&2
   exit 2
 fi
 
-exec cmd-php.sh "xf-addon:${_verb}" "${_addOnId}"
+shift 2
+
+exec cmd-php.sh "xf-addon:${_verb}" "${_addOnId}" "$@"

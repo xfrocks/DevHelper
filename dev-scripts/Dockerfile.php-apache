@@ -4,7 +4,7 @@ RUN pear install PHP_CodeSniffer; \
     pecl install apcu; \
     docker-php-ext-enable apcu
 
-ENV DEVHELPER_PHP_APACHE_VERSION_ID 2017120601
+ENV DEVHELPER_PHP_APACHE_VERSION_ID 2017120901
 
 COPY docker/* /usr/local/bin/
 RUN chmod +x /usr/local/bin/*.sh
