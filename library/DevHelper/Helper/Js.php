@@ -23,7 +23,7 @@ class DevHelper_Helper_Js
         XenForo_Helper_File::createDirectory(dirname($minPath));
 
         $command = sprintf(
-            'nodejs /usr/local/bin/uglifyjs --compress --mangle'
+            'uglifyjs --compress --mangle'
             . ' --output %2$s --source-map %3$s -- %1$s 2>&1',
             escapeshellarg($fullPath),
             escapeshellarg($minPath),

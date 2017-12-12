@@ -4,7 +4,10 @@
     <exclude-pattern>*/DevHelper/Generated/</exclude-pattern>
     <exclude-pattern>*/Lib/</exclude-pattern>
     <exclude-pattern>*/ShippableHelper/</exclude-pattern>
+    <exclude-pattern>*/build/</exclude-pattern>
+    <exclude-pattern>*/static/</exclude-pattern>
     <exclude-pattern>*/tests/</exclude-pattern>
+    <exclude-pattern>*.min.css</exclude-pattern>
     <exclude-pattern>*.min.js</exclude-pattern>
 
     <rule ref="PHPCompatibility"/>
