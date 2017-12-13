@@ -9,6 +9,7 @@
     <exclude-pattern>*/tests/</exclude-pattern>
     <exclude-pattern>*.min.css</exclude-pattern>
     <exclude-pattern>*.min.js</exclude-pattern>
+    <exclude-pattern>FileSums.php</exclude-pattern>
 
     <rule ref="PHPCompatibility"/>
 
