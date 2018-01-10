@@ -151,4 +151,10 @@ class DevHelper_Router
 
         return array($xenforoDir, $addOnPaths);
     }
+
+    public static function reset()
+    {
+        exec('/usr/local/bin/find-addons.sh');
+        apcu_clear_cache();
+    }
 }

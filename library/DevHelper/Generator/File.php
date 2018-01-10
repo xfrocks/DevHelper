@@ -187,7 +187,23 @@ class DevHelper_Generator_File
     {
         $path = self::getClassPath($className, $config);
 
+        $resetRouter = false;
+        if ($config === null &&
+            preg_match('#^(.+)_DevHelper_Config$#', $className, $matches)) {
+            $classNamePrefix = $matches[1];
+            list($xenforoDir,) = DevHelper_Router::getLocatePaths();
+            if (strpos($path, $xenforoDir) === 0) {
+                $addOnPath = '/var/www/html/addons/' . str_replace('_', '/', $classNamePrefix);
+                $path = substr_replace($path, $addOnPath, 0, strlen($xenforoDir));
+                $resetRouter = !file_exists($path);
+            }
+        }
+
         self::writeFile($path, $contents, true, true);
+
+        if ($resetRouter) {
+            DevHelper_Router::reset();
+        }
 
         if (strpos($className, 'DevHelper_Generated') === false) {
             $backupClassName = self::_getBackupClassName($className);
