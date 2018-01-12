@@ -1,27 +1,9 @@
-FROM xfrocks/xenforo:php-apache-7.2.0
+FROM xfrocks/xenforo:php-apache-7.2.1d
 
-RUN pear install PHP_CodeSniffer; \
-    pecl install apcu; \
-    docker-php-ext-enable apcu
-
-ENV PHP_COMPATIBILITY_VERSION 8.0.1
-RUN curl -Lo /tmp/PHPCompatibility.tar.gz "https://github.com/wimg/PHPCompatibility/archive/${PHP_COMPATIBILITY_VERSION}.tar.gz" \
-    && tar -xzf /tmp/PHPCompatibility.tar.gz -C /usr/local/share/ \
-    && phpcs --config-set installed_paths "/usr/local/share/PHPCompatibility-${PHP_COMPATIBILITY_VERSION}" \
-    && phpcs -i | grep PHPCompatibility \
-    && rm -rf /tmp/*
-
-ENV DEVHELPER_PHP_APACHE_VERSION_ID 2017120902
+ENV DEVHELPER_PHP_APACHE_VERSION_ID 2018011202
 
 COPY docker/* /usr/local/bin/
 RUN chmod +x /usr/local/bin/*.sh
-
-RUN echo 'PassEnv DEVHELPER_PHP_APACHE_VERSION_ID' >> /etc/apache2/mods-available/env.conf; \
-    mv /usr/local/bin/ssl-cert-snakeoil.key /etc/ssl/private/ssl-cert-snakeoil.key; \
-    chmod 0640 /etc/ssl/private/ssl-cert-snakeoil.key; \
-    mv /usr/local/bin/ssl-cert-snakeoil.pem /etc/ssl/certs/ssl-cert-snakeoil.pem; \
-    chmod 0644 /etc/ssl/certs/ssl-cert-snakeoil.pem; \
-    a2enmod env rewrite ssl && a2ensite default-ssl
 
 RUN /usr/local/bin/build.sh
 
