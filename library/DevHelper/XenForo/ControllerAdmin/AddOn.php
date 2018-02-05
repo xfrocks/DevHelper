@@ -302,7 +302,10 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
 
         $config = $this->_getConfigModel()->loadAddOnConfig($addOn);
 
-        $exportPath = $config->getExportPath();
+        $exportPath = $this->_input->filterSingle('export_path', XenForo_Input::STRING);
+        if (empty($exportPath)) {
+            $exportPath = $config->getExportPath();
+        }
 
         if ($exportPath === false) {
             return $this->responseNoPermission();
@@ -382,6 +385,21 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
         );
     }
 
+    public function assertAdmin()
+    {
+        switch ($this->_routeMatch->getAction()) {
+            case 'file-export':
+                return;
+        }
+
+        parent::assertAdmin();
+    }
+
+    public function assertAdminPermission($permissionId)
+    {
+        // no op
+    }
+
     /**
      * @return DevHelper_Model_Config
      */
@@ -389,5 +407,11 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
     {
         /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('DevHelper_Model_Config');
+    }
+}
+
+if (false) {
+    class XFCP_DevHelper_XenForo_ControllerAdmin_AddOn extends XenForo_ControllerAdmin_AddOn
+    {
     }
 }

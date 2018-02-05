@@ -482,6 +482,7 @@ class {$fileSumsClassName}
             }
         }
         $phpcsOutput = array();
+        $listText = [];
         foreach ($list as $type => $entry) {
             if (!empty($codingStandardBinary)) {
                 exec(sprintf(
@@ -497,6 +498,8 @@ class {$fileSumsClassName}
             }
 
             self::_fileExport($entry, $exportPath, $rootPath, array_merge($options, array('type' => $type)));
+
+            $listText[] = trim(str_replace($rootPath, '', $entry), '/');
         }
 
         $hashesFilePath = self::generateHashesFile($addOn, $config, $list, $exportPath, $rootPath);
@@ -509,6 +512,8 @@ class {$fileSumsClassName}
         } else {
             echo "Can't cp       $xmlPath -> $xmlCopyPath\n";
         }
+
+        file_put_contents(dirname($exportPath) . '/list.txt', implode("\n", $listText) . "\n\n");
 
         echo(implode("\n", $phpcsOutput));
     }
