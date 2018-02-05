@@ -121,7 +121,7 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
     protected function _actionGenerateDataWriter(array $addOn, DevHelper_Config_Base $config, array $dataClass)
     {
         list($className, $contents) = DevHelper_Generator_Code_DataWriter::generate($addOn, $config, $dataClass);
-        $path = DevHelper_Generator_File::writeClass($className, $contents);
+        $path = DevHelper_Generator_File::writeClass($className, $contents, $config);
 
         $config->updateDataClassFile($dataClass['name'], 'data_writer', $className, $path);
         $this->_getConfigModel()->saveAddOnConfig($addOn, $config);
@@ -139,7 +139,7 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
     protected function _actionGenerateModel(array $addOn, DevHelper_Config_Base $config, array $dataClass)
     {
         list($className, $contents) = DevHelper_Generator_Code_Model::generate($addOn, $config, $dataClass);
-        $path = DevHelper_Generator_File::writeClass($className, $contents);
+        $path = DevHelper_Generator_File::writeClass($className, $contents, $config);
 
         $config->updateDataClassFile($dataClass['name'], 'model', $className, $path);
         $this->_getConfigModel()->saveAddOnConfig($addOn, $config);
@@ -193,7 +193,7 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
                     'majorSection' => $majorSection,
                 )
             );
-            $path = DevHelper_Generator_File::writeClass($className, $contents);
+            $path = DevHelper_Generator_File::writeClass($className, $contents, $config);
 
             $config->updateDataClassFile($dataClass['name'], 'route_prefix_admin', $className, $path);
             $this->_getConfigModel()->saveAddOnConfig($addOn, $config);
@@ -245,7 +245,7 @@ class DevHelper_XenForo_ControllerAdmin_AddOn extends XFCP_DevHelper_XenForo_Con
                     'controller' => $controller,
                 )
             );
-            $path = DevHelper_Generator_File::writeClass($className, $contents);
+            $path = DevHelper_Generator_File::writeClass($className, $contents, $config);
 
             $config->updateDataClassFile($dataClass['name'], 'controller_admin', $className, $path);
             $this->_getConfigModel()->saveAddOnConfig($addOn, $config);

@@ -205,7 +205,7 @@ class DevHelper_Generator_File
             DevHelper_Router::reset();
         }
 
-        if (strpos($className, 'DevHelper_Generated') === false) {
+        if ($config !== null && strpos($className, 'DevHelper_Generated') === false) {
             $backupClassName = self::_getBackupClassName($className);
             $backupPath = self::getClassPath($backupClassName, $config);
             self::writeFile($backupPath . '.devhelper', $contents, false, false);
