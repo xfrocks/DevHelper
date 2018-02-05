@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_TempFile
- * @version 14
+ * @version 15
  */
 class DevHelper_Helper_ShippableHelper_TempFile
 {
@@ -146,7 +146,7 @@ class DevHelper_Helper_ShippableHelper_TempFile
 
         if ($error === null
             && isset($curlInfo['size_download'])
-            && $fileSize !== $curlInfo['size_download']
+            && $fileSize !== intval($curlInfo['size_download'])
         ) {
             // file size reported by our system seems to be off, probably a write error
             $error = sprintf('file size %d, size_download %d', $fileSize, $curlInfo['size_download']);
