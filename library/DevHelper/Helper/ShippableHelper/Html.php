@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_Html
- * @version 20
+ * @version 21
  */
 class DevHelper_Helper_ShippableHelper_Html
 {
@@ -243,10 +243,12 @@ class DevHelper_Helper_ShippableHelper_Html
 
     public static function snippetFixBrokenHtml(&$snippet, array &$options)
     {
+        $strlen = utf8_strlen($snippet);
         $offset = 0;
         $stack = array();
+
         while (true) {
-            $startPos = utf8_strpos($snippet, '<', $offset);
+            $startPos = $offset < $strlen ? utf8_strpos($snippet, '<', $offset) : false;
             if ($startPos !== false) {
                 $endPos = utf8_strpos($snippet, '>', $startPos);
                 if ($endPos === false) {
