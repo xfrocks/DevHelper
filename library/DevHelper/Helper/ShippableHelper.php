@@ -4,6 +4,10 @@ class DevHelper_Helper_ShippableHelper
 {
     public static function getVersionId($class, $path, $contents)
     {
+        if (empty($contents)) {
+            return 0;
+        }
+
         if (XenForo_Application::debugMode()) {
             return filemtime($path);
         }
