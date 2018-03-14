@@ -304,15 +304,16 @@ EOF;
                 break;
             case XenForo_DataWriter::TYPE_INT:
                 $dbType = 'INT(11)';
-                if (isset($field['length'])) {
-                    if ($field['length'] == 4) {
-                        $dbType = 'TINYINT(' . $field['length'] . ')';
-                    }
+                if (isset($field['length']) && $field['length'] == 4) {
+                    $dbType = 'TINYINT(' . $field['length'] . ')';
                 }
                 break;
             case XenForo_DataWriter::TYPE_UINT:
             case XenForo_DataWriter::TYPE_UINT_FORCED:
                 $dbType = 'INT(10) UNSIGNED';
+                if (isset($field['length']) && $field['length'] <= 3) {
+                    $dbType = 'TINYINT(' . $field['length'] . ') UNSIGNED';
+                }
                 break;
             case XenForo_DataWriter::TYPE_FLOAT:
                 $dbType = 'FLOAT';
