@@ -94,7 +94,7 @@ class DevHelper_Installer
             $addOns = XenForo_Application::get('addOns');
             $versionId = $addOns['devHelper'];
 
-            $xml = file_get_contents(dirname(__FILE__) . '/addon-DevHelper.xml');
+            $xml = file_get_contents(dirname(__FILE__) . '/addon-devHelper.xml');
             if (preg_match('#version_id="(?<id>\d+)"#', $xml, $matches)) {
                 if ($versionId < $matches['id']) {
                     return false;
