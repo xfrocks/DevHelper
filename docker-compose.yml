@@ -6,6 +6,8 @@ services:
       context: dev-scripts
       dockerfile: Dockerfile.php-apache
     environment:
+      #- APACHE_RUN_GROUP=uid1001
+      #- APACHE_RUN_USER=uid1001
       - VIRTUAL_HOST=xenforo.local.xfrocks.com
     expose:
       - "80"
