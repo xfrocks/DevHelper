@@ -1,55 +1,26 @@
 version: '2'
 
 services:
-  php-apache:
+  php:
     build:
-      context: dev-scripts
-      dockerfile: Dockerfile.php-apache
-    environment:
-      - VIRTUAL_HOST=xenforo.local.xfrocks.com
-    expose:
-      - "80"
+      context: .
     links:
-      - mysqld:mysqld
-    #volumes:
-      #- /path/to/xenforo:/var/www/html/xenforo:rw
-      #- /path/to/addons:/var/www/html/addons:rw
-      #- .:/var/www/html/:rw
-
-  php-cli:
-    image: xfrocks/docker-xenforo:php-cli
-    links:
-      - php-apache:php-apache
-      - mysqld:mysqld
-    volumes_from:
-      - php-apache
-    working_dir: /var/www/html/
-
-  mysqld:
-    image: mysql:latest
-    environment:
-      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
-      MYSQL_ONETIME_PASSWORD: 'yes'
-      MYSQL_DATABASE: 'xenforo'
-      MYSQL_USER: 'xenforo'
-      MYSQL_PASSWORD: 'xenforo'
-    expose:
-      - "3306"
-    volumes:
-      - ./.data/mysql:/var/lib/mysql:rw
-
-  mysql:
-    image: arey/mysql-client
-    links:
-      - mysqld:mysqld
-    volumes_from:
-      - php-apache
-    working_dir: /var/www/html/
-    entrypoint: mysql -hmysqld -uxenforo -pxenforo xenforo
-
-  nginx-proxy:
-    image: jwilder/nginx-proxy
+      - mysql:mysql
     ports:
       - "80:80"
     volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./../../xenforo:/var/www/html
+      - ./..:/var/www/html/src/addons
+      - ./../../xenforo/src/addons/XF:/var/www/html/src/addons/XF
+      - ./.data/external:/var/www/html/data
+      - ./.data/internal:/var/www/html/internal_data
+
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_DATABASE: 'xenforo2'
+      MYSQL_ROOT_PASSWORD: 'root'
+    expose:
+      - "3306"
+    volumes:
+      - ./.data/mysql:/var/lib/mysql
