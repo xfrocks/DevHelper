@@ -410,6 +410,6 @@ EOF;
 
     protected function _normalizeName($name)
     {
-        return preg_replace('/[^a-zA-Z_]/', '', $name);
+        return preg_replace('/[^a-zA-Z0-9_]/', '', $name);
     }
 }

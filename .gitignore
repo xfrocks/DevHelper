@@ -11,3 +11,4 @@ library/DevHelper/Config.php
 .data
 docker-compose.override.yml
 js/DevHelper/*.min.js
+.idea

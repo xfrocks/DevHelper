@@ -90,7 +90,10 @@ return implode(' AND ', \$conditions);
 
         $this->_addMethod("_get{$this->_dataClass['camelCase']}Model", 'protected', array(), "
 
-return \$this->getModelFromCache('$modelClassName');
+/** @var $modelClassName \$model */
+\$model = \$this->getModelFromCache('$modelClassName');
+
+return \$model;
 
         ");
 
