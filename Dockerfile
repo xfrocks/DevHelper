@@ -1,4 +1,4 @@
-FROM xfrocks/xenforo:php-apache-7.2.3
+FROM xfrocks/xenforo:php-apache-7.2.4
 
 COPY docker/* /usr/local/bin/
 RUN chmod +x /usr/local/bin/*.sh
