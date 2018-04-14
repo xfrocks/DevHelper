@@ -2,7 +2,6 @@
 
 set -e
 
-echo 'PassEnv DEVHELPER_PHP_APACHE_VERSION_ID' >> /etc/apache2/mods-available/env.conf
 a2enmod env rewrite
 
 for _verb in build-release \
