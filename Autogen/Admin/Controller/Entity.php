@@ -4,6 +4,7 @@ namespace DevHelper\Autogen\Admin\Controller;
 
 use XF\Admin\Controller\AbstractController;
 use XF\Mvc\Entity\Entity as MvcEntity;
+use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 use XF\Mvc\Reply\Error;
 use XF\Mvc\Reply\Exception;
@@ -12,7 +13,7 @@ use XF\Mvc\Reply\View;
 use XF\PrintableException;
 
 /**
- * @version 3
+ * @version 4
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -113,15 +114,7 @@ abstract class Entity extends AbstractController
             $entity = $this->createEntity();
         }
 
-        $columns = $this->filter('values', 'array');
-        $entity->bulkSet($columns);
-
-        $entity->preSave();
-        if ($entity->hasErrors()) {
-            return $this->error($entity->getErrors());
-        }
-
-        $entity->save();
+        $this->entitySaveProcess($entity)->run();
 
         return $this->redirect($this->buildLink($this->getRoutePrefix()));
     }
@@ -183,53 +176,11 @@ abstract class Entity extends AbstractController
     {
         $viewParams = [
             'entity' => $entity,
-            'columns' => []
+            'columns' => [],
         ];
 
         $structure = $entity->structure();
-
-        foreach ($structure->columns as $columnName => $column) {
-            if (empty($column['type']) ||
-                $columnName === $structure->primaryKey) {
-                continue;
-            }
-
-            $columnLabel = $this->callGetEntityColumnLabel($entity, $columnName);
-            if (empty($columnLabel)) {
-                continue;
-            }
-
-            if (!$entity->exists() && !empty($column['default'])) {
-                $entity->set($columnName, $column['default']);
-            }
-
-            $columnTag = null;
-            $columnTagOptions = [];
-            switch ($column['type']) {
-                case MvcEntity::INT:
-                    $columnTag = 'number-box';
-                    break;
-                case MvcEntity::UINT:
-                    $columnTag = 'number-box';
-                    $columnTagOptions['min'] = 0;
-                    break;
-                case MvcEntity::STR:
-                    if (!empty($column['maxLength']) && $column['maxLength'] <= 255) {
-                        $columnTag = 'text-box';
-                    } else {
-                        $columnTag = 'text-area';
-                    }
-                    break;
-            }
-
-            $viewParams['columns'][$columnName] = [
-                'label' => $columnLabel,
-                'name' => sprintf('values[%s]', $columnName),
-                'value' => $entity->get($columnName),
-                'tag' => $columnTag,
-                'tagOptions' => $columnTagOptions
-            ];
-        }
+        $viewParams['columns'] = $this->entityGetMetadataForColumns($entity);
 
         foreach ($structure->relations as $relationKey => $relation) {
             if (empty($relation['entity']) ||
@@ -258,6 +209,85 @@ abstract class Entity extends AbstractController
         }
 
         return $this->getViewReply('edit', $viewParams);
+    }
+
+    /**
+     * @param \XF\Mvc\Entity\Entity $entity
+     * @return array
+     */
+    protected function entityGetMetadataForColumns($entity)
+    {
+        $columns = [];
+        $structure = $entity->structure();
+
+        foreach ($structure->columns as $columnName => $column) {
+            if (empty($column['type']) ||
+                $columnName === $structure->primaryKey) {
+                continue;
+            }
+
+            $columnLabel = $this->callGetEntityColumnLabel($entity, $columnName);
+            if (empty($columnLabel)) {
+                continue;
+            }
+
+            if (!$entity->exists() && !empty($column['default'])) {
+                $entity->set($columnName, $column['default']);
+            }
+
+            $columnTag = null;
+            $columnTagOptions = [];
+            $columnFilter = null;
+            switch ($column['type']) {
+                case MvcEntity::INT:
+                    $columnTag = 'number-box';
+                    $columnFilter = 'int';
+                    break;
+                case MvcEntity::UINT:
+                    $columnTag = 'number-box';
+                    $columnTagOptions['min'] = 0;
+                    $columnFilter = 'uint';
+                    break;
+                case MvcEntity::STR:
+                    if (!empty($column['maxLength']) && $column['maxLength'] <= 255) {
+                        $columnTag = 'text-box';
+                    } else {
+                        $columnTag = 'text-area';
+                    }
+                    $columnFilter = 'str';
+                    break;
+            }
+
+            $columns[$columnName] = [
+                'filter' => $columnFilter,
+                'label' => $columnLabel,
+                'name' => sprintf('values[%s]', $columnName),
+                'tag' => $columnTag,
+                'tagOptions' => $columnTagOptions,
+                'value' => $entity->get($columnName),
+            ];
+        }
+
+        return $columns;
+    }
+
+    /**
+     * @param \XF\Mvc\Entity\Entity $entity
+     * @return FormAction
+     */
+    protected function entitySaveProcess($entity)
+    {
+        $filters = [];
+        $columns = $this->entityGetMetadataForColumns($entity);
+        foreach ($columns as $columnName => $metadata) {
+            $filters[$columnName] = $metadata['filter'];
+        }
+
+        $form = $this->formAction();
+        $input = $this->filter(['values' => $filters]);
+        $form->basicEntitySave($entity, $input['values']);
+
+        return $form;
     }
 
     /**
@@ -551,6 +581,8 @@ abstract class Entity extends AbstractController
             if (!$templateSource) {
                 throw new \LogicException("Source template {$templateTitleSource} not found");
             }
+            $header = gmdate('c', \XF::$time);
+            $templateSourceWithHeader = "<xf:comment>{$header}</xf:comment>\n{$templateSource->template}";
 
             /** @var \XF\Entity\Template $templateTarget */
             $templateTarget = $this->finder('XF:Template')
@@ -561,13 +593,14 @@ abstract class Entity extends AbstractController
                 ->fetchOne();
 
             if ($templateTarget) {
-                if ($templateTarget->template === $templateSource->template) {
+                $templateTargetWithoutHeader = preg_replace('/.*\n/', '', $templateTarget->template, 1);
+                if ($templateTargetWithoutHeader === $templateSource->template) {
                     $output->writeln(
                         "<info>Template #{$templateTarget->template_id} {$templateTarget->title} OK</info>",
                         \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_VERY_VERBOSE
                     );
                 } else {
-                    $templateTarget->template = $templateSource->template;
+                    $templateTarget->template = $templateSourceWithHeader;
                     $templateTarget->save();
 
                     $output->writeln("<info>Template #{$templateTarget->template_id} {$templateTarget->title} UPDATED</info>");
@@ -578,7 +611,7 @@ abstract class Entity extends AbstractController
                 $newTemplate->type = 'admin';
                 $newTemplate->title = $templateTitleTarget;
                 $newTemplate->style_id = 0;
-                $newTemplate->template = $templateSource->template;
+                $newTemplate->template = $templateSourceWithHeader;
                 $newTemplate->addon_id = $addOn->getAddOnId();
                 $newTemplate->save();
 
@@ -586,7 +619,7 @@ abstract class Entity extends AbstractController
             }
         }
 
-        $output->writeln(__CLASS__);
+        $output->writeln(get_class($this));
     }
 
     // DevHelper/Autogen ends

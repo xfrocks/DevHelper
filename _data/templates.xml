@@ -64,6 +64,11 @@
                 </xf:if>
             </xf:foreach>
 
+			<xf:if is="{$macroTemplate} && {$macroName}">
+				<xf:macro template="{$macroTemplate}" name="{$macroName}"
+						  arg-columns="{$columns}"
+						  arg-entity="{$entity}" />
+			</xf:if>
         </div>
 
         <xf:hiddenval name="entity_id" value="{{ $entity.getEntityId() }}"/>
