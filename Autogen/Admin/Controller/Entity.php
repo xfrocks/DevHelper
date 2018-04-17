@@ -3,12 +3,17 @@
 namespace DevHelper\Autogen\Admin\Controller;
 
 use XF\Admin\Controller\AbstractController;
+use XF\Mvc\Entity\Entity as MvcEntity;
 use XF\Mvc\ParameterBag;
+use XF\Mvc\Reply\Error;
+use XF\Mvc\Reply\Exception;
 use XF\Mvc\Reply\Redirect;
 use XF\Mvc\Reply\View;
+use XF\PrintableException;
 
 /**
- * @version 2
+ * @version 3
+ * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
 {
@@ -49,8 +54,8 @@ abstract class Entity extends AbstractController
     /**
      * @param ParameterBag $params
      * @return View|Redirect
-     * @throws \XF\Mvc\Reply\Exception
-     * @throws \XF\PrintableException
+     * @throws Exception
+     * @throws PrintableException
      */
     public function actionDelete(ParameterBag $params)
     {
@@ -67,12 +72,9 @@ abstract class Entity extends AbstractController
             return $this->redirect($this->buildLink($this->getRoutePrefix()));
         }
 
-        /** @noinspection PhpUndefinedMethodInspection */
-        $entityLabel = $entity->getLabel();
-
         $viewParams = [
             'entity' => $entity,
-            'entityLabel' => $entityLabel
+            'entityLabel' => $this->callGetEntityLabel($entity)
         ];
 
         return $this->getViewReply('delete', $viewParams);
@@ -80,8 +82,8 @@ abstract class Entity extends AbstractController
 
     /**
      * @param ParameterBag $params
-     * @return \XF\Mvc\Reply\View
-     * @throws \XF\Mvc\Reply\Exception
+     * @return View
+     * @throws Exception
      */
     public function actionEdit(ParameterBag $params)
     {
@@ -95,10 +97,10 @@ abstract class Entity extends AbstractController
     }
 
     /**
-     * @return \XF\Mvc\Reply\Error|\XF\Mvc\Reply\Redirect
+     * @return Error|Redirect
      * @throws \Exception
-     * @throws \XF\Mvc\Reply\Exception
-     * @throws \XF\PrintableException
+     * @throws Exception
+     * @throws PrintableException
      */
     public function actionSave()
     {
@@ -126,8 +128,8 @@ abstract class Entity extends AbstractController
 
     /**
      * @param int $entityId
-     * @return \XF\Mvc\Entity\Entity
-     * @throws \XF\Mvc\Reply\Exception
+     * @return MvcEntity
+     * @throws Exception
      */
     protected function assertEntityExists($entityId)
     {
@@ -135,7 +137,38 @@ abstract class Entity extends AbstractController
     }
 
     /**
-     * @return \XF\Mvc\Entity\Entity
+     * @param MvcEntity $entity
+     * @param string $columnName
+     * @return string|null
+     */
+    protected function callGetEntityColumnLabel($entity, $columnName)
+    {
+        $callback = [$entity, 'getEntityColumnLabel'];
+        if (!is_callable($callback)) {
+            $shortName = $entity->structure()->shortName;
+            throw new \InvalidArgumentException("{$shortName} does not implement {$callback[1]}");
+        }
+
+        return call_user_func($callback, $columnName);
+    }
+
+    /**
+     * @param MvcEntity $entity
+     * @return string|null
+     */
+    protected function callGetEntityLabel($entity)
+    {
+        $callback = [$entity, 'getEntityLabel'];
+        if (!is_callable($callback)) {
+            $shortName = $entity->structure()->shortName;
+            throw new \InvalidArgumentException("{$shortName} does not implement {$callback[1]}");
+        }
+
+        return call_user_func($callback);
+    }
+
+    /**
+     * @return MvcEntity
      */
     protected function createEntity()
     {
@@ -143,8 +176,8 @@ abstract class Entity extends AbstractController
     }
 
     /**
-     * @param \XF\Mvc\Entity\Entity $entity
-     * @return \XF\Mvc\Reply\View
+     * @param MvcEntity $entity
+     * @return View
      */
     protected function entityAddEdit($entity)
     {
@@ -156,17 +189,31 @@ abstract class Entity extends AbstractController
         $structure = $entity->structure();
 
         foreach ($structure->columns as $columnName => $column) {
-            if (empty($column['required']) ||
-                empty($column['type'])) {
+            if (empty($column['type']) ||
+                $columnName === $structure->primaryKey) {
                 continue;
             }
 
-            /** @noinspection PhpUndefinedMethodInspection */
-            $columnLabel = $entity->getColumnLabel($columnName);
+            $columnLabel = $this->callGetEntityColumnLabel($entity, $columnName);
+            if (empty($columnLabel)) {
+                continue;
+            }
+
+            if (!$entity->exists() && !empty($column['default'])) {
+                $entity->set($columnName, $column['default']);
+            }
+
             $columnTag = null;
             $columnTagOptions = [];
             switch ($column['type']) {
-                case \XF\Mvc\Entity\Entity::STR:
+                case MvcEntity::INT:
+                    $columnTag = 'number-box';
+                    break;
+                case MvcEntity::UINT:
+                    $columnTag = 'number-box';
+                    $columnTagOptions['min'] = 0;
+                    break;
+                case MvcEntity::STR:
                     if (!empty($column['maxLength']) && $column['maxLength'] <= 255) {
                         $columnTag = 'text-box';
                     } else {
@@ -187,22 +234,27 @@ abstract class Entity extends AbstractController
         foreach ($structure->relations as $relationKey => $relation) {
             if (empty($relation['entity']) ||
                 empty($relation['type']) ||
-                $relation['type'] !== \XF\Mvc\Entity\Entity::TO_ONE ||
+                $relation['type'] !== MvcEntity::TO_ONE ||
                 empty($relation['primary']) ||
-                empty($relation['conditions']) ||
-                !is_string($relation['conditions'])) {
+                empty($relation['conditions'])) {
                 continue;
             }
 
             $columnName = $relation['conditions'];
-            $relationChoices = $this->getRelationChoices($relation['entity']);
-
-            if (count($relationChoices) > 0) {
-                $viewParams['columns'][$columnName]['tag'] = 'select';
-                $viewParams['columns'][$columnName]['tagOptions'] = [
-                    'choices' => $relationChoices
-                ];
+            if (!is_string($columnName) ||
+                !isset($viewParams['columns'][$columnName])) {
+                continue;
             }
+            $columnViewParamRef = &$viewParams['columns'][$columnName];
+
+            $relationChoices = $this->getRelationChoices($relation['entity']);
+            if (count($relationChoices) === 0) {
+                $columnViewParamRef['tag'] = 'text-box';
+                continue;
+            }
+
+            $columnViewParamRef['tag'] = 'select';
+            $columnViewParamRef['tagOptions'] = ['choices' => $relationChoices];
         }
 
         return $this->getViewReply('edit', $viewParams);
@@ -276,14 +328,11 @@ abstract class Entity extends AbstractController
 
         $choices = [];
 
-        /** @var \XF\Mvc\Entity\Entity $entity */
+        /** @var MvcEntity $entity */
         foreach ($this->em()->getFinder($shortName)->fetch() as $entity) {
-            /** @noinspection PhpUndefinedMethodInspection */
-            $entityLabel = $entity->getLabel();
-
             $choices[] = [
                 'value' => $entity->getEntityId(),
-                'label' => $entityLabel
+                'label' => $this->callGetEntityLabel($entity)
             ];
         }
 
@@ -343,7 +392,7 @@ abstract class Entity extends AbstractController
     /**
      * @param string $action
      * @param array $viewParams
-     * @return \XF\Mvc\Reply\View
+     * @return View
      */
     protected function getViewReply($action, array $viewParams)
     {
@@ -426,6 +475,18 @@ abstract class Entity extends AbstractController
     {
         /** @var \Symfony\Component\Console\Helper\QuestionHelper $helper */
         $helper = $command->getHelper('question');
+
+        $entity = $this->createEntity();
+        try {
+            $this->callGetEntityLabel($entity);
+        } catch (\InvalidArgumentException $e) {
+            $output->writeln("<error>{$e->getMessage()}</error>");
+        }
+        try {
+            $this->callGetEntityColumnLabel($entity, __METHOD__);
+        } catch (\InvalidArgumentException $e) {
+            $output->writeln("<error>{$e->getMessage()}</error>");
+        }
 
         foreach ([
                      '_add',

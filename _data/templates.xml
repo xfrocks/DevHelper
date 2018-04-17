@@ -22,7 +22,7 @@
   <template type="admin" title="devhelper_autogen_ace_edit" version_id="2000000" version_string="2.0.0"><![CDATA[<xf:if is="$entity.isInsert()">
     <xf:title>{$phrases.add|raw}</xf:title>
     <xf:else/>
-    <xf:title>{$phrases.edit|raw}: {$entity.label}</xf:title>
+    <xf:title>{$phrases.edit|raw}: {$entity.getEntityLabel()}</xf:title>
 </xf:if>
 
 <xf:pageaction if="$entity.isUpdate()">
@@ -35,7 +35,13 @@
         <div class="block-body">
 
             <xf:foreach loop="$columns" key="$columnName" value="$column">
-                <xf:if is="{$column.tag} === 'select'">
+				<xf:if is="{$column.tag} === 'number-box'">
+                    <xf:numberboxrow label="{$column.label}"
+									 min="{$column.tagOptions.min}"
+									 name="{$column.name}"
+									 value="{$column.value}"/>
+
+	                <xf:elseif is="{$column.tag} === 'select'" />
                     <xf:selectrow label="{$column.label}"
                                   name="{$column.name}"
                                   value="{$column.value}">
@@ -88,7 +94,7 @@
                                 value="{{ (empty($editLink) && $links.view) ? link($links.view, $entity) : '' }}"/>
                         <xf:datarow delete="{{ $links.delete ? link($links.delete, $entity) : '' }}"
                                     href="{{ $editLink ?: $viewLink }}"
-                                    label="{$entity.label}"
+                                    label="{$entity.getEntityLabel()}"
                                     overlay="{{ !!$viewLink }}"/>
                     </xf:foreach>
                 </xf:datalist>
