@@ -2,7 +2,10 @@
 
 set -e
 
+echo 'PassEnv DEVHELPER_PHP_APACHE_VERSION_ID' >> /etc/apache2/mods-available/env.conf
 a2enmod env rewrite
+
+echo 'auto_prepend_file=/var/www/html/src/addons/DevHelper/prepend.php' > /usr/local/etc/php/conf.d/DevHelper.ini
 
 for _verb in build-release \
   bump-version \

@@ -2,7 +2,7 @@
 
 set -e
 
-_phpcsXmlPath='/usr/local/bin/phpcs.xml'
+_phpcsXmlPath='/var/www/html/src/addons/DevHelper/phpcs.xml'
 set -- "--standard=${_phpcsXmlPath}" "$@"
 
 if [ -z "$PHPCBF" ]; then
