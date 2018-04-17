@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+  <template type="admin" title="devhelper_autogen_ace_delete" version_id="2000000" version_string="2.0.0"><![CDATA[<xf:title>{{ phrase('confirm_action') }}</xf:title>
+
+<xf:form action="{{ link($links.delete, $entity) }}" ajax="true" class="block">
+    <div class="block-container">
+        <div class="block-body">
+            <xf:inforow rowtype="confirm">
+                {{ phrase('please_confirm_that_you_want_to_delete_following:') }}
+                <strong>
+                    <xf:if is="{$links.edit}">
+                        <a href="{{ link($links.edit, $entity) }}">{$entityLabel}</a>
+                        <xf:else/>
+                        {$entityLabel}
+                    </xf:if>
+                </strong>
+            </xf:inforow>
+        </div>
+        <xf:submitrow rowtype="simple" icon="delete"/>
+    </div>
+</xf:form>]]></template>
+  <template type="admin" title="devhelper_autogen_ace_edit" version_id="2000000" version_string="2.0.0"><![CDATA[<xf:if is="$entity.isInsert()">
+    <xf:title>{$phrases.add|raw}</xf:title>
+    <xf:else/>
+    <xf:title>{$phrases.edit|raw}: {$entity.label}</xf:title>
+</xf:if>
+
+<xf:pageaction if="$entity.isUpdate()">
+    <xf:button href="{{ link('notices/delete', $entity) }}" icon="delete" overlay="true"/>
+</xf:pageaction>
+
+<xf:form action="{{ link({$links.save}) }}" ajax="true" class="block">
+    <div class="block-container">
+
+        <div class="block-body">
+
+            <xf:foreach loop="$columns" key="$columnName" value="$column">
+                <xf:if is="{$column.tag} === 'select'">
+                    <xf:selectrow label="{$column.label}"
+                                  name="{$column.name}"
+                                  value="{$column.value}">
+                        <xf:foreach loop="$column.tagOptions.choices" value="$choice">
+                            <xf:option disabled="{$choice.disabled}"
+                                       label="{$choice.label}"
+                                       value="{$choice.value}"/>
+                        </xf:foreach>
+                    </xf:selectrow>
+
+                    <xf:elseif is="{$column.tag} === 'text-area'"/>
+                    <xf:textarearow label="{$column.label}"
+                                    name="{$column.name}"
+                                    value="{{ $entity.get($columnName) }}"/>
+
+                    <xf:elseif is="{$column.tag} === 'text-box'"/>
+                    <xf:textboxrow label="{$column.label}"
+                                   name="{$column.name}"
+                                   value="{$column.value}"/>
+                </xf:if>
+            </xf:foreach>
+
+        </div>
+
+        <xf:hiddenval name="entity_id" value="{{ $entity.getEntityId() }}"/>
+        <xf:submitrow sticky="true" icon="save"/>
+    </div>
+</xf:form>]]></template>
+  <template type="admin" title="devhelper_autogen_ace_list" version_id="2000000" version_string="2.0.0"><![CDATA[<xf:title>{$phrases.entities|raw}</xf:title>
+
+<xf:if is="{$links.add}">
+    <xf:pageaction>
+        <xf:button href="{{ link($links.add) }}" icon="add">{$phrases.add|raw}</xf:button>
+    </xf:pageaction>
+</xf:if>
+
+<xf:if is="$entities is not empty">
+    <div class="block">
+        <div class="block-outer">
+            <xf:macro template="filter_macros" name="quick_filter" arg-key="{$phrases.entity}"
+                      arg-class="block-outer-opposite"/>
+        </div>
+        <div class="block-container">
+            <div class="block-body">
+                <xf:datalist>
+                    <xf:foreach loop="{$entities}" value="$entity">
+                        <xf:set var="$editLink"
+                                value="{{ $links.edit ? link($links.edit, $entity) : '' }}"/>
+                        <xf:set var="$viewLink"
+                                value="{{ (empty($editLink) && $links.view) ? link($links.view, $entity) : '' }}"/>
+                        <xf:datarow delete="{{ $links.delete ? link($links.delete, $entity) : '' }}"
+                                    href="{{ $editLink ?: $viewLink }}"
+                                    label="{$entity.label}"
+                                    overlay="{{ !!$viewLink }}"/>
+                    </xf:foreach>
+                </xf:datalist>
+                <div class="block-footer">
+                    <span class="block-footer-counter">{{ display_totals($entities, $total) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <xf:pagenav page="{$page}" perpage="{$perPage}" total="{$total}"
+                    link="{$links.index}"
+                    wrapperclass="block-outer block-outer--after"/>
+    </div>
+    <xf:else/>
+    <div class="blockMessage">{{ phrase('no_items_have_been_created_yet') }}</div>
+</xf:if>]]></template>
+</templates>
