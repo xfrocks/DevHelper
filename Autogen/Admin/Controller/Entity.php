@@ -4,7 +4,6 @@ namespace DevHelper\Autogen\Admin\Controller;
 
 use XF\Admin\Controller\AbstractController;
 use XF\Mvc\Entity\Entity as MvcEntity;
-use XF\Mvc\Entity\Finder;
 use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 use XF\Mvc\Reply\Error;
@@ -14,7 +13,7 @@ use XF\Mvc\Reply\View;
 use XF\PrintableException;
 
 /**
- * @version 5
+ * @version 6
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -27,12 +26,15 @@ abstract class Entity extends AbstractController
         $page = $this->filterPage();
         $perPage = $this->getPerPage();
 
-        $finder = $this->finderForList()->limitByPage($page, $perPage);
+        list($finder, $filters) = $this->entityListData();
+
+        $finder->limitByPage($page, $perPage);
         $total = $finder->total();
 
         $viewParams = [
             'entities' => $finder->fetch(),
 
+            'filters' => $filters,
             'page' => $page,
             'perPage' => $perPage,
             'total' => $total
@@ -296,6 +298,24 @@ abstract class Entity extends AbstractController
     }
 
     /**
+     * @return array
+     */
+    protected function entityListData()
+    {
+        $shortName = $this->getShortName();
+        $finder = $this->finder($shortName);
+
+        $structure = $this->em()->getEntityStructure($shortName);
+        if (!empty($structure->columns['display_order'])) {
+            $finder->order('display_order');
+        }
+
+        $filters = ['pageNavParams' => []];
+
+        return [$finder, $filters];
+    }
+
+    /**
      * @param \XF\Mvc\Entity\Entity $entity
      * @return FormAction
      */
@@ -312,22 +332,6 @@ abstract class Entity extends AbstractController
         $form->basicEntitySave($entity, $input['values']);
 
         return $form;
-    }
-
-    /**
-     * @return Finder
-     */
-    protected function finderForList()
-    {
-        $shortName = $this->getShortName();
-        $finder = $this->finder($shortName);
-
-        $structure = $this->em()->getEntityStructure($shortName);
-        if (!empty($structure->columns['display_order'])) {
-            $finder->order('display_order');
-        }
-
-        return $finder;
     }
 
     /**
