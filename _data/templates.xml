@@ -22,11 +22,11 @@
   <template type="admin" title="devhelper_autogen_ace_edit" version_id="2000000" version_string="2.0.0"><![CDATA[<xf:if is="$entity.isInsert()">
     <xf:title>{$phrases.add|raw}</xf:title>
     <xf:else/>
-    <xf:title>{$phrases.edit|raw}: {$entity.getEntityLabel()}</xf:title>
+    <xf:title>{$phrases.edit|raw}: {$controller.getEntityLabel($entity)}</xf:title>
 </xf:if>
 
-<xf:pageaction if="$entity.isUpdate()">
-    <xf:button href="{{ link('notices/delete', $entity) }}" icon="delete" overlay="true"/>
+<xf:pageaction if="$links.delete && $entity.isUpdate()">
+    <xf:button href="{{ link({$links.delete}, $entity) }}" icon="delete" overlay="true"/>
 </xf:pageaction>
 
 <xf:form action="{{ link({$links.save}) }}" ajax="true" class="block">
@@ -64,8 +64,8 @@
                 </xf:if>
             </xf:foreach>
 
-			<xf:if is="{$macroTemplate} && {$macroName}">
-				<xf:macro template="{$macroTemplate}" name="{$macroName}"
+			<xf:if is="{$macroTemplateEntityEdit}">
+				<xf:macro template="{$macroTemplateEntityEdit}" name="entity_edit"
 						  arg-columns="{$columns}"
 						  arg-entity="{$entity}" />
 			</xf:if>
@@ -98,8 +98,10 @@
                         <xf:set var="$viewLink"
                                 value="{{ (empty($editLink) && $links.view) ? link($links.view, $entity) : '' }}"/>
                         <xf:datarow delete="{{ $links.delete ? link($links.delete, $entity) : '' }}"
+									explain="{$controller.getEntityExplain($entity)}"
+									hint="{$controller.getEntityHint($entity)}"
                                     href="{{ $editLink ?: $viewLink }}"
-                                    label="{$entity.getEntityLabel()}"
+                                    label="{$controller.getEntityLabel($entity)}"
                                     overlay="{{ !!$viewLink }}"/>
                     </xf:foreach>
                 </xf:datalist>

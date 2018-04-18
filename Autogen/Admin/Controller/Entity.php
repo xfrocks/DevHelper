@@ -4,6 +4,7 @@ namespace DevHelper\Autogen\Admin\Controller;
 
 use XF\Admin\Controller\AbstractController;
 use XF\Mvc\Entity\Entity as MvcEntity;
+use XF\Mvc\Entity\Finder;
 use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 use XF\Mvc\Reply\Error;
@@ -13,7 +14,7 @@ use XF\Mvc\Reply\View;
 use XF\PrintableException;
 
 /**
- * @version 4
+ * @version 5
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -26,7 +27,7 @@ abstract class Entity extends AbstractController
         $page = $this->filterPage();
         $perPage = $this->getPerPage();
 
-        $finder = $this->em()->getFinder($this->getShortName())->limitByPage($page, $perPage);
+        $finder = $this->finderForList()->limitByPage($page, $perPage);
         $total = $finder->total();
 
         $viewParams = [
@@ -75,7 +76,7 @@ abstract class Entity extends AbstractController
 
         $viewParams = [
             'entity' => $entity,
-            'entityLabel' => $this->callGetEntityLabel($entity)
+            'entityLabel' => $this->getEntityLabel($entity)
         ];
 
         return $this->getViewReply('delete', $viewParams);
@@ -120,21 +121,11 @@ abstract class Entity extends AbstractController
     }
 
     /**
-     * @param int $entityId
-     * @return MvcEntity
-     * @throws Exception
-     */
-    protected function assertEntityExists($entityId)
-    {
-        return $this->assertRecordExists($this->getShortName(), $entityId);
-    }
-
-    /**
      * @param MvcEntity $entity
      * @param string $columnName
      * @return string|null
      */
-    protected function callGetEntityColumnLabel($entity, $columnName)
+    public function getEntityColumnLabel($entity, $columnName)
     {
         $callback = [$entity, 'getEntityColumnLabel'];
         if (!is_callable($callback)) {
@@ -147,9 +138,32 @@ abstract class Entity extends AbstractController
 
     /**
      * @param MvcEntity $entity
+     * @return string
+     */
+    public function getEntityExplain($entity)
+    {
+        return '';
+    }
+
+    /**
+     * @param MvcEntity $entity
+     * @return string
+     */
+    public function getEntityHint($entity)
+    {
+        $structure = $entity->structure();
+        if (!empty($structure->columns['display_order'])) {
+            return sprintf('%s: %d', \XF::phrase('display_order'), $entity->get('display_order'));
+        }
+
+        return '';
+    }
+
+    /**
+     * @param MvcEntity $entity
      * @return string|null
      */
-    protected function callGetEntityLabel($entity)
+    public function getEntityLabel($entity)
     {
         $callback = [$entity, 'getEntityLabel'];
         if (!is_callable($callback)) {
@@ -158,6 +172,16 @@ abstract class Entity extends AbstractController
         }
 
         return call_user_func($callback);
+    }
+
+    /**
+     * @param int $entityId
+     * @return MvcEntity
+     * @throws Exception
+     */
+    protected function assertEntityExists($entityId)
+    {
+        return $this->assertRecordExists($this->getShortName(), $entityId);
     }
 
     /**
@@ -226,7 +250,7 @@ abstract class Entity extends AbstractController
                 continue;
             }
 
-            $columnLabel = $this->callGetEntityColumnLabel($entity, $columnName);
+            $columnLabel = $this->getEntityColumnLabel($entity, $columnName);
             if (empty($columnLabel)) {
                 continue;
             }
@@ -288,6 +312,22 @@ abstract class Entity extends AbstractController
         $form->basicEntitySave($entity, $input['values']);
 
         return $form;
+    }
+
+    /**
+     * @return Finder
+     */
+    protected function finderForList()
+    {
+        $shortName = $this->getShortName();
+        $finder = $this->finder($shortName);
+
+        $structure = $this->em()->getEntityStructure($shortName);
+        if (!empty($structure->columns['display_order'])) {
+            $finder->order('display_order');
+        }
+
+        return $finder;
     }
 
     /**
@@ -359,10 +399,10 @@ abstract class Entity extends AbstractController
         $choices = [];
 
         /** @var MvcEntity $entity */
-        foreach ($this->em()->getFinder($shortName)->fetch() as $entity) {
+        foreach ($this->finder($shortName)->fetch() as $entity) {
             $choices[] = [
                 'value' => $entity->getEntityId(),
-                'label' => $this->callGetEntityLabel($entity)
+                'label' => $this->getEntityLabel($entity)
             ];
         }
 
@@ -429,6 +469,7 @@ abstract class Entity extends AbstractController
         $viewClass = sprintf('%s:Entity\%s', $this->getPrefixForClasses(), ucwords($action));
         $templateTitle = sprintf('%s_entity_%s', $this->getPrefixForTemplates(), strtolower($action));
 
+        $viewParams['controller'] = $this;
         $viewParams['links'] = $this->getViewLinks();
         $viewParams['phrases'] = $this->getViewPhrases();
 
@@ -508,12 +549,12 @@ abstract class Entity extends AbstractController
 
         $entity = $this->createEntity();
         try {
-            $this->callGetEntityLabel($entity);
+            $this->getEntityLabel($entity);
         } catch (\InvalidArgumentException $e) {
             $output->writeln("<error>{$e->getMessage()}</error>");
         }
         try {
-            $this->callGetEntityColumnLabel($entity, __METHOD__);
+            $this->getEntityColumnLabel($entity, __METHOD__);
         } catch (\InvalidArgumentException $e) {
             $output->writeln("<error>{$e->getMessage()}</error>");
         }
