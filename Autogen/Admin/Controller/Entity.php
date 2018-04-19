@@ -13,7 +13,7 @@ use XF\Mvc\Reply\View;
 use XF\PrintableException;
 
 /**
- * @version 6
+ * @version 7
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -285,6 +285,7 @@ abstract class Entity extends AbstractController
             }
 
             $columns[$columnName] = [
+                '_structureData' => $column,
                 'filter' => $columnFilter,
                 'label' => $columnLabel,
                 'name' => sprintf('values[%s]', $columnName),

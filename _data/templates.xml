@@ -35,13 +35,19 @@
         <div class="block-body">
 
             <xf:foreach loop="$columns" key="$columnName" value="$column">
-				<xf:if is="{$column.tag} === 'number-box'">
-                    <xf:numberboxrow label="{$column.label}"
-									 min="{$column.tagOptions.min}"
-									 name="{$column.name}"
-									 value="{$column.value}"/>
+                <xf:if is="{$column.macroTemplate}">
+                    <xf:macro template="{$column.macroTemplate}" name="entity_edit_column"
+                              arg-column="{$column}"
+                              arg-columnName="{$columnName}"
+							  arg-entity="{$entity}"/>
 
-	                <xf:elseif is="{$column.tag} === 'select'" />
+                    <xf:elseif is="{$column.tag} === 'number-box'"/>
+                    <xf:numberboxrow label="{$column.label}"
+                                     min="{$column.tagOptions.min}"
+                                     name="{$column.name}"
+                                     value="{$column.value}"/>
+
+                    <xf:elseif is="{$column.tag} === 'select'"/>
                     <xf:selectrow label="{$column.label}"
                                   name="{$column.name}"
                                   value="{$column.value}">
@@ -53,7 +59,13 @@
                     </xf:selectrow>
 
                     <xf:elseif is="{$column.tag} === 'text-area'"/>
-                    <xf:textarearow label="{$column.label}"
+					<xf:set var="$hint">
+						<xf:if is="{$column._structureData.html}">
+							{{ phrase('you_may_use_html') }}
+						</xf:if>
+					</xf:set>
+                    <xf:textarearow hint="{{ trim($hint) }}"
+									label="{$column.label}"
                                     name="{$column.name}"
                                     value="{{ $entity.get($columnName) }}"/>
 
@@ -64,11 +76,11 @@
                 </xf:if>
             </xf:foreach>
 
-			<xf:if is="{$macroTemplateEntityEdit}">
-				<xf:macro template="{$macroTemplateEntityEdit}" name="entity_edit"
-						  arg-columns="{$columns}"
-						  arg-entity="{$entity}" />
-			</xf:if>
+            <xf:if is="{$macroTemplateEntityEdit}">
+                <xf:macro template="{$macroTemplateEntityEdit}" name="entity_edit"
+                          arg-columns="{$columns}"
+                          arg-entity="{$entity}"/>
+            </xf:if>
         </div>
 
         <xf:hiddenval name="entity_id" value="{{ $entity.getEntityId() }}"/>
