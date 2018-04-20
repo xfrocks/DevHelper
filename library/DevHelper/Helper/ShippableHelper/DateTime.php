@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_DateTime
- * @version 3
+ * @version 4
  */
 class DevHelper_Helper_ShippableHelper_DateTime
 {
@@ -50,6 +50,8 @@ class DevHelper_Helper_ShippableHelper_DateTime
      */
     public static function gmmktime($year, $month = 0, $day = 0, $hour = 0, $minute = 0, $second = 0, $offset = null)
     {
+        $timestamp = null;
+
         if (is_array($year)) {
             $args = func_get_args();
             if (count($args) !== 1) {
@@ -58,7 +60,7 @@ class DevHelper_Helper_ShippableHelper_DateTime
 
             $values = $year;
             $year = 0;
-            foreach (array('year', 'month', 'day', 'hour', 'minute', 'second', 'offset') as $key) {
+            foreach (array('year', 'month', 'day', 'hour', 'minute', 'second', 'timestamp', 'offset') as $key) {
                 if (isset($values[$key])
                     && is_int($values[$key])
                 ) {
@@ -67,7 +69,9 @@ class DevHelper_Helper_ShippableHelper_DateTime
             }
         }
 
-        $timestamp = gmmktime($hour, $minute, $second, $month, $day, $year);
+        if ($timestamp === null) {
+            $timestamp = gmmktime($hour, $minute, $second, $month, $day, $year);
+        }
 
         if ($offset === null) {
             $offset = XenForo_Locale::getTimeZoneOffset();
