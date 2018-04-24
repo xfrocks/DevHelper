@@ -3,6 +3,7 @@
 namespace DevHelper\Cli\Command;
 
 use DevHelper\Autogen\Admin\Controller\Entity;
+use DevHelper\Util\AutogenContext;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -91,7 +92,8 @@ class AutoGen extends Command
                 continue;
             }
 
-            $controller->devHelperAutogen($this, $input, $output, $addOn);
+            $context = new AutogenContext($this, $input, $output, $app, $addOn);
+            $controller->devHelperAutogen($context);
         }
 
         $pattern = '#\s+' . preg_quote(self::MARKER_BEGINS, '#') . '.+' .

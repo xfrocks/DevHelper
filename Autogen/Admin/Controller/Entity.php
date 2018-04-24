@@ -13,7 +13,7 @@ use XF\Mvc\Reply\View;
 use XF\PrintableException;
 
 /**
- * @version 7
+ * @version 2018042301
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -132,7 +132,7 @@ abstract class Entity extends AbstractController
         $callback = [$entity, 'getEntityColumnLabel'];
         if (!is_callable($callback)) {
             $shortName = $entity->structure()->shortName;
-            throw new \InvalidArgumentException("{$shortName} does not implement {$callback[1]}");
+            throw new \InvalidArgumentException("Entity {$shortName} does not implement {$callback[1]}");
         }
 
         return call_user_func($callback, $columnName);
@@ -170,7 +170,7 @@ abstract class Entity extends AbstractController
         $callback = [$entity, 'getEntityLabel'];
         if (!is_callable($callback)) {
             $shortName = $entity->structure()->shortName;
-            throw new \InvalidArgumentException("{$shortName} does not implement {$callback[1]}");
+            throw new \InvalidArgumentException("Entity {$shortName} does not implement {$callback[1]}");
         }
 
         return call_user_func($callback);
@@ -217,24 +217,178 @@ abstract class Entity extends AbstractController
                 continue;
             }
 
-            $columnName = $relation['conditions'];
-            if (!is_string($columnName) ||
-                !isset($viewParams['columns'][$columnName])) {
+            $columnName = null;
+            $relationConditions = $relation['conditions'];
+            if (is_string($relationConditions)) {
+                $columnName = $relationConditions;
+            } elseif (is_array($relationConditions)) {
+                if (count($relationConditions) === 1) {
+                    $relationCondition = reset($relationConditions);
+                    if (count($relationCondition) === 3 &&
+                        $relationCondition[1] === '=' &&
+                        preg_match('/\$(.+)$/', $relationCondition[2], $matches)) {
+                        $columnName = $matches[1];
+                    }
+                }
+            }
+            if (empty($columnName) || !isset($viewParams['columns'][$columnName])) {
                 continue;
             }
             $columnViewParamRef = &$viewParams['columns'][$columnName];
+            list ($relationTag, $relationTagOptions) = $this->entityAddEditRelationColumn(
+                $entity,
+                $columnViewParamRef['_structureData'],
+                $relationKey,
+                $relation
+            );
 
-            $relationChoices = $this->getRelationChoices($relation['entity']);
-            if (count($relationChoices) === 0) {
-                $columnViewParamRef['tag'] = 'text-box';
-                continue;
+            if ($relationTag !== null) {
+                $columnViewParamRef['tag'] = $relationTag;
+                $columnViewParamRef['tagOptions'] = $relationTagOptions;
             }
-
-            $columnViewParamRef['tag'] = 'select';
-            $columnViewParamRef['tagOptions'] = ['choices' => $relationChoices];
         }
 
         return $this->getViewReply('edit', $viewParams);
+    }
+
+    /**
+     * @param MvcEntity $entity
+     * @param array $column
+     * @param string $relationKey
+     * @param array $relation
+     * @return array
+     */
+    protected function entityAddEditRelationColumn($entity, array $column, $relationKey, array $relation)
+    {
+        $tag = null;
+        $tagOptions = [];
+        switch ($relation['entity']) {
+            case 'XF:Forum':
+                $tag = 'select';
+                /** @var \XF\Repository\Node $nodeRepo */
+                $nodeRepo = $entity->repository('XF:Node');
+                $tagOptions['choices'] = $nodeRepo->getNodeOptionsData(false, ['Forum']);
+                break;
+            case 'XF:User':
+                $tag = 'username';
+                /** @var \XF\Entity\User $user */
+                $user = $entity->getRelation($relationKey);
+                $tagOptions['username'] = $user ? $user->username : '';
+                break;
+            default:
+                if (strpos($relation['entity'], $this->getPrefixForClasses()) === 0) {
+                    $choices = [];
+
+                    /** @var MvcEntity $entity */
+                    foreach ($this->finder($relation['entity'])->fetch() as $entity) {
+                        $choices[] = [
+                            'value' => $entity->getEntityId(),
+                            'label' => $this->getEntityLabel($entity)
+                        ];
+                    }
+
+                    $tag = 'select';
+                    $tagOptions['choices'] = $choices;
+                }
+        }
+
+        if ($tag === 'select') {
+            if (isset($tagOptions['choices']) && empty($column['required'])) {
+                array_unshift($tagOptions['choices'], [
+                    'value' => 0,
+                    'label' => '',
+                ]);
+            }
+        }
+
+        return [$tag, $tagOptions];
+    }
+
+    /**
+     * @param \XF\Mvc\Entity\Entity $entity
+     * @param string $columnName
+     * @param array $column
+     * @return array
+     */
+    protected function entityGetMetadataForColumn($entity, $columnName, array $column)
+    {
+        $columnTag = null;
+        $columnTagOptions = [];
+        $columnFilter = null;
+        $requiresLabel = true;
+
+        if (!$entity->exists()) {
+            if (!empty($column['default'])) {
+                $entity->set($columnName, $column['default']);
+            }
+
+            if ($this->request->exists($columnName)) {
+                $input = $this->filter(['filters' => [$columnName => 'str']]);
+                if (!empty($input['filters'][$columnName])) {
+                    $entity->set($columnName, $this->filter($columnName, $input['filters'][$columnName]));
+                    $requiresLabel = false;
+                }
+            }
+        } else {
+            if (!empty($column['writeOnce'])) {
+                // do not render row for write once column, new value won't be accepted anyway
+                return null;
+            }
+        }
+
+        $columnLabel = $this->getEntityColumnLabel($entity, $columnName);
+        if ($requiresLabel && empty($columnLabel)) {
+            return null;
+        }
+
+        switch ($column['type']) {
+            case MvcEntity::INT:
+                $columnTag = 'number-box';
+                $columnFilter = 'int';
+                break;
+            case MvcEntity::UINT:
+                $columnTag = 'number-box';
+                $columnTagOptions['min'] = 0;
+                $columnFilter = 'uint';
+                break;
+            case MvcEntity::STR:
+                if (!empty($column['allowedValues'])) {
+                    $choices = [];
+                    foreach ($column['allowedValues'] as $allowedValue) {
+                        $label = $allowedValue;
+                        if (is_object($columnLabel) && $columnLabel instanceof \XF\Phrase) {
+                            $labelPhraseName = $columnLabel->getName() . '_' .
+                                preg_replace('/[^a-z]+/i', '_', $allowedValue);
+                            $label = \XF::phraseDeferred($labelPhraseName);
+                        }
+
+                        $choices[] = [
+                            'value' => $allowedValue,
+                            'label' => $label
+                        ];
+                    }
+
+                    $columnTag = 'select';
+                    $columnTagOptions = ['choices' => $choices];
+                } elseif (!empty($column['maxLength']) && $column['maxLength'] <= 255) {
+                    $columnTag = 'text-box';
+                } else {
+                    $columnTag = 'text-area';
+                }
+                $columnFilter = 'str';
+                break;
+        }
+
+        if ($columnTag === null || $columnFilter === null) {
+            return null;
+        }
+
+        return [
+            'filter' => $columnFilter,
+            'label' => $columnLabel,
+            'tag' => $columnTag,
+            'tagOptions' => $columnTagOptions,
+        ];
     }
 
     /**
@@ -252,45 +406,15 @@ abstract class Entity extends AbstractController
                 continue;
             }
 
-            $columnLabel = $this->getEntityColumnLabel($entity, $columnName);
-            if (empty($columnLabel)) {
+            $metadata = $this->entityGetMetadataForColumn($entity, $columnName, $column);
+            if (!is_array($metadata)) {
                 continue;
             }
 
-            if (!$entity->exists() && !empty($column['default'])) {
-                $entity->set($columnName, $column['default']);
-            }
-
-            $columnTag = null;
-            $columnTagOptions = [];
-            $columnFilter = null;
-            switch ($column['type']) {
-                case MvcEntity::INT:
-                    $columnTag = 'number-box';
-                    $columnFilter = 'int';
-                    break;
-                case MvcEntity::UINT:
-                    $columnTag = 'number-box';
-                    $columnTagOptions['min'] = 0;
-                    $columnFilter = 'uint';
-                    break;
-                case MvcEntity::STR:
-                    if (!empty($column['maxLength']) && $column['maxLength'] <= 255) {
-                        $columnTag = 'text-box';
-                    } else {
-                        $columnTag = 'text-area';
-                    }
-                    $columnFilter = 'str';
-                    break;
-            }
-
-            $columns[$columnName] = [
+            $columns[$columnName] = $metadata;
+            $columns[$columnName] += [
                 '_structureData' => $column,
-                'filter' => $columnFilter,
-                'label' => $columnLabel,
                 'name' => sprintf('values[%s]', $columnName),
-                'tag' => $columnTag,
-                'tagOptions' => $columnTagOptions,
                 'value' => $entity->get($columnName),
             ];
         }
@@ -332,6 +456,43 @@ abstract class Entity extends AbstractController
         $input = $this->filter(['values' => $filters]);
         $form->basicEntitySave($entity, $input['values']);
 
+        $form->setup(function (FormAction $form) use ($entity) {
+            $input = $this->filter([
+                'hidden_columns' => 'array-str',
+                'hidden_values' => 'array-str',
+            ]);
+
+            foreach ($input['hidden_columns'] as $columnName) {
+                if (empty($input['hidden_values'][$columnName])) {
+                    continue;
+                }
+                $entity->set($columnName, $input['hidden_values'][$columnName]);
+            }
+        });
+
+        $form->setup(function (FormAction $form) use ($entity) {
+            $input = $this->filter([
+                'username_columns' => 'array-str',
+                'username_values' => 'array-str',
+            ]);
+
+            foreach ($input['username_columns'] as $columnName) {
+                $userId = 0;
+                if (!empty($input['username_values'][$columnName])) {
+                    /** @var \XF\Repository\User $userRepo */
+                    $userRepo = $this->repository('XF:User');
+                    $user = $userRepo->getUserByNameOrEmail($input['username_values'][$columnName]);
+                    if (empty($user)) {
+                        $form->logError(\XF::phrase('requested_user_not_found'));
+                    } else {
+                        $userId = $user->user_id;
+                    }
+                }
+
+                $entity->set($columnName, $userId);
+            }
+        });
+
         return $form;
     }
 
@@ -355,63 +516,6 @@ abstract class Entity extends AbstractController
     protected function getPerPage()
     {
         return 20;
-    }
-
-    /**
-     * @return array
-     */
-    protected function getRelationForums()
-    {
-        /** @var \XF\Repository\Node $nodeRepo */
-        $nodeRepo = \XF::repository('XF:Node');
-        $nodeTree = $nodeRepo->createNodeTree($nodeRepo->getFullNodeList());
-
-        // only list nodes that are forums or contain forums
-        $nodeTree = $nodeTree->filter(null, function ($id, $node, $depth, $children, $tree) {
-            return ($children || $node->node_type_id == 'Forum');
-        });
-
-        $choices = [];
-
-        foreach ($nodeTree->getFlattened(0) as $leaf) {
-            /** @var \XF\Entity\Node $node */
-            $node = $leaf['record'];
-            $choices[] = [
-                'value' => $node->node_id,
-                'disabled' => $node->node_type_id !== 'Forum',
-                'label' => str_repeat(html_entity_decode('&nbsp;&nbsp;'), $node->depth) . $node->title
-            ];
-        }
-
-        return $choices;
-    }
-
-    /**
-     * @param string $shortName
-     * @return array
-     */
-    protected function getRelationChoices($shortName)
-    {
-        switch ($shortName) {
-            case 'XF:Forum':
-                return $this->getRelationForums();
-            default:
-                if (strpos($shortName, $this->getPrefixForClasses()) !== 0) {
-                    return [];
-                }
-        }
-
-        $choices = [];
-
-        /** @var MvcEntity $entity */
-        foreach ($this->finder($shortName)->fetch() as $entity) {
-            $choices[] = [
-                'value' => $entity->getEntityId(),
-                'label' => $this->getEntityLabel($entity)
-            ];
-        }
-
-        return $choices;
     }
 
     /**
@@ -541,28 +645,30 @@ abstract class Entity extends AbstractController
     // DevHelper/Autogen begins
 
     /**
-     * @param \Symfony\Component\Console\Command\Command $command
-     * @param \Symfony\Component\Console\Input\InputInterface $input
-     * @param \Symfony\Component\Console\Output\OutputInterface $output
-     * @param \XF\AddOn\AddOn $addOn
-     * @throws \XF\PrintableException
+     * @param \DevHelper\Util\AutogenContext $context
+     * @throws PrintableException
      */
-    public function devHelperAutogen($command, $input, $output, $addOn)
+    public function devHelperAutogen($context)
     {
-        /** @var \Symfony\Component\Console\Helper\QuestionHelper $helper */
-        $helper = $command->getHelper('question');
-
         $entity = $this->createEntity();
         try {
             $this->getEntityLabel($entity);
         } catch (\InvalidArgumentException $e) {
-            $output->writeln("<error>{$e->getMessage()}</error>");
+            $context->writeln("<error>{$e->getMessage()}</error>");
         }
         try {
             $this->getEntityColumnLabel($entity, __METHOD__);
         } catch (\InvalidArgumentException $e) {
-            $output->writeln("<error>{$e->getMessage()}</error>");
+            $context->writeln("<error>{$e->getMessage()}</error>");
         }
+
+        $structure = $entity->structure();
+        \DevHelper\Util\Autogen\AdminRoute::autogen(
+            $context,
+            $this->getRoutePrefix(),
+            $structure->primaryKey,
+            str_replace('\Admin\Controller\\', ':', get_class($this))
+        );
 
         foreach ([
                      '_add',
@@ -570,42 +676,7 @@ abstract class Entity extends AbstractController
                      '_entities',
                      '_entity',
                  ] as $phraseTitlePartial) {
-            $phraseTitle = $this->getPrefixForPhrases() . $phraseTitlePartial;
-
-            /** @var \XF\Entity\Phrase $phrase */
-            $phrase = $this->finder('XF:Phrase')
-                ->where('language_id', 0)
-                ->where('addon_id', $addOn->getAddOnId())
-                ->where('title', $phraseTitle)
-                ->fetchOne();
-            if ($phrase) {
-                $output->writeln(
-                    "<info>Phrase #{$phrase->phrase_id} {$phrase->title} = {$phrase->phrase_text} OK</info>",
-                    \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_VERY_VERBOSE
-                );
-                continue;
-            }
-
-            $questionText = sprintf('<question>Enter phrase text for %s:</question> ', $phraseTitle);
-            $question = new \Symfony\Component\Console\Question\Question($questionText);
-            $question->setValidator(function ($answer) {
-                $answer = utf8_trim($answer);
-                if (empty($answer)) {
-                    throw new \InvalidArgumentException('Phrase text cannot be empty');
-                }
-                return $answer;
-            });
-            $phraseText = $helper->ask($input, $output, $question);
-
-            /** @var \XF\Entity\Phrase $newPhrase */
-            $newPhrase = $this->em()->create('XF:Phrase');
-            $newPhrase->addon_id = $addOn->getAddOnId();
-            $newPhrase->language_id = 0;
-            $newPhrase->title = $phraseTitle;
-            $newPhrase->phrase_text = $phraseText;
-            $newPhrase->save();
-
-            $output->writeln("<info>Phrase #{$newPhrase->phrase_id} {$newPhrase->title} = {$newPhrase->phrase_text} NEW</info>");
+            \DevHelper\Util\Autogen\Phrase::autogen($context, $this->getPrefixForPhrases() . $phraseTitlePartial);
         }
 
         $prefixForTemplates = $this->getPrefixForTemplates();
@@ -616,56 +687,10 @@ abstract class Entity extends AbstractController
                  ] as $action) {
             $templateTitleSource = "devhelper_autogen_ace_{$action}";
             $templateTitleTarget = "{$prefixForTemplates}_entity_{$action}";
-
-            /** @var \XF\Entity\Template $templateSource */
-            $templateSource = $this->finder('XF:Template')
-                ->where('type', 'admin')
-                ->where('style_id', 0)
-                ->where('addon_id', 'DevHelper')
-                ->where('title', $templateTitleSource)
-                ->fetchOne();
-            if (!$templateSource) {
-                throw new \LogicException("Source template {$templateTitleSource} not found");
-            }
-            $header = gmdate('c', \XF::$time);
-            $templateSourceWithHeader = "<xf:comment>{$header}</xf:comment>\n{$templateSource->template}";
-
-            /** @var \XF\Entity\Template $templateTarget */
-            $templateTarget = $this->finder('XF:Template')
-                ->where('type', 'admin')
-                ->where('style_id', 0)
-                ->where('addon_id', $addOn->getAddOnId())
-                ->where('title', $templateTitleTarget)
-                ->fetchOne();
-
-            if ($templateTarget) {
-                $templateTargetWithoutHeader = preg_replace('/.*\n/', '', $templateTarget->template, 1);
-                if ($templateTargetWithoutHeader === $templateSource->template) {
-                    $output->writeln(
-                        "<info>Template #{$templateTarget->template_id} {$templateTarget->title} OK</info>",
-                        \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_VERY_VERBOSE
-                    );
-                } else {
-                    $templateTarget->template = $templateSourceWithHeader;
-                    $templateTarget->save();
-
-                    $output->writeln("<info>Template #{$templateTarget->template_id} {$templateTarget->title} UPDATED</info>");
-                }
-            } else {
-                /** @var \XF\Entity\Template $newTemplate */
-                $newTemplate = $this->em()->create('XF:Template');
-                $newTemplate->type = 'admin';
-                $newTemplate->title = $templateTitleTarget;
-                $newTemplate->style_id = 0;
-                $newTemplate->template = $templateSourceWithHeader;
-                $newTemplate->addon_id = $addOn->getAddOnId();
-                $newTemplate->save();
-
-                $output->writeln("<info>Template #{$newTemplate->template_id} {$newTemplate->title} NEW</info>");
-            }
+            \DevHelper\Util\Autogen\AdminTemplate::autogen($context, $templateTitleSource, $templateTitleTarget);
         }
 
-        $output->writeln(get_class($this));
+        $context->writeln(get_class($this));
     }
 
     // DevHelper/Autogen ends

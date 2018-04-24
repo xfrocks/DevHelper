@@ -35,11 +35,15 @@
         <div class="block-body">
 
             <xf:foreach loop="$columns" key="$columnName" value="$column">
-                <xf:if is="{$column.macroTemplate}">
-                    <xf:macro template="{$column.macroTemplate}" name="entity_edit_column"
+                <xf:if is="{$column._structureData.macroTemplate}">
+                    <xf:macro template="{$column._structureData.macroTemplate}" name="entity_edit_column"
                               arg-column="{$column}"
                               arg-columnName="{$columnName}"
 							  arg-entity="{$entity}"/>
+
+                    <xf:elseif is="!{$column.label}"/>
+					<xf:hiddenval name="hidden_columns[]" value="{$columnName}"/>
+                    <xf:hiddenval name="hidden_{$column.name}" value="{$column.value}"/>
 
                     <xf:elseif is="{$column.tag} === 'number-box'"/>
                     <xf:numberboxrow label="{$column.label}"
@@ -71,8 +75,19 @@
 
                     <xf:elseif is="{$column.tag} === 'text-box'"/>
                     <xf:textboxrow label="{$column.label}"
+								   maxlength="{$column._structureData.maxLength}"
                                    name="{$column.name}"
                                    value="{$column.value}"/>
+
+                    <xf:elseif is="{$column.tag} === 'username'"/>
+					<xf:hiddenval name="username_columns[]" value="{$columnName}"/>
+					<xf:textboxrow ac="single"
+								   autocomplete="off"
+								   label="{$column.label}"
+								   maxlength="{{ max_length($xf.visitor, 'username') }}"
+								   name="username_{$column.name}"
+								   placeholder="{{ phrase('name...') }}"
+								   value="{$column.tagOptions.username}"/>
                 </xf:if>
             </xf:foreach>
 
