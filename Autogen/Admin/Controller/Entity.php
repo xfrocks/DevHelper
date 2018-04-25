@@ -13,7 +13,7 @@ use XF\Mvc\Reply\View;
 use XF\PrintableException;
 
 /**
- * @version 2018042301
+ * @version 2018042501
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -670,23 +670,28 @@ abstract class Entity extends AbstractController
             str_replace('\Admin\Controller\\', ':', get_class($this))
         );
 
-        foreach ([
-                     '_add',
-                     '_edit',
-                     '_entities',
-                     '_entity',
-                 ] as $phraseTitlePartial) {
+        $phraseTitlePartials = ['_entities', '_entity'];
+        if ($this->supportsAdding()) {
+            $phraseTitlePartial[] = '_add';
+        }
+        if ($this->supportsEditing()) {
+            $phraseTitlePartial[] = '_edit';
+        }
+        foreach ($phraseTitlePartials as $phraseTitlePartial) {
             \DevHelper\Util\Autogen\Phrase::autogen($context, $this->getPrefixForPhrases() . $phraseTitlePartial);
         }
 
         $prefixForTemplates = $this->getPrefixForTemplates();
-        foreach ([
-                     'delete',
-                     'edit',
-                     'list',
-                 ] as $action) {
-            $templateTitleSource = "devhelper_autogen_ace_{$action}";
-            $templateTitleTarget = "{$prefixForTemplates}_entity_{$action}";
+        $templateTitlePartials = ['list'];
+        if ($this->supportsDeleting()) {
+            $templateTitlePartials[] = 'delete';
+        }
+        if ($this->supportsEditing()) {
+            $templateTitlePartials[] = 'edit';
+        }
+        foreach ($templateTitlePartials as $templateTitlePartial) {
+            $templateTitleSource = "devhelper_autogen_ace_{$templateTitlePartial}";
+            $templateTitleTarget = "{$prefixForTemplates}_entity_{$templateTitlePartial}";
             \DevHelper\Util\Autogen\AdminTemplate::autogen($context, $templateTitleSource, $templateTitleTarget);
         }
 
