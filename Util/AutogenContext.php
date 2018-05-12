@@ -9,6 +9,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use XF\AddOn\AddOn;
 use XF\App;
+use XF\Mvc\Controller;
 use XF\Mvc\Entity\Entity;
 use XF\Mvc\Entity\Finder;
 
@@ -76,6 +77,22 @@ class AutogenContext
     }
 
     /**
+     * @param $obj
+     * @return bool
+     * @see \DevHelper\Autogen\Admin\Controller\Entity::devHelperAutogen()
+     */
+    public function executeDevHelperAutogen($obj)
+    {
+        $f = [$obj, 'devHelperAutogen'];
+        if (!is_callable($f)) {
+            return false;
+        }
+
+        call_user_func($f, $this);
+        return true;
+    }
+
+    /**
      * @param string $identifier
      * @return Finder
      */
@@ -90,6 +107,23 @@ class AutogenContext
     public function getAddOnId()
     {
         return $this->addOn->getAddOnId();
+    }
+
+    /**
+     * @return string
+     */
+    public function getAddOnDirectory()
+    {
+        return $this->addOn->getAddOnDirectory();
+    }
+
+    /**
+     * @param string $class
+     * @return Controller
+     */
+    public function newController($class)
+    {
+        return new $class($this->app, $this->app->request());
     }
 
     /**

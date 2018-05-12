@@ -2,13 +2,11 @@
 
 namespace DevHelper\Cli\Command;
 
-use DevHelper\Autogen\Admin\Controller\Entity;
 use DevHelper\Util\AutogenContext;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use XF\AddOn\AddOn;
 use XF\Cli\Command\AddOnActionTrait;
 use XF\Util\File;
 use XF\Util\Json;
@@ -30,18 +28,14 @@ class AutoGen extends Command
     }
 
     /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @param AddOn $addOn
      * @param array $autoGen
+     * @param AutogenContext $context
      * @throws \ReflectionException
-     * @throws \XF\PrintableException
      */
-    public function doAdminControllerEntity($input, $output, $addOn, array &$autoGen)
+    public function doAdminControllerEntity(array &$autoGen, AutogenContext $context)
     {
-        $app = \XF::app();
-        $addOnId = $addOn->getAddOnId();
-        $addOnDir = $addOn->getAddOnDirectory();
+        $addOnId = $context->getAddOnId();
+        $addOnDir = $context->getAddOnDirectory();
         $classNamePrefix = str_replace('/', '\\', $addOnId);
         $baseNamespace = "{$classNamePrefix}\\DevHelper\\Admin\\Controller";
         $baseClass = "{$baseNamespace}\\Entity";
@@ -88,14 +82,8 @@ class AutoGen extends Command
                 continue;
             }
 
-            /** @var Entity $controller */
-            $controller = new $controllerClass($app, $app->request());
-            if (!is_callable([$controller, 'devHelperAutogen'])) {
-                continue;
-            }
-
-            $context = new AutogenContext($this, $input, $output, $app, $addOn);
-            $controller->devHelperAutogen($context);
+            $controller = $context->newController($controllerClass);
+            $context->executeDevHelperAutogen($controller);
         }
 
         $pattern = '#\s+' . preg_quote(self::MARKER_BEGINS, '#') . '.+' .
@@ -104,6 +92,47 @@ class AutoGen extends Command
         if (file_put_contents($basePathTarget, $baseContents) === false) {
             throw new \LogicException("Cannot update {$basePathTarget}");
         }
+    }
+
+    public function doGitIgnore(array &$autoGen, AutogenContext $context)
+    {
+        static $lines = [
+            '/_output/',
+            '/_releases/',
+            '/DevHelper/*',
+            '!/DevHelper/autogen.json',
+        ];
+
+        $addOnDir = $context->getAddOnDirectory();
+        $gitignorePath = "{$addOnDir}/.gitignore";
+
+        $gitignore = [];
+        if (file_exists($gitignorePath)) {
+            $gitignore = array_map('trim', file($gitignorePath));
+        }
+        $newLines = [];
+
+        foreach ($lines as $line) {
+            if (in_array($line, $gitignore, true)) {
+                continue;
+            }
+
+            $gitignore[] = $line;
+            $newLines[] = $line;
+        }
+
+        if (count($newLines) > 0) {
+            if (!File::writeFile($gitignorePath, implode("\n", $gitignore), false)) {
+                $context->writeln("<error>Cannot update {$gitignorePath}</error>");
+            } else {
+                $context->writeln(
+                    "<info>{$gitignorePath} OK</info>",
+                    \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_VERY_VERBOSE
+                );
+            }
+        }
+
+        $autoGen['.gitignore'] = $lines;
     }
 
     protected function configure()
@@ -141,7 +170,9 @@ class AutoGen extends Command
             }
         }
 
-        $this->doAdminControllerEntity($input, $output, $addOn, $autoGen);
+        $context = new AutogenContext($this, $input, $output, \XF::app(), $addOn);
+        $this->doAdminControllerEntity($autoGen, $context);
+        $this->doGitIgnore($autoGen, $context);
 
         unset($autoGen[__CLASS__]);
         ksort($autoGen);
@@ -149,7 +180,9 @@ class AutoGen extends Command
             'time' => \XF::$time,
             'version_id' => $devHelperAddOn->getInstalledAddOn()->version_id
         ];
-        File::writeFile($autoGenPath, Json::jsonEncodePretty($autoGen), false);
+        if (!File::writeFile($autoGenPath, Json::jsonEncodePretty($autoGen), false)) {
+            throw new \LogicException("Cannot update {$autoGenPath}");
+        }
 
         return 0;
     }
