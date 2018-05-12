@@ -6,20 +6,15 @@ use XF\Admin\Controller\AbstractController;
 use XF\Mvc\Entity\Entity as MvcEntity;
 use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
-use XF\Mvc\Reply\Error;
-use XF\Mvc\Reply\Exception;
-use XF\Mvc\Reply\Redirect;
-use XF\Mvc\Reply\View;
-use XF\PrintableException;
 
 /**
- * @version 2018042801
+ * @version 2018051301
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
 {
     /**
-     * @return View
+     * @return \XF\Mvc\Reply\View
      */
     public function actionIndex()
     {
@@ -44,7 +39,7 @@ abstract class Entity extends AbstractController
     }
 
     /**
-     * @return View
+     * @return \XF\Mvc\Reply\View
      */
     public function actionAdd()
     {
@@ -57,9 +52,9 @@ abstract class Entity extends AbstractController
 
     /**
      * @param ParameterBag $params
-     * @return View|Redirect
-     * @throws Exception
-     * @throws PrintableException
+     * @return \XF\Mvc\Reply\View|\XF\Mvc\Reply\Redirect
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
      */
     public function actionDelete(ParameterBag $params)
     {
@@ -86,8 +81,8 @@ abstract class Entity extends AbstractController
 
     /**
      * @param ParameterBag $params
-     * @return View
-     * @throws Exception
+     * @return \XF\Mvc\Reply\View
+     * @throws \XF\Mvc\Reply\Exception
      */
     public function actionEdit(ParameterBag $params)
     {
@@ -101,10 +96,10 @@ abstract class Entity extends AbstractController
     }
 
     /**
-     * @return Error|Redirect
+     * @return \XF\Mvc\Reply\Error|\XF\Mvc\Reply\Redirect
      * @throws \Exception
-     * @throws Exception
-     * @throws PrintableException
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
      */
     public function actionSave()
     {
@@ -179,7 +174,7 @@ abstract class Entity extends AbstractController
     /**
      * @param int $entityId
      * @return MvcEntity
-     * @throws Exception
+     * @throws \XF\Mvc\Reply\Exception
      */
     protected function assertEntityExists($entityId)
     {
@@ -196,7 +191,7 @@ abstract class Entity extends AbstractController
 
     /**
      * @param MvcEntity $entity
-     * @return View
+     * @return \XF\Mvc\Reply\View
      */
     protected function entityAddEdit($entity)
     {
@@ -571,7 +566,7 @@ abstract class Entity extends AbstractController
     /**
      * @param string $action
      * @param array $viewParams
-     * @return View
+     * @return \XF\Mvc\Reply\View
      */
     protected function getViewReply($action, array $viewParams)
     {
@@ -646,7 +641,7 @@ abstract class Entity extends AbstractController
 
     /**
      * @param \DevHelper\Util\AutogenContext $context
-     * @throws PrintableException
+     * @throws \XF\PrintableException
      */
     public function devHelperAutogen($context)
     {

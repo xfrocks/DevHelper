@@ -11,6 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use XF\AddOn\AddOn;
 use XF\Cli\Command\AddOnActionTrait;
 use XF\Util\File;
+use XF\Util\Json;
 
 class AutoGen extends Command
 {
@@ -32,10 +33,11 @@ class AutoGen extends Command
      * @param InputInterface $input
      * @param OutputInterface $output
      * @param AddOn $addOn
+     * @param array $autoGen
      * @throws \ReflectionException
      * @throws \XF\PrintableException
      */
-    public function doAdminControllerEntity($input, $output, $addOn)
+    public function doAdminControllerEntity($input, $output, $addOn, array &$autoGen)
     {
         $app = \XF::app();
         $addOnId = $addOn->getAddOnId();
@@ -75,8 +77,8 @@ class AutoGen extends Command
 
         $baseContents = file_get_contents($basePathSource);
         $baseContents = preg_replace('/namespace .+;/', "namespace {$baseNamespace};", $baseContents);
-        if (!File::createDirectory(dirname($basePathTarget), false) ||
-            file_put_contents($basePathTarget, $baseContents) === false) {
+        $this->extractVersion($basePathPartial, $baseContents, $autoGen);
+        if (!File::writeFile($basePathTarget, $baseContents, false)) {
             throw new \LogicException("Cannot copy {$basePathSource} -> {$basePathTarget}");
         }
 
@@ -125,7 +127,43 @@ class AutoGen extends Command
             return 1;
         }
 
-        $this->doAdminControllerEntity($input, $output, $addOn);
+        $devHelperAddOn = $this->checkInstalledAddOn('DevHelper');
+        if (empty($devHelperAddOn)) {
+            throw new \LogicException('DevHelper add-on must be installed');
+        }
+
+        $autoGenPath = $addOn->getAddOnDirectory() . '/DevHelper/autogen.json';
+        $autoGen = [];
+        if (file_exists($autoGenPath)) {
+            $autoGen = @json_decode(file_get_contents($autoGenPath), true);
+            if (!is_array($autoGen)) {
+                $autoGen = [];
+            }
+        }
+
+        $this->doAdminControllerEntity($input, $output, $addOn, $autoGen);
+
+        unset($autoGen[__CLASS__]);
+        ksort($autoGen);
+        $autoGen[__CLASS__] = [
+            'time' => \XF::$time,
+            'version_id' => $devHelperAddOn->getInstalledAddOn()->version_id
+        ];
+        File::writeFile($autoGenPath, Json::jsonEncodePretty($autoGen), false);
+
         return 0;
+    }
+
+    /**
+     * @param string $path
+     * @param string $contents
+     * @param array $autoGen
+     */
+    private function extractVersion($path, $contents, array &$autoGen)
+    {
+        if (!preg_match('#\n \* @version (\d+)\n#', $contents, $versionMatches)) {
+            throw new \LogicException("Cannot extract autogen version from {$path}");
+        }
+        $autoGen[$path] = intval($versionMatches[1]);
     }
 }
