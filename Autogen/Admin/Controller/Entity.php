@@ -8,7 +8,7 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2018051301
+ * @version 2018051302
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -650,11 +650,17 @@ abstract class Entity extends AbstractController
             $this->getEntityLabel($entity);
         } catch (\InvalidArgumentException $e) {
             $context->writeln("<error>{$e->getMessage()}</error>");
+        } catch (\Exception $e) {
+            // ignore
         }
-        try {
-            $this->getEntityColumnLabel($entity, __METHOD__);
-        } catch (\InvalidArgumentException $e) {
-            $context->writeln("<error>{$e->getMessage()}</error>");
+        if ($this->supportsAdding() || $this->supportsEditing()) {
+            try {
+                $this->getEntityColumnLabel($entity, __METHOD__);
+            } catch (\InvalidArgumentException $e) {
+                $context->writeln("<error>{$e->getMessage()}</error>");
+            } catch (\Exception $e) {
+                // ignore
+            }
         }
 
         $structure = $entity->structure();
