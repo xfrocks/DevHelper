@@ -8,7 +8,7 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2018051302
+ * @version 2018051303
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -570,7 +570,7 @@ abstract class Entity extends AbstractController
      */
     protected function getViewReply($action, array $viewParams)
     {
-        $viewClass = sprintf('%s:Entity\%s', $this->getPrefixForClasses(), ucwords($action));
+        $viewClass = sprintf('%s\Entity%s', $this->getShortName(), ucwords($action));
         $templateTitle = sprintf('%s_entity_%s', $this->getPrefixForTemplates(), strtolower($action));
 
         $viewParams['controller'] = $this;
