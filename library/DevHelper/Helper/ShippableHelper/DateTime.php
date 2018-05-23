@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_DateTime
- * @version 4
+ * @version 5
  */
 class DevHelper_Helper_ShippableHelper_DateTime
 {
@@ -62,9 +62,18 @@ class DevHelper_Helper_ShippableHelper_DateTime
             $year = 0;
             foreach (array('year', 'month', 'day', 'hour', 'minute', 'second', 'timestamp', 'offset') as $key) {
                 if (isset($values[$key])
-                    && is_int($values[$key])
+                    && is_numeric($values[$key])
                 ) {
                     $$key = intval($values[$key]);
+                }
+            }
+
+            if (isset($values['input_type_date'])) {
+                $inputTypeDate = strval($values['input_type_date']);
+                if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $inputTypeDate, $matches)) {
+                    $year = intval($matches[1]);
+                    $month = intval($matches[2]);
+                    $day = intval($matches[3]);
                 }
             }
         }
