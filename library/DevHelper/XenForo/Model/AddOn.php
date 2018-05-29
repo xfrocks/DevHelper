@@ -2,7 +2,6 @@
 
 class DevHelper_XenForo_Model_AddOn extends XFCP_DevHelper_XenForo_Model_AddOn
 {
-
     public function getAddOnOptionsList($includeCustomOption = true, $includeXenForoOption = true)
     {
         $options = parent::getAddOnOptionsList($includeCustomOption, $includeXenForoOption);
@@ -30,5 +29,17 @@ class DevHelper_XenForo_Model_AddOn extends XFCP_DevHelper_XenForo_Model_AddOn
         }
 
         return $options;
+    }
+
+    public function installAddOnXmlFromFile($fileName, $upgradeAddOnId = false)
+    {
+        if (!empty($upgradeAddOnId)) {
+            $dw = XenForo_DataWriter::create('XenForo_DataWriter_AddOn');
+            $dw->setExistingData($upgradeAddOnId);
+            $dw->set('active', 1);
+            $dw->save();
+        }
+
+        return parent::installAddOnXmlFromFile($fileName, $upgradeAddOnId);
     }
 }
