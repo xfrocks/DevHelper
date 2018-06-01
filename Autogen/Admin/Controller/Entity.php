@@ -8,7 +8,7 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2018060101
+ * @version 2018060102
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -105,7 +105,7 @@ abstract class Entity extends AbstractController
     {
         $this->assertPostOnly();
 
-        $entityId = $this->filter('entity_id', 'uint');
+        $entityId = $this->filter('entity_id', 'str');
         if (!empty($entityId)) {
             $entity = $this->assertEntityExists($entityId);
         } else {
@@ -395,12 +395,32 @@ abstract class Entity extends AbstractController
         $columns = [];
         $structure = $entity->structure();
 
-        foreach ($structure->columns as $columnName => $column) {
-            if (empty($column['type']) ||
-                $columnName === $structure->primaryKey) {
+        $getterColumns = [];
+        foreach ($structure->getters as $getterKey => $getterCacheable) {
+            if (isset($structureColumns[$getterKey]) || !$getterCacheable) {
                 continue;
             }
 
+            $columnLabel = $this->getEntityColumnLabel($entity, $getterKey);
+            if (empty($columnLabel)) {
+                continue;
+            }
+
+            $value = $entity->get($getterKey);
+            if (!($value instanceof \XF\Phrase)) {
+                continue;
+            }
+
+            $getterColumns[$getterKey] = [
+                'isGetter' => true,
+                'isNotValue' => true,
+                'isPhrase' => true,
+                'type' => MvcEntity::STR
+            ];
+        }
+
+        $structureColumns = array_merge($getterColumns, $structure->columns);
+        foreach ($structureColumns as $columnName => $column) {
             $metadata = $this->entityGetMetadataForColumn($entity, $columnName, $column);
             if (!is_array($metadata)) {
                 continue;
@@ -444,6 +464,10 @@ abstract class Entity extends AbstractController
         $filters = [];
         $columns = $this->entityGetMetadataForColumns($entity);
         foreach ($columns as $columnName => $metadata) {
+            if (!empty($metadata['_structureData']['isNotValue'])) {
+                continue;
+            }
+
             $filters[$columnName] = $metadata['filter'];
         }
 
@@ -451,10 +475,11 @@ abstract class Entity extends AbstractController
         $input = $this->filter(['values' => $filters]);
         $form->basicEntitySave($entity, $input['values']);
 
-        $form->setup(function (FormAction $form) use ($entity) {
+        $form->setup(function (FormAction $form) use ($columns, $entity) {
             $input = $this->filter([
                 'hidden_columns' => 'array-str',
                 'hidden_values' => 'array-str',
+                'values' => 'array',
             ]);
 
             foreach ($input['hidden_columns'] as $columnName) {
@@ -462,6 +487,20 @@ abstract class Entity extends AbstractController
                     continue;
                 }
                 $entity->set($columnName, $input['hidden_values'][$columnName]);
+            }
+
+            foreach ($columns as $columnName => $metadata) {
+                if (!isset($input['values'][$columnName])) {
+                    continue;
+                }
+
+                if (!empty($metadata['_structureData']['isPhrase'])) {
+                    /** @var \XF\Entity\Phrase $masterPhrase */
+                    /** @noinspection PhpUndefinedMethodInspection */
+                    $masterPhrase = $entity->getMasterPhrase($columnName);
+                    $masterPhrase->phrase_text = $input['values'][$columnName];
+                    $entity->addCascadedSave($masterPhrase);
+                }
             }
         });
 
