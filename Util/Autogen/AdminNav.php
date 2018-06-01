@@ -24,12 +24,6 @@ class AdminNav
             ->where('navigation_id', $navId)
             ->fetchOne();
         if (!empty($existing)) {
-            if ($existing->addon_id !== $context->getAddOnId() &&
-                $existing->addon_id !== 'XF') {
-                $existing = null;
-            }
-        }
-        if (!empty($existing)) {
             $context->writeln(
                 "<info>Admin navigation {$existing->navigation_id} OK</info>",
                 OutputInterface::VERBOSITY_VERY_VERBOSE
