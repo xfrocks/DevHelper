@@ -8,7 +8,7 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2018051303
+ * @version 2018060101
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -673,10 +673,10 @@ abstract class Entity extends AbstractController
 
         $phraseTitlePartials = ['_entities', '_entity'];
         if ($this->supportsAdding()) {
-            $phraseTitlePartial[] = '_add';
+            $phraseTitlePartials[] = '_add';
         }
         if ($this->supportsEditing()) {
-            $phraseTitlePartial[] = '_edit';
+            $phraseTitlePartials[] = '_edit';
         }
         foreach ($phraseTitlePartials as $phraseTitlePartial) {
             \DevHelper\Util\Autogen\Phrase::autogen($context, $this->getPrefixForPhrases() . $phraseTitlePartial);
