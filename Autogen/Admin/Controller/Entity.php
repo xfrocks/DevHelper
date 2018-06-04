@@ -8,7 +8,7 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2018060102
+ * @version 2018060401
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -372,6 +372,13 @@ abstract class Entity extends AbstractController
                 }
                 $columnFilter = 'str';
                 break;
+        }
+
+        if ($columnTag === null || $columnFilter === null) {
+            if (!empty($column['inputFilter']) && !empty($column['macroTemplate'])) {
+                $columnTag = 'custom';
+                $columnFilter = $column['inputFilter'];
+            }
         }
 
         if ($columnTag === null || $columnFilter === null) {
