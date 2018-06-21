@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_S3
- * @version 4
+ * @version 5
  */
 class DevHelper_Helper_ShippableHelper_S3 extends Zend_Service_Amazon_S3
 {
@@ -58,8 +58,8 @@ class DevHelper_Helper_ShippableHelper_S3 extends Zend_Service_Amazon_S3
             $headers['x-amz-content-sha256'] = Zend_Crypt::hash('sha256', $data);
             $headers['x-amz-date'] = sprintf(
                 '%sT%sZ',
-                gmdate('Ymd', XenForo_Application::$time),
-                gmdate('His', XenForo_Application::$time)
+                gmdate('Ymd', time()),
+                gmdate('His', time())
             );
             $headers['Host'] = parse_url($endpoint, PHP_URL_HOST);
 
