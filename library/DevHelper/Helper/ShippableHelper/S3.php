@@ -73,10 +73,21 @@ class DevHelper_Helper_ShippableHelper_S3 extends Zend_Service_Amazon_S3
             self::addSignature($method, $path, $headers);
         }
 
-        $client = self::getHttpClient();
+        $className = get_class($this);
+        $classParts = explode('_', $className);
+        array_pop($classParts);
+        array_pop($classParts);
+        $classPrefix = implode('_', $classParts);
+        $useUntrustedClient = XenForo_Application::getConfig()->get($classPrefix . '_useUntrustedClient');
+        if ($useUntrustedClient === true) {
+            $client = XenForo_Helper_Http::getUntrustedClient($endpoint->getUri());
+            $headers['X-Untrusted-Client'] = 1;
+        } else {
+            $client = self::getHttpClient();
+            $client->resetParameters();
+            $client->setUri($endpoint);
+        }
 
-        $client->resetParameters();
-        $client->setUri($endpoint);
         $client->setAuth(false);
         $client->setHeaders($headers);
 
