@@ -90,7 +90,7 @@ class DevHelper_Helper_ShippableHelper_S3 extends Zend_Service_Amazon_S3
         }
 
         do {
-            $retry = false;
+            $retry = null;
 
             $response = $client->request($method);
             $responseCode = $response->getStatus();
@@ -116,10 +116,12 @@ class DevHelper_Helper_ShippableHelper_S3 extends Zend_Service_Amazon_S3
             } elseif ($responseCode == 307) {
                 // need to redirect, new S3 endpoint given
                 // this should never happen as Zend_Http_Client will redirect automatically
+                $retry = false;
             } elseif ($responseCode == 100) {
                 // 'OK to Continue';
+                $retry = false;
             }
-        } while ($retry);
+        } while ($retry === true);
 
         return $response;
     }
