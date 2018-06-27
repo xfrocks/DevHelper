@@ -19,6 +19,10 @@ class DevHelper_Helper_ShippableHelper_S3 extends Zend_Service_Amazon_S3
             case 'us-east-1':
                 // default endpoint is correct for this region
                 break;
+            case 'cn-north-1':
+            case 'cn-northwest-1':
+                $this->setEndpoint(sprintf('http://s3.%s.amazonaws.com.cn', $region));
+                break;
             default:
                 $this->setEndpoint(sprintf('http://s3-%s.amazonaws.com', $region));
         }
@@ -216,13 +220,17 @@ class DevHelper_Helper_ShippableHelper_S3 extends Zend_Service_Amazon_S3
             'us-west-2' => 'US West (Oregon)',
             'ca-central-1' => 'Canada (Central)',
             'ap-south-1' => 'Asia Pacific (Mumbai)',
+            'ap-northeast-1' => 'Asia Pacific (Tokyo)',
             'ap-northeast-2' => 'Asia Pacific (Seoul)',
+            'ap-northeast-3' => 'Asia Pacific (Osaka-Local)',
             'ap-southeast-1' => 'Asia Pacific (Singapore)',
             'ap-southeast-2' => 'Asia Pacific (Sydney)',
-            'ap-northeast-1' => 'Asia Pacific (Tokyo)',
+            'cn-north-1' => 'China (Beijing)',
+            'cn-northwest-1' => 'China (Ningxia)',
             'eu-central-1' => 'EU (Frankfurt)',
             'eu-west-1' => 'EU (Ireland)',
             'eu-west-2' => 'EU (London)',
+            'eu-west-3' => 'EU (Paris)',
             'sa-east-1' => 'South America (São Paulo)',
         );
     }
