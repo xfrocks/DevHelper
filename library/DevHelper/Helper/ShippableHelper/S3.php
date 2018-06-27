@@ -2,7 +2,7 @@
 
 /**
  * Class DevHelper_Helper_ShippableHelper_S3
- * @version 5
+ * @version 6
  */
 class DevHelper_Helper_ShippableHelper_S3 extends Zend_Service_Amazon_S3
 {
