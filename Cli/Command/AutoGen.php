@@ -97,6 +97,7 @@ class AutoGen extends Command
     public function doGitIgnore(array &$autoGen, AutogenContext $context)
     {
         static $lines = [
+            '/_build/',
             '/_output/',
             '/_releases/',
             '/DevHelper/*',
