@@ -8,7 +8,7 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2018062801
+ * @version 2018062802
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -738,7 +738,18 @@ abstract class Entity extends AbstractController
     protected function devHelperGetImplementHints(\XF\Mvc\Entity\Entity $entity)
     {
         $implementHints = [];
+        $docComments = [];
         $methods = [];
+
+        $entityClass = get_class($entity);
+        $rc = new \ReflectionClass($entityClass);
+        $rcDocComment = $rc->getDocComment();
+        if (empty($rcDocComment)) {
+            $entityClassAsArg = $entityClass;
+            $entityClassAsArg = str_replace('\\Entity\\', ':', $entityClassAsArg);
+            $entityClassAsArg = str_replace('\\', '\\\\', $entityClassAsArg);
+            $docComments[] = "/**\n * Run `cmd-php.sh xf-dev:entity-class-properties {$entityClassAsArg}`\n */";
+        }
 
         $t = str_repeat(" ", 4);
         if ($this->supportsAdding() || $this->supportsEditing()) {
@@ -765,13 +776,27 @@ abstract class Entity extends AbstractController
             // ignore
         }
 
+        if (count($docComments) === 0 && count($methods) === 0) {
+            return $implementHints;
+        }
+
+        if (count($docComments) > 0) {
+            foreach ($docComments as $docComment) {
+                $implementHints[] = $docComment;
+            }
+        }
+
+        $implementHints[] = "class X extends Entity\n{\n";
+
         if (count($methods) > 0) {
-            $implementHints[] = "class X extends Entity\n{\n{$t}...\n";
+            $implementHints[] = "{$t}...\n";
             foreach ($methods as $method) {
                 $implementHints[] = $method;
             }
-            $implementHints[] = "{$t}...\n}";
+            $implementHints[] = "{$t}...\n";
         }
+
+        $implementHints[] = '}';
 
         return $implementHints;
     }
