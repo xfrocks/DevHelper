@@ -8,7 +8,7 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2018061001
+ * @version 2018062801
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -692,21 +692,11 @@ abstract class Entity extends AbstractController
     public function devHelperAutogen($context)
     {
         $entity = $this->createEntity();
-        try {
-            $this->getEntityLabel($entity);
-        } catch (\InvalidArgumentException $e) {
-            $context->writeln("<error>{$e->getMessage()}</error>");
-        } catch (\Exception $e) {
-            // ignore
-        }
-        if ($this->supportsAdding() || $this->supportsEditing()) {
-            try {
-                $this->getEntityColumnLabel($entity, __METHOD__);
-            } catch (\InvalidArgumentException $e) {
-                $context->writeln("<error>{$e->getMessage()}</error>");
-            } catch (\Exception $e) {
-                // ignore
-            }
+
+        $implementHints = $this->devHelperGetImplementHints($entity);
+        if (count($implementHints) > 0) {
+            $context->writeln(sprintf("%s should implement these:\n", $this->getShortName()));
+            $context->writeln(implode("\n", $implementHints));
         }
 
         $structure = $entity->structure();
@@ -743,6 +733,47 @@ abstract class Entity extends AbstractController
         }
 
         $context->writeln(get_class($this));
+    }
+
+    protected function devHelperGetImplementHints(\XF\Mvc\Entity\Entity $entity)
+    {
+        $implementHints = [];
+        $methods = [];
+
+        $t = str_repeat(" ", 4);
+        if ($this->supportsAdding() || $this->supportsEditing()) {
+            try {
+                $this->getEntityColumnLabel($entity, __METHOD__);
+            } catch (\InvalidArgumentException $e) {
+                $methods[] = "{$t}public function getEntityColumnLabel(\$columnName)\n{$t}{\n" .
+                    "{$t}{$t}switch (\$columnName) {\n" .
+                    "{$t}{$t}{$t}case 'column_1':\n" .
+                    "{$t}{$t}{$t}case 'column_2':\n" .
+                    "{$t}{$t}{$t}{$t}return \\XF::phrase('{$this->getPrefixForPhrases()}_' . \$columnName);\n" .
+                    "{$t}{$t}}\n\n" .
+                    "{$t}{$t}return null;\n" .
+                    "{$t}}\n";
+            } catch (\Exception $e) {
+                // ignore
+            }
+        }
+        try {
+            $this->getEntityLabel($entity);
+        } catch (\InvalidArgumentException $e) {
+            $methods[] = "{$t}public function getEntityLabel()\n{$t}{\n{$t}{$t}return \$this->column_name;\n{$t}}\n";
+        } catch (\Exception $e) {
+            // ignore
+        }
+
+        if (count($methods) > 0) {
+            $implementHints[] = "class X extends Entity\n{\n{$t}...\n";
+            foreach ($methods as $method) {
+                $implementHints[] = $method;
+            }
+            $implementHints[] = "{$t}...\n}";
+        }
+
+        return $implementHints;
     }
 
     // DevHelper/Autogen ends
