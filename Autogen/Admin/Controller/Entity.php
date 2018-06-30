@@ -8,7 +8,7 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2018062802
+ * @version 2018063001
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -337,6 +337,16 @@ abstract class Entity extends AbstractController
         }
 
         switch ($column['type']) {
+            case MvcEntity::BOOL:
+                $columnTag = 'radio';
+                $columnTagOptions = [
+                    'choices' => [
+                        ['value' => 0, 'label' => \XF::phrase('yes')],
+                        ['value' => 0, 'label' => \XF::phrase('no')],
+                    ]
+                ];
+                $columnFilter = 'bool';
+                break;
             case MvcEntity::INT:
                 $columnTag = 'number-box';
                 $columnFilter = 'int';

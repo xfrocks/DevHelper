@@ -70,6 +70,16 @@
 							 name="{$column.name}"
 							 value="{$column.value}"/>
 
+			<xf:elseif is="{$column.tag} === 'radio'"/>
+			<xf:radiorow label="{$column.label}"
+						  name="{$column.name}"
+						  value="{$column.value}">
+				<xf:foreach loop="$column.tagOptions.choices" value="$choice">
+					<xf:option label="{$choice.label}"
+							   value="{$choice.value}"/>
+				</xf:foreach>
+			</xf:radiorow>
+
 			<xf:elseif is="{$column.tag} === 'select'"/>
 			<xf:selectrow label="{$column.label}"
 						  name="{$column.name}"
