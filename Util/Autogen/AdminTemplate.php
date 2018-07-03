@@ -17,6 +17,8 @@ class AdminTemplate
      */
     public static function autogen($context, $titleSource, $titleTarget)
     {
+        $context->gitignoreAdds[] = sprintf('/_output/templates/admin/%s.html', $titleTarget);
+
         /** @var Template $templateSource */
         $templateSource = $context->finder('XF:Template')
             ->where('type', 'admin')

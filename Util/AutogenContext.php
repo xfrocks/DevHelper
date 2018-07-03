@@ -41,6 +41,24 @@ class AutogenContext
     protected $addOn;
 
     /**
+     * @var string[]
+     */
+    public $gitignoreAdds = [
+        '/_build/',
+        '/_data/',
+        '/_releases/',
+        '/DevHelper/*',
+        '!/DevHelper/autogen.json',
+    ];
+
+    /**
+     * @var string[]
+     */
+    public $gitignoreDeletes = [
+        '/_output/',
+    ];
+
+    /**
      * @param Command $command
      * @param InputInterface $input
      * @param OutputInterface $output

@@ -1,0 +1,64 @@
+<xf:title>{$phrases.entities|raw}</xf:title>
+
+<xf:if is="{$links.add}">
+    <xf:pageaction>
+        <xf:button href="{{ link($links.add) }}" icon="add">{$phrases.add|raw}</xf:button>
+    </xf:pageaction>
+</xf:if>
+
+<xf:if is="$macroTemplateEntityListFilters">
+	<xf:macro template="{$macroTemplateEntityListFilters}"
+			  name="entity_list_filters"
+			  arg-controller="{$controller}"
+			  arg-filters="{$filters}"/>
+</xf:if>
+
+<xf:if is="$entities is not empty">
+    <div class="block">
+        <div class="block-outer">
+            <xf:macro template="filter_macros" name="quick_filter" arg-key="{$phrases.entity}"
+                      arg-class="block-outer-opposite"/>
+        </div>
+        <div class="block-container">
+            <div class="block-body">
+                <xf:datalist>
+                    <xf:foreach loop="{$entities}" value="$entity">
+                        <xf:set var="$editLink"
+                                value="{{ $links.edit ? link($links.edit, $entity) : '' }}"/>
+                        <xf:set var="$viewLink"
+                                value="{{ (empty($editLink) && $links.view) ? link($links.view, $entity) : '' }}"/>
+						<xf:set var="$popup">
+							<xf:if is="$macroTemplateEntityListItemPopup">
+								<xf:macro template="{$macroTemplateEntityListItemPopup}"
+										  name="entity_list_item_popup"
+										  arg-controller="{$controller}"
+										  arg-entity="{$entity}"/>
+							</xf:if>
+						</xf:set>
+                        <xf:datarow delete="{{ $links.delete ? link($links.delete, $entity) : '' }}"
+									explain="{$controller.getEntityExplain($entity)}"
+									hint="{$controller.getEntityHint($entity)}"
+                                    href="{{ $editLink ?: $viewLink }}"
+                                    label="{$controller.getEntityLabel($entity)}"
+                                    overlay="{{ !!$viewLink }}">
+							<xf:if is="trim($popup)">
+								<xf:popup label="&#8226;&#8226;&#8226;">
+									{$popup|raw}
+								</xf:popup>
+							</xf:if>
+						</xf:datarow>
+                    </xf:foreach>
+                </xf:datalist>
+                <div class="block-footer">
+                    <span class="block-footer-counter">{{ display_totals($entities, $total) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <xf:pagenav page="{$page}" perpage="{$perPage}" total="{$total}"
+                    link="{$links.index}" params="{$filters.pageNavParams}"
+                    wrapperclass="block-outer block-outer--after"/>
+    </div>
+    <xf:else/>
+    <div class="blockMessage">{{ phrase('no_items_have_been_created_yet') }}</div>
+</xf:if>

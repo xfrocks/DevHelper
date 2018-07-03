@@ -8,18 +8,19 @@ if [ -z "${_addOnId}" ]; then
   exit 1
 fi
 
-_phpcs=$( xf-addon--phpcs.sh "${_addOnId}" || true )
+devhelper-autogen.sh "${_addOnId}"
+
+_phpcs=$( phpcs--addon.sh "${_addOnId}" 2>&1 || true )
 if [ ! -z "$_phpcs" ]; then
   echo "$_phpcs"
 
   _phpcbfSuggestion=$( echo "$_phpcs" | grep 'PHPCBF CAN FIX' )
   if [ ! -z "$_phpcbfSuggestion" ]; then
-    xf-addon--phpcbf.sh "${_addOnId}"
-    echo 'phpcs failed, phpcbf OK'
+    echo "phpcs failed, execute \`phpcbf--addon.sh ${_addOnId}\` to attempt fixing automatically" >&2
     exit 2
   fi
 
-  echo 'phpcs failed'
+  echo 'phpcs failed' >&2
   exit 1
 fi
 echo 'phpcs OK'

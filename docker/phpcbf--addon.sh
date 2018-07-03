@@ -4,4 +4,4 @@ set -e
 
 export PHPCBF=1
 
-exec xf-addon--phpcs.sh "$@"
+exec phpcs--addon.sh "$@"

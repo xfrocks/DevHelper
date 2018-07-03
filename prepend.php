@@ -4,15 +4,16 @@
 
 function DevHelper_verifyPhpApacheVersionId()
 {
-    $versionExpected = '2018062801';
+    $versionExpected = '2018070301';
     $versionActual = $_ENV['DEVHELPER_PHP_APACHE_VERSION_ID'];
     if ($versionActual !== $versionExpected) {
-        die(sprintf('Please rebuild Docker image. Expected version %s, actual %s', $versionExpected, $versionActual));
+        die(sprintf("Please rebuild Docker image. Expected version %s, actual %s\n", $versionExpected, $versionActual));
     }
 }
 
 DevHelper_verifyPhpApacheVersionId();
 
+/** @noinspection PhpUndefinedClassInspection */
 /**
  * @param string $class
  * @param \Composer\Autoload\ClassLoader $al
@@ -34,7 +35,7 @@ function DevHelper_patchClass($class, $al)
     $classParts = explode('\\', $class);
     $classFirst = reset($classParts);
     $contents = preg_replace(
-        '#(\nnamespace\s+)(' . preg_quote($classFirst, '#') . ')#',
+        '#(\n' . 'namespace\s+)(' . preg_quote($classFirst, '#') . ')#',
         '$1DevHelper\\\\$2',
         $contents,
         -1,
@@ -46,7 +47,7 @@ function DevHelper_patchClass($class, $al)
 
     $classLast = end($classParts);
     $contents = preg_replace(
-        '#(\nclass\s+)(' . preg_quote($classLast, '#') . ')#',
+        '#(\n' . 'class\s+)(' . preg_quote($classLast, '#') . ')#',
         '$1DevHelperCP_$2',
         $contents,
         -1,

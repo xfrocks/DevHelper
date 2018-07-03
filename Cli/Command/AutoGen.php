@@ -45,6 +45,10 @@ class AutoGen extends Command
         $controllerDirPath = "{$addOnDir}/Admin/Controller";
         $controllerNamespace = "{$classNamePrefix}\\Admin\\Controller";
 
+        if (!is_dir($controllerDirPath)) {
+            return;
+        }
+
         $baseClassRefFound = false;
         $controllerClasses = [];
         foreach (new \DirectoryIterator($controllerDirPath) as $entry) {
@@ -96,33 +100,43 @@ class AutoGen extends Command
 
     public function doGitIgnore(array &$autoGen, AutogenContext $context)
     {
-        static $lines = [
-            '/_build/',
-            '/_output/',
-            '/_releases/',
-            '/DevHelper/*',
-            '!/DevHelper/autogen.json',
-        ];
+        $lineAdds = $context->gitignoreAdds;
+        $lineAdds = array_unique($lineAdds);
+        sort($lineAdds);
+
+        $lineDeletes = $context->gitignoreDeletes;
+        $lineDeletes = array_unique($lineDeletes);
+        sort($lineDeletes);
 
         $addOnDir = $context->getAddOnDirectory();
         $gitignorePath = "{$addOnDir}/.gitignore";
 
         $gitignore = [];
+        $changed = false;
         if (file_exists($gitignorePath)) {
-            $gitignore = array_map('trim', file($gitignorePath));
-        }
-        $newLines = [];
+            $currentLines = array_map('trim', file($gitignorePath));
+            foreach ($currentLines as $currentLine) {
+                if (in_array($currentLine, $lineDeletes, true)) {
+                    $changed = true;
+                    continue;
+                }
 
-        foreach ($lines as $line) {
+                $gitignore[] = $currentLine;
+            }
+        }
+
+        foreach ($lineAdds as $line) {
             if (in_array($line, $gitignore, true)) {
                 continue;
             }
 
             $gitignore[] = $line;
-            $newLines[] = $line;
+            $changed = true;
         }
 
-        if (count($newLines) > 0) {
+        if ($changed) {
+            sort($gitignore);
+
             if (!File::writeFile($gitignorePath, implode("\n", $gitignore), false)) {
                 $context->writeln("<error>Cannot update {$gitignorePath}</error>");
             } else {
@@ -131,9 +145,9 @@ class AutoGen extends Command
                     \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_VERY_VERBOSE
                 );
             }
-        }
 
-        $autoGen['.gitignore'] = $lines;
+            $autoGen['.gitignore'] = $lineAdds;
+        }
     }
 
     protected function configure()
@@ -170,19 +184,27 @@ class AutoGen extends Command
                 $autoGen = [];
             }
         }
+        unset($autoGen[__CLASS__]);
+        $autoGenBefore = md5(json_encode($autoGen));
 
         $context = new AutogenContext($this, $input, $output, \XF::app(), $addOn);
         $this->doAdminControllerEntity($autoGen, $context);
         $this->doGitIgnore($autoGen, $context);
 
-        unset($autoGen[__CLASS__]);
         ksort($autoGen);
-        $autoGen[__CLASS__] = [
-            'time' => \XF::$time,
-            'version_id' => $devHelperAddOn->getInstalledAddOn()->version_id
-        ];
-        if (!File::writeFile($autoGenPath, Json::jsonEncodePretty($autoGen), false)) {
-            throw new \LogicException("Cannot update {$autoGenPath}");
+        $autoGenAfter = md5(json_encode($autoGen));
+        if ($autoGenAfter !== $autoGenBefore) {
+            $autoGen[__CLASS__] = [
+                'time' => \XF::$time,
+                'version_id' => $devHelperAddOn->getInstalledAddOn()->version_id
+            ];
+            if (!File::writeFile($autoGenPath, Json::jsonEncodePretty($autoGen), false)) {
+                throw new \LogicException("Cannot update {$autoGenPath}");
+            }
+
+            $output->writeln("autogen@" . $autoGen[__CLASS__]['time']);
+        } else {
+            $output->writeln("autogen OK");
         }
 
         return 0;
