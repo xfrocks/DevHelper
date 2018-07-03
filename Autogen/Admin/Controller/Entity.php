@@ -8,7 +8,7 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2018063002
+ * @version 2018070301
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -742,7 +742,10 @@ abstract class Entity extends AbstractController
             \DevHelper\Util\Autogen\AdminTemplate::autogen($context, $templateTitleSource, $templateTitleTarget);
         }
 
-        $context->writeln(get_class($this));
+        $context->writeln(
+            '<info>' . get_class($this) . ' OK</info>',
+            \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_VERY_VERBOSE
+        );
     }
 
     protected function devHelperGetImplementHints(\XF\Mvc\Entity\Entity $entity)
@@ -753,12 +756,21 @@ abstract class Entity extends AbstractController
 
         $entityClass = get_class($entity);
         $rc = new \ReflectionClass($entityClass);
+        while (true) {
+            $parent = $rc->getParentClass();
+            if ($parent->getName() === 'XF\Mvc\Entity\Entity' || $parent->isAbstract()) {
+                break;
+            }
+
+            $rc = $parent;
+            $entityClass = $rc->getName();
+        }
         $rcDocComment = $rc->getDocComment();
         if (empty($rcDocComment)) {
             $entityClassAsArg = $entityClass;
             $entityClassAsArg = str_replace('\\Entity\\', ':', $entityClassAsArg);
             $entityClassAsArg = str_replace('\\', '\\\\', $entityClassAsArg);
-            $docComments[] = "/**\n * Run `cmd-php.sh xf-dev:entity-class-properties {$entityClassAsArg}`\n */";
+            $docComments[] = "/**\n * Run `xf-dev--entity-class-properties.sh {$entityClassAsArg}`\n */";
         }
 
         $t = str_repeat(" ", 4);
