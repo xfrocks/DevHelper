@@ -18,6 +18,11 @@ class Extension extends DevHelperCP_Extension
 
         parent::__construct($listeners, $classExtensions);
     }
+
+    public function getClassExtensionsForDevHelper()
+    {
+        return $this->classExtensions;
+    }
 }
 
 // phpcs:disable

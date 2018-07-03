@@ -77,6 +77,7 @@ function DevHelper_autoload()
 {
     $targetClasses = [
         'XF\Extension',
+        'XF\Util\File',
     ];
 
     $unregistered = false;
