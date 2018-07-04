@@ -4,11 +4,14 @@
 
 function DevHelper_verifyPhpApacheVersionId()
 {
-    $versionExpected = '2018070301';
-    $versionActual = $_ENV['DEVHELPER_PHP_APACHE_VERSION_ID'];
-    if ($versionActual !== $versionExpected) {
-        die(sprintf("Please rebuild Docker image. Expected version %s, actual %s\n", $versionExpected, $versionActual));
+    $expected = '2018070302';
+    $actual = getenv('DEVHELPER_PHP_APACHE_VERSION_ID');
+    if ($actual === $expected) {
+        return;
     }
+
+    printf("Please rebuild container, expected v%s, actual v%s\n", $expected, $actual);
+    exit(1);
 }
 
 DevHelper_verifyPhpApacheVersionId();
