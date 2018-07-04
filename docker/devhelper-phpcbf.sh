@@ -4,4 +4,4 @@ set -e
 
 export PHPCBF=1
 
-exec phpcs--addon.sh "$@"
+exec devhelper-phpcs.sh "$@"

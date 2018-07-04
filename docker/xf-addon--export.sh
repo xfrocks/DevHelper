@@ -10,13 +10,14 @@ fi
 
 devhelper-autogen.sh "${_addOnId}"
 
-_phpcs=$( phpcs--addon.sh "${_addOnId}" 2>&1 || true )
+_addOnDir="/var/www/html/src/addons/${_addOnId}"
+_phpcs=$( devhelper-phpcs.sh "${_addOnDir}" 2>&1 || true )
 if [ ! -z "$_phpcs" ]; then
   echo "$_phpcs"
 
   _phpcbfSuggestion=$( echo "$_phpcs" | grep 'PHPCBF CAN FIX' )
   if [ ! -z "$_phpcbfSuggestion" ]; then
-    echo "phpcs failed, execute \`phpcbf--addon.sh ${_addOnId}\` to attempt fixing automatically" >&2
+    echo "phpcs failed, execute \`devhelper-phpcbf.sh ${_addOnDir}\` to attempt fixing automatically" >&2
     exit 2
   fi
 
@@ -24,5 +25,8 @@ if [ ! -z "$_phpcs" ]; then
   exit 1
 fi
 echo 'phpcs OK'
+
+devhelper-phpstan.sh "${_addOnDir}" >/dev/null 2>&1
+echo 'phpstan OK'
 
 exec cmd-php.sh xf-addon:export "${_addOnId}"

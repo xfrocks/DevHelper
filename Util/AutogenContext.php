@@ -49,6 +49,7 @@ class AutogenContext
         '/_releases/',
         '/DevHelper/*',
         '!/DevHelper/autogen.json',
+        '/vendor/',
     ];
 
     /**
@@ -95,7 +96,7 @@ class AutogenContext
     }
 
     /**
-     * @param $obj
+     * @param mixed $obj
      * @return bool
      * @see \DevHelper\Autogen\Admin\Controller\Entity::devHelperAutogen()
      */

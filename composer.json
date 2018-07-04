@@ -1,0 +1,14 @@
+{
+    "name": "xfrocks/dev-helper",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Dao Hoang Son",
+            "email": "daohoangson@gmail.com"
+        }
+    ],
+    "require": {},
+    "require-dev": {
+        "phpstan/phpstan": "^0.10.1"
+    }
+}

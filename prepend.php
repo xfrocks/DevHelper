@@ -30,15 +30,17 @@ function DevHelper_patchClass($class, $al)
     }
 
     $contents = file_get_contents($file);
+    if ($contents === false) {
+        return null;
+    }
     $contents = preg_replace('#^\s*<\?php#', '', $contents, -1, $count);
     if ($count !== 1) {
         return null;
     }
 
     $classParts = explode('\\', $class);
-    $classFirst = reset($classParts);
     $contents = preg_replace(
-        '#(\n' . 'namespace\s+)(' . preg_quote($classFirst, '#') . ')#',
+        '#(\n' . 'namespace\s+)(' . preg_quote($classParts[0], '#') . ')#',
         '$1DevHelper\\\\$2',
         $contents,
         -1,
@@ -48,9 +50,8 @@ function DevHelper_patchClass($class, $al)
         return null;
     }
 
-    $classLast = end($classParts);
     $contents = preg_replace(
-        '#(\n' . 'class\s+)(' . preg_quote($classLast, '#') . ')#',
+        '#(\n' . 'class\s+)(' . preg_quote($classParts[count($classParts) - 1], '#') . ')#',
         '$1DevHelperCP_$2',
         $contents,
         -1,

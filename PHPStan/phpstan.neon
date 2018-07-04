@@ -1,0 +1,22 @@
+parameters:
+	excludes_analyse:
+		- */vendor/*
+
+	ignoreErrors:
+		- '#^If condition is always false.$#'
+		# https://github.com/phpstan/phpstan/issues/1062
+		- '#^Offset .+ does not exist on#'
+		- '#^Parameter \#1 \$toSerialize of static method XF\\Util\\Php::safeSerialize\(\) expects string#'
+		- '#^PHPDoc tag @property has invalid value#'
+
+	reportUnmatchedIgnoredErrors: false
+
+	universalObjectCratesClasses:
+		- ArrayObject
+		- XF\Mvc\ParameterBag
+
+services:
+	-
+		class: DevHelper\PHPStan\Type\Entity
+		tags:
+			- phpstan.broker.propertiesClassReflectionExtension
