@@ -6,7 +6,6 @@ echo 'PassEnv DEVHELPER_PHP_APACHE_VERSION_ID' >> /etc/apache2/mods-available/en
 a2enmod env rewrite
 
 echo 'export "PATH=$PATH:/var/www/html/src/addons/DevHelper/docker"' >> /root/.bashrc
-echo 'export "PATH=$PATH:/root/.composer.bak/vendor/bin"' >> /root/.bashrc
 
 echo 'auto_prepend_file=/var/www/html/src/addons/DevHelper/prepend.php' > /usr/local/etc/php/conf.d/DevHelper.ini
 

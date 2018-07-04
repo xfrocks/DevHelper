@@ -26,7 +26,6 @@ if [ ! -z "$_phpcs" ]; then
 fi
 echo 'phpcs OK'
 
-devhelper-phpstan.sh "${_addOnDir}" >/dev/null 2>&1
-echo 'phpstan OK'
+devhelper-phpstan.sh "${_addOnDir}"
 
 exec cmd-php.sh xf-addon:export "${_addOnId}"
