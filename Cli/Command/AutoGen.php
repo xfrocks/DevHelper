@@ -64,6 +64,10 @@ class AutoGen extends Command
             $controllerClasses[] = "{$controllerNamespace}\\{$entryClassName}";
 
             $entryContents = file_get_contents($entry->getPath());
+            if (!is_string($entryContents)) {
+                continue;
+            }
+
             if (strpos($entryContents, $baseClass) !== false) {
                 $baseClassRefFound = true;
             }
@@ -74,6 +78,10 @@ class AutoGen extends Command
         }
 
         $baseContents = file_get_contents($basePathSource);
+        if (!is_string($baseContents)) {
+            return;
+        }
+
         $baseContents = preg_replace('/namespace .+;/', "namespace {$baseNamespace};", $baseContents);
         $this->extractVersion($basePathPartial, $baseContents, $autoGen);
         if (!File::writeFile($basePathTarget, $baseContents, false)) {
@@ -114,7 +122,11 @@ class AutoGen extends Command
         $gitignore = [];
         $changed = false;
         if (file_exists($gitignorePath)) {
-            $currentLines = array_map('trim', file($gitignorePath));
+            $currentLines = file($gitignorePath);
+            if (!is_array($currentLines)) {
+                $currentLines = [];
+            }
+            $currentLines = array_map('trim', $currentLines);
             foreach ($currentLines as $currentLine) {
                 if (in_array($currentLine, $lineDeletes, true)) {
                     $changed = true;
@@ -179,20 +191,23 @@ class AutoGen extends Command
         $autoGenPath = $addOn->getAddOnDirectory() . '/DevHelper/autogen.json';
         $autoGen = [];
         if (file_exists($autoGenPath)) {
-            $autoGen = @json_decode(file_get_contents($autoGenPath), true);
-            if (!is_array($autoGen)) {
-                $autoGen = [];
+            $autoGenContents = file_get_contents($autoGenPath);
+            if (is_string($autoGenContents)) {
+                $autoGen = @json_decode($autoGenContents, true);
+                if (!is_array($autoGen)) {
+                    $autoGen = [];
+                }
             }
         }
         unset($autoGen[__CLASS__]);
-        $autoGenBefore = md5(json_encode($autoGen));
+        $autoGenBefore = md5(serialize($autoGen));
 
         $context = new AutogenContext($this, $input, $output, \XF::app(), $addOn);
         $this->doAdminControllerEntity($autoGen, $context);
         $this->doGitIgnore($autoGen, $context);
 
         ksort($autoGen);
-        $autoGenAfter = md5(json_encode($autoGen));
+        $autoGenAfter = md5(serialize($autoGen));
         if ($autoGenAfter !== $autoGenBefore) {
             $autoGen[__CLASS__] = [
                 'time' => \XF::$time,

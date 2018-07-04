@@ -8,6 +8,4 @@ if [ -z "${_addOnOrEntity}" ]; then
   exit 1
 fi
 
-export DEVHELPER_XF_UTIL_FILE_PATCH_DOC_COMMENT_PROPERTY=1
-
 exec cmd-php.sh xf-dev:entity-class-properties "${_addOnOrEntity}"

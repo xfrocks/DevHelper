@@ -19,20 +19,20 @@ class AdminTemplate
     {
         $context->gitignoreAdds[] = sprintf('/_output/templates/admin/%s.html', $titleTarget);
 
-        /** @var Template $templateSource */
+        /** @var Template|null $templateSource */
         $templateSource = $context->finder('XF:Template')
             ->where('type', 'admin')
             ->where('style_id', 0)
             ->where('addon_id', 'DevHelper')
             ->where('title', $titleSource)
             ->fetchOne();
-        if (!$templateSource) {
+        if ($templateSource === null) {
             throw new \LogicException("Source template {$titleSource} not found");
         }
         $header = gmdate('c', \XF::$time);
         $templateSourceWithHeader = "<xf:comment>{$header}</xf:comment>\n{$templateSource->template}";
 
-        /** @var Template $templateTarget */
+        /** @var Template|null $templateTarget */
         $templateTarget = $context->finder('XF:Template')
             ->where('type', 'admin')
             ->where('style_id', 0)
@@ -40,22 +40,7 @@ class AdminTemplate
             ->where('title', $titleTarget)
             ->fetchOne();
 
-        if ($templateTarget) {
-            $templateTargetWithoutHeader = preg_replace('/.*\n/', '', $templateTarget->template, 1);
-            if ($templateTargetWithoutHeader === $templateSource->template) {
-                $context->writeln(
-                    "<info>Template #{$templateTarget->template_id} {$templateTarget->title} OK</info>",
-                    \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_VERY_VERBOSE
-                );
-                return $templateTarget;
-            } else {
-                $templateTarget->template = $templateSourceWithHeader;
-                $templateTarget->save();
-
-                $context->writeln("<info>Template #{$templateTarget->template_id} {$templateTarget->title} UPDATED</info>");
-                return $templateTarget;
-            }
-        } else {
+        if ($templateTarget === null) {
             /** @var Template $newTemplate */
             $newTemplate = $context->createEntity('XF:Template');
             $newTemplate->type = 'admin';
@@ -67,6 +52,21 @@ class AdminTemplate
 
             $context->writeln("<info>Template #{$newTemplate->template_id} {$newTemplate->title} NEW</info>");
             return $newTemplate;
+        }
+
+        $templateTargetWithoutHeader = preg_replace('/.*\n/', '', $templateTarget->template, 1);
+        if ($templateTargetWithoutHeader === $templateSource->template) {
+            $context->writeln(
+                "<info>Template #{$templateTarget->template_id} {$templateTarget->title} OK</info>",
+                \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_VERY_VERBOSE
+            );
+            return $templateTarget;
+        } else {
+            $templateTarget->template = $templateSourceWithHeader;
+            $templateTarget->save();
+
+            $context->writeln("<info>Template #{$templateTarget->template_id} {$templateTarget->title} UPDATED</info>");
+            return $templateTarget;
         }
     }
 }

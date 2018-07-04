@@ -8,7 +8,7 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2018070301
+ * @version 2018070401
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -120,7 +120,7 @@ abstract class Entity extends AbstractController
     /**
      * @param MvcEntity $entity
      * @param string $columnName
-     * @return string|null
+     * @return mixed
      */
     public function getEntityColumnLabel($entity, $columnName)
     {
@@ -158,7 +158,7 @@ abstract class Entity extends AbstractController
 
     /**
      * @param MvcEntity $entity
-     * @return string|null
+     * @return mixed
      */
     public function getEntityLabel($entity)
     {
@@ -266,7 +266,7 @@ abstract class Entity extends AbstractController
                 break;
             case 'XF:User':
                 $tag = 'username';
-                /** @var \XF\Entity\User $user */
+                /** @var \XF\Entity\User|null $user */
                 $user = $entity->getRelation($relationKey);
                 $tagOptions['username'] = $user ? $user->username : '';
                 break;
@@ -303,7 +303,7 @@ abstract class Entity extends AbstractController
      * @param \XF\Mvc\Entity\Entity $entity
      * @param string $columnName
      * @param array $column
-     * @return array
+     * @return array|null
      */
     protected function entityGetMetadataForColumn($entity, $columnName, array $column)
     {
@@ -414,7 +414,7 @@ abstract class Entity extends AbstractController
 
         $getterColumns = [];
         foreach ($structure->getters as $getterKey => $getterCacheable) {
-            if (isset($structureColumns[$getterKey]) || !$getterCacheable) {
+            if (!$getterCacheable) {
                 continue;
             }
 
@@ -512,11 +512,13 @@ abstract class Entity extends AbstractController
                 }
 
                 if (!empty($metadata['_structureData']['isPhrase'])) {
-                    /** @var \XF\Entity\Phrase $masterPhrase */
-                    /** @noinspection PhpUndefinedMethodInspection */
-                    $masterPhrase = $entity->getMasterPhrase($columnName);
-                    $masterPhrase->phrase_text = $input['values'][$columnName];
-                    $entity->addCascadedSave($masterPhrase);
+                    $callable = [$entity, 'getMasterPhrase'];
+                    if (is_callable($callable)) {
+                        /** @var \XF\Entity\Phrase $masterPhrase */
+                        $masterPhrase = call_user_func($callable, $columnName);
+                        $masterPhrase->phrase_text = $input['values'][$columnName];
+                        $entity->addCascadedSave($masterPhrase);
+                    }
                 }
             }
         });
@@ -758,12 +760,15 @@ abstract class Entity extends AbstractController
         $rc = new \ReflectionClass($entityClass);
         while (true) {
             $parent = $rc->getParentClass();
-            if ($parent->getName() === 'XF\Mvc\Entity\Entity' || $parent->isAbstract()) {
+            if (!$parent || $parent->getName() === 'XF\Mvc\Entity\Entity' || $parent->isAbstract()) {
                 break;
             }
 
             $rc = $parent;
             $entityClass = $rc->getName();
+        }
+        if (!$rc) {
+            throw new \LogicException('$rc has gone away');
         }
         $rcDocComment = $rc->getDocComment();
         if (empty($rcDocComment)) {

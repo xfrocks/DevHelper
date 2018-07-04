@@ -1,5 +1,10 @@
 <?php
 
+foreach (glob('/var/www/html/src/addons/DevHelper/PHPStan/**/*.php') as $file) {
+    /** @noinspection PhpIncludeInspection */
+    require_once($file);
+}
+
 $dir = '/var/www/html';
 /** @noinspection PhpIncludeInspection */
 require($dir . '/src/XF.php');
@@ -30,6 +35,8 @@ spl_autoload_register(function ($class) use ($app) {
             }
         }
     }
+
+    return null;
 });
 
 return XF::$autoLoader;
