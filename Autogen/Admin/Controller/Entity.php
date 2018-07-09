@@ -8,7 +8,7 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2018070401
+ * @version 2018070901
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -40,6 +40,7 @@ abstract class Entity extends AbstractController
 
     /**
      * @return \XF\Mvc\Reply\View
+     * @throws \Exception
      */
     public function actionAdd()
     {
@@ -192,6 +193,7 @@ abstract class Entity extends AbstractController
     /**
      * @param MvcEntity $entity
      * @return \XF\Mvc\Reply\View
+     * @throws \Exception
      */
     protected function entityAddEdit($entity)
     {
@@ -304,6 +306,7 @@ abstract class Entity extends AbstractController
      * @param string $columnName
      * @param array $column
      * @return array|null
+     * @throws \Exception
      */
     protected function entityGetMetadataForColumn($entity, $columnName, array $column)
     {
@@ -392,6 +395,22 @@ abstract class Entity extends AbstractController
         }
 
         if ($columnTag === null || $columnFilter === null) {
+            if (\XF::$debugMode) {
+                if ($columnTag === null) {
+                    throw new \Exception(
+                        "Cannot render column {$columnName}, " .
+                        "consider putting \`macroTemplate\` in getStructure for custom rendering."
+                    );
+                }
+
+                if ($columnFilter === null) {
+                    throw new \Exception(
+                        "Cannot detect filter data type for column {$columnName}, " .
+                        "consider putting \`inputFilter\` in getStructure to continue."
+                    );
+                }
+            }
+
             return null;
         }
 
@@ -406,6 +425,7 @@ abstract class Entity extends AbstractController
     /**
      * @param \XF\Mvc\Entity\Entity $entity
      * @return array
+     * @throws \Exception
      */
     protected function entityGetMetadataForColumns($entity)
     {
@@ -475,6 +495,7 @@ abstract class Entity extends AbstractController
     /**
      * @param \XF\Mvc\Entity\Entity $entity
      * @return FormAction
+     * @throws \Exception
      */
     protected function entitySaveProcess($entity)
     {
