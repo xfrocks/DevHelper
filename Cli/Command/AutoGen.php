@@ -2,6 +2,7 @@
 
 namespace DevHelper\Cli\Command;
 
+use DevHelper\Util\Autogen\GitIgnore;
 use DevHelper\Util\AutogenContext;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -110,11 +111,11 @@ class AutoGen extends Command
     {
         $lineAdds = $context->gitignoreAdds;
         $lineAdds = array_unique($lineAdds);
-        sort($lineAdds);
+        GitIgnore::sort($lineAdds);
 
         $lineDeletes = $context->gitignoreDeletes;
         $lineDeletes = array_unique($lineDeletes);
-        sort($lineDeletes);
+        GitIgnore::sort($lineDeletes);
 
         $addOnDir = $context->getAddOnDirectory();
         $gitignorePath = "{$addOnDir}/.gitignore";
@@ -147,7 +148,7 @@ class AutoGen extends Command
         }
 
         if ($changed) {
-            sort($gitignore);
+            GitIgnore::sort($gitignore);
 
             if (!File::writeFile($gitignorePath, implode("\n", $gitignore), false)) {
                 $context->writeln("<error>Cannot update {$gitignorePath}</error>");
