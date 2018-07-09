@@ -8,6 +8,8 @@ if [ -z "${_srcPath}" ]; then
   exit 1
 fi
 
+export "DEVHELPER_PHPSTAN_SRC_PATH=${_srcPath}"
+
 exec /etc/devhelper-composer-vendor/bin/phpstan analyse \
   --autoload-file=/var/www/html/src/addons/DevHelper/PHPStan/autoload.php \
   --level max \

@@ -6,11 +6,35 @@ foreach (glob('/var/www/html/src/addons/DevHelper/PHPStan/**/*.php') as $file) {
 }
 
 $dir = '/var/www/html';
+$appClass = 'XF\Pub\App';
+
+$srcPath = getenv('DEVHELPER_PHPSTAN_SRC_PATH');
+if (empty($srcPath)) {
+    echo("DEVHELPER_PHPSTAN_SRC_PATH is missing");
+    die(1);
+}
+$autogenPath = $srcPath . '/DevHelper/autogen.json';
+if (file_exists($autogenPath)) {
+    $autogenJson = file_get_contents($autogenPath);
+    $autogen = json_decode($autogenJson, true);
+    if (is_array($autogen) && !empty($autogen['phpstan'])) {
+        $autogenPhpstan = $autogen['phpstan'];
+        if (isset($autogenPhpstan['autoload'])) {
+            /** @noinspection PhpIncludeInspection */
+            require($autogenPhpstan['autoload']);
+        }
+
+        if (isset($autogenPhpstan['appClass'])) {
+            $appClass = $autogenPhpstan['appClass'];
+        }
+    }
+}
+
 /** @noinspection PhpIncludeInspection */
 require($dir . '/src/XF.php');
 XF::start($dir);
 
-$app = XF::setupApp('XF\Pub\App');
+$app = XF::setupApp($appClass);
 
 spl_autoload_register(function ($class) use ($app) {
     if (strpos($class, 'XFCP_') === false) {

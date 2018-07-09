@@ -77,21 +77,23 @@ class Entity implements PropertiesClassReflectionExtension
             return $structures[$className];
         }
 
-        /** @noinspection PhpParamsInspection */
         $isEntity = $classReflection->isSubclassOf('XF\Mvc\Entity\Entity');
         if (!$isEntity) {
             return null;
         }
 
+        $structure = new Structure();
         $callable = [$className, 'getStructure'];
         if (!is_callable($callable)) {
-            return null;
+            if (!$classReflection->isAbstract()) {
+                return null;
+            } else {
+                $structures[$className] = $structure;
+            }
+        } else {
+            $structures[$className] = call_user_func($callable, $structure);
         }
 
-        /** @var Structure $structure */
-        $structure = call_user_func($callable, new Structure());
-        $structures[$className] = $structure;
-
-        return $structure;
+        return $structures[$className];
     }
 }
