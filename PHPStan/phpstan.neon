@@ -7,6 +7,7 @@ parameters:
 		- '#^If condition is always false.$#'
 		# https://github.com/phpstan/phpstan/issues/1062
 		- '#^Offset .+ does not exist on#'
+		- '#^Parameter \#1 \$categories of method XF\\Repository\\AbstractCategoryTree::createCategoryTree\(\) expects null#'
 		- '#^Parameter \#1 \$toSerialize of static method XF\\Util\\Php::safeSerialize\(\) expects string#'
 		- '#^PHPDoc tag @property has invalid value#'
 		- '#^Undefined variable: \$escape$#'
