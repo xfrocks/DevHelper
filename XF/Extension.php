@@ -7,7 +7,8 @@ class Extension extends DevHelperCP_Extension
     public function __construct(array $listeners = [], array $classExtensions = [])
     {
         foreach ([
-                     'XF\Entity\ClassExtension'
+                     'XF\AddOn\Manager',
+                     'XF\Entity\ClassExtension',
                  ] as $targetClass) {
             if (!isset($classExtensions[$targetClass])) {
                 $classExtensions[$targetClass] = [];
