@@ -16,16 +16,18 @@ if (empty($srcPath)) {
 $autogenPath = $srcPath . '/DevHelper/autogen.json';
 if (file_exists($autogenPath)) {
     $autogenJson = file_get_contents($autogenPath);
-    $autogen = json_decode($autogenJson, true);
-    if (is_array($autogen) && !empty($autogen['phpstan'])) {
-        $autogenPhpstan = $autogen['phpstan'];
-        if (isset($autogenPhpstan['autoload'])) {
-            /** @noinspection PhpIncludeInspection */
-            require($autogenPhpstan['autoload']);
-        }
+    if (is_string($autogenJson)) {
+        $autogen = json_decode($autogenJson, true);
+        if (is_array($autogen) && !empty($autogen['phpstan'])) {
+            $autogenPhpstan = $autogen['phpstan'];
+            if (isset($autogenPhpstan['autoload'])) {
+                /** @noinspection PhpIncludeInspection */
+                require($autogenPhpstan['autoload']);
+            }
 
-        if (isset($autogenPhpstan['appClass'])) {
-            $appClass = $autogenPhpstan['appClass'];
+            if (isset($autogenPhpstan['appClass'])) {
+                $appClass = $autogenPhpstan['appClass'];
+            }
         }
     }
 }
