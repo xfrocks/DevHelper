@@ -4,15 +4,22 @@ namespace DevHelper\XF\Entity;
 
 class ClassExtension extends XFCP_ClassExtension
 {
+    protected function _preSave()
+    {
+        parent::_preSave();
+
+        if ($this->to_class === '') {
+            $newClass = $this->generateToClassFileAutomatically();
+            if (!empty($newClass)) {
+                $this->to_class = $newClass;
+            }
+        }
+    }
+
     protected function verifyToClass(&$class)
     {
-        if (empty($class)) {
-            if ($this->addon_id && $this->from_class) {
-                $newClass = $this->generateToClassFileAutomatically();
-                if (!empty($newClass)) {
-                    $class = $newClass;
-                }
-            }
+        if ($class === '') {
+            return true;
         }
 
         return parent::verifyToClass($class);
