@@ -47,8 +47,6 @@ class AutogenContext
         '/_build/',
         '/_data/',
         '/_releases/',
-        '/DevHelper/*',
-        '!/DevHelper/autogen.json',
         '/vendor/',
     ];
 
@@ -57,6 +55,8 @@ class AutogenContext
      */
     public $gitignoreDeletes = [
         '/_output/',
+        '/DevHelper/*',
+        '!/DevHelper/autogen.json',
     ];
 
     /**

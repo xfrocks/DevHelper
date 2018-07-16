@@ -724,6 +724,8 @@ abstract class Entity extends AbstractController
      */
     public function devHelperAutogen($context)
     {
+        $context->gitignoreAdds[] = '/DevHelper/Admin/Controller/Entity.php';
+
         $entity = $this->createEntity();
 
         $implementHints = $this->devHelperGetImplementHints($entity);
