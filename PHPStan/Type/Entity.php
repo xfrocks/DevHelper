@@ -82,16 +82,12 @@ class Entity implements PropertiesClassReflectionExtension
             return null;
         }
 
-        $structure = new Structure();
-        $callable = [$className, 'getStructure'];
-        if (!is_callable($callable)) {
-            if (!$classReflection->isAbstract()) {
-                return null;
-            } else {
-                $structures[$className] = $structure;
+        $structures[$className] = new Structure();
+        if (!$classReflection->isAbstract()) {
+            $callable = [$className, 'getStructure'];
+            if (is_callable($callable)) {
+                $structures[$className] = call_user_func($callable, $structures[$className]);
             }
-        } else {
-            $structures[$className] = call_user_func($callable, $structure);
         }
 
         return $structures[$className];
