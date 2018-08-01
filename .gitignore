@@ -1,6 +1,5 @@
-!/DevHelper/autogen.json
 /.data/
-/DevHelper/*
+/DevHelper/
 /_build/
 /_data/
 /_releases/

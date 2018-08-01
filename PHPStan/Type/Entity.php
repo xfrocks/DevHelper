@@ -84,7 +84,10 @@ class Entity implements PropertiesClassReflectionExtension
 
         $structures[$className] = $structure = new Structure();
         if (!$classReflection->isAbstract()) {
-            $structure = call_user_func([$className, 'getStructure'], $structure);
+            $classNameGetStructure = [$className, 'getStructure'];
+            if (is_callable($classNameGetStructure)) {
+                $structure = call_user_func($classNameGetStructure, $structure);
+            }
         } else {
             $srcPath = getenv('DEVHELPER_PHPSTAN_SRC_PATH');
             if (!empty($srcPath)) {
@@ -97,7 +100,10 @@ class Entity implements PropertiesClassReflectionExtension
                     throw new \LogicException("Class {$structureClassName} does not exists");
                 }
 
-                $structure = call_user_func([$structureClassName, 'getStructure'], $structure);
+                $structureClassNameGetStructure = [$structureClassName, 'getStructure'];
+                if (is_callable($structureClassNameGetStructure)) {
+                    $structure = call_user_func($structureClassNameGetStructure, $structure);
+                }
             }
         }
 
