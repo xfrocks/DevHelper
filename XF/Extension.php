@@ -8,6 +8,7 @@ class Extension extends DevHelperCP_Extension
     {
         foreach ([
                      'XF\AddOn\Manager',
+                     'XF\DevelopmentOutput',
                      'XF\Entity\ClassExtension',
                  ] as $targetClass) {
             if (!isset($classExtensions[$targetClass])) {
