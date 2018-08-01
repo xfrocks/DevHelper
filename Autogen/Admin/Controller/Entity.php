@@ -8,7 +8,7 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2018070901
+ * @version 2018080102
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -125,7 +125,9 @@ abstract class Entity extends AbstractController
      */
     public function getEntityColumnLabel($entity, $columnName)
     {
-        $callback = [$entity, 'getEntityColumnLabel'];
+        /** @var mixed $unknownEntity */
+        $unknownEntity = $entity;
+        $callback = [$unknownEntity, 'getEntityColumnLabel'];
         if (!is_callable($callback)) {
             $shortName = $entity->structure()->shortName;
             throw new \InvalidArgumentException("Entity {$shortName} does not implement {$callback[1]}");
@@ -163,7 +165,9 @@ abstract class Entity extends AbstractController
      */
     public function getEntityLabel($entity)
     {
-        $callback = [$entity, 'getEntityLabel'];
+        /** @var mixed $unknownEntity */
+        $unknownEntity = $entity;
+        $callback = [$unknownEntity, 'getEntityLabel'];
         if (!is_callable($callback)) {
             $shortName = $entity->structure()->shortName;
             throw new \InvalidArgumentException("Entity {$shortName} does not implement {$callback[1]}");
@@ -533,7 +537,9 @@ abstract class Entity extends AbstractController
                 }
 
                 if (!empty($metadata['_structureData']['isPhrase'])) {
-                    $callable = [$entity, 'getMasterPhrase'];
+                    /** @var mixed $unknownEntity */
+                    $unknownEntity = $entity;
+                    $callable = [$unknownEntity, 'getMasterPhrase'];
                     if (is_callable($callable)) {
                         /** @var \XF\Entity\Phrase $masterPhrase */
                         $masterPhrase = call_user_func($callable, $columnName);
