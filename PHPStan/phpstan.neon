@@ -18,6 +18,7 @@ parameters:
 	universalObjectCratesClasses:
 		- ArrayObject
 		- XF\Mvc\ParameterBag
+		- XF\Payment\CallbackState
 
 services:
 	-
