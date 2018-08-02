@@ -29,8 +29,6 @@ class AdminTemplate
         if ($templateSource === null) {
             throw new \LogicException("Source template {$titleSource} not found");
         }
-        $header = gmdate('c', \XF::$time);
-        $templateSourceWithHeader = "<xf:comment>{$header}</xf:comment>\n{$templateSource->template}";
 
         /** @var Template|null $templateTarget */
         $templateTarget = $context->finder('XF:Template')
@@ -46,7 +44,7 @@ class AdminTemplate
             $newTemplate->type = 'admin';
             $newTemplate->title = $titleTarget;
             $newTemplate->style_id = 0;
-            $newTemplate->template = $templateSourceWithHeader;
+            $newTemplate->template = $templateSource->template;
             $newTemplate->addon_id = $context->getAddOnId();
             $newTemplate->save();
 
@@ -54,15 +52,14 @@ class AdminTemplate
             return $newTemplate;
         }
 
-        $templateTargetWithoutHeader = preg_replace('/.*\n/', '', $templateTarget->template, 1);
-        if ($templateTargetWithoutHeader === $templateSource->template) {
+        if ($templateTarget->template === $templateSource->template) {
             $context->writeln(
                 "<info>Template #{$templateTarget->template_id} {$templateTarget->title} OK</info>",
                 \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_VERY_VERBOSE
             );
             return $templateTarget;
         } else {
-            $templateTarget->template = $templateSourceWithHeader;
+            $templateTarget->template = $templateSource->template;
             $templateTarget->save();
 
             $context->writeln("<info>Template #{$templateTarget->template_id} {$templateTarget->title} UPDATED</info>");
