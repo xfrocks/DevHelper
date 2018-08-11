@@ -8,5 +8,5 @@ if (isset($_SERVER['DEVHELPER_PHP_APACHE_VERSION_ID'])) {
     }
 }
 
-require('./library/DevHelper/Router.php');
+require(__DIR__ . '/library/DevHelper/Router.php');
 DevHelper_Router::route(__FILE__);
