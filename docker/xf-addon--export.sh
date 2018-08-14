@@ -9,6 +9,7 @@ if [ -z "${_addOnId}" ]; then
 fi
 
 devhelper-autogen.sh "${_addOnId}"
+devhelper-autocheck.sh "${_addOnId}"
 
 _addOnDir="/var/www/html/src/addons/${_addOnId}"
 _phpcs=$( devhelper-phpcs.sh "${_addOnDir}" 2>&1 || true )
