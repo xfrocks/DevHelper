@@ -13,6 +13,46 @@ class AutoCheck extends Command
 {
     use AddOnActionTrait;
 
+    public function checkBuildJson(AddOn $addOn, OutputInterface $output)
+    {
+        $result = 0;
+        $additionalFiles = $addOn->additional_files;
+        $filesJsPath = "js/{$addOn->getAddOnId()}";
+        $filesStylesPath = "styles/default/{$addOn->getAddOnId()}";
+
+        $includedJs = false;
+        $includedStyles = false;
+        foreach ((array)$additionalFiles AS $additionalFile) {
+            if ($additionalFile === $filesJsPath) {
+                $includedJs = true;
+                break;
+            }
+
+            if ($additionalFile === $filesStylesPath) {
+                $includedStyles = true;
+                break;
+            }
+        }
+
+        if (!$includedJs) {
+            $filesJsFullPath = $addOn->getFilesDirectory() . '/' . $filesJsPath;
+            if (is_dir($filesJsFullPath)) {
+                $output->writeln("<error>JS directory found, {$filesJsPath} should be in `build.json`</error>");
+                $result = 1;
+            }
+        }
+
+        if (!$includedStyles) {
+            $filesStylesFullPath = $addOn->getFilesDirectory() . '/' . $filesStylesPath;
+            if (is_dir($filesStylesFullPath)) {
+                $output->writeln("<error>Styles directory found, {$filesStylesPath} should be in `build.json`</error>");
+                $result = 1;
+            }
+        }
+
+        return $result;
+    }
+
     public function checkPurchasables(AddOn $addOn, OutputInterface $output)
     {
         $result = 0;
@@ -63,6 +103,7 @@ class AutoCheck extends Command
         }
 
         $result = 0;
+        $result |= $this->checkBuildJson($addOn, $output);
         $result |= $this->checkPurchasables($addOn, $output);
 
         if ($result === 0) {

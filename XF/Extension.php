@@ -10,6 +10,7 @@ class Extension extends DevHelperCP_Extension
                      'XF\AddOn\Manager',
                      'XF\DevelopmentOutput',
                      'XF\Entity\ClassExtension',
+                     'XF\Mvc\Dispatcher',
                  ] as $targetClass) {
             if (!isset($classExtensions[$targetClass])) {
                 $classExtensions[$targetClass] = [];
