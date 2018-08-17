@@ -4,7 +4,7 @@
 
 function DevHelper_verifyPhpApacheVersionId()
 {
-    $expected = '2018081601';
+    $expected = '2018081701';
     $actual = getenv('DEVHELPER_PHP_APACHE_VERSION_ID');
     if ($actual === $expected) {
         return;
