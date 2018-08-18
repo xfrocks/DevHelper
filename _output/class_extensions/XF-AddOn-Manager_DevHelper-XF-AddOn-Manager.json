@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\AddOn\\Manager",
+    "to_class": "DevHelper\\XF\\AddOn\\Manager",
+    "execute_order": 10,
+    "active": true
+}

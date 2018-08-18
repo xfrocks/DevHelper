@@ -4,27 +4,36 @@ namespace DevHelper\XF;
 
 class Extension extends DevHelperCP_Extension
 {
+    private $enableSelf = false;
+
     public function __construct(array $listeners = [], array $classExtensions = [])
     {
-        foreach ([
-                     'XF\AddOn\Manager',
-                     'XF\DevelopmentOutput',
-                     'XF\Entity\ClassExtension',
-                     'XF\Mvc\Dispatcher',
-                 ] as $targetClass) {
-            if (!isset($classExtensions[$targetClass])) {
-                $classExtensions[$targetClass] = [];
-            }
-
-            $classExtensions[$targetClass][] = 'DevHelper\\' . $targetClass;
-        }
-
         parent::__construct($listeners, $classExtensions);
+
+        $xfDevOutput = 'XF\DevelopmentOutput';
+        if (empty($classExtensions[$xfDevOutput]) ||
+            !in_array('DevHelper\\' . $xfDevOutput, $classExtensions[$xfDevOutput], true)
+        ) {
+            $this->enableSelf = true;
+        }
     }
 
-    public function getClassExtensionsForDevHelper()
+    public function extendClass($class, $fakeBaseClass = null)
     {
-        return $this->classExtensions;
+        if ($this->enableSelf) {
+            $this->enableSelf = false;
+
+            $addOnManager = \XF::app()->addOnManager();
+            $addOn = $addOnManager->getById('DevHelper');
+            if ($addOn->isInstalled()) {
+                $installed = $addOn->getInstalledAddOn();
+                $installed->active = true;
+                $installed->save();
+                die('Enabled DevHelper automatically');
+            }
+        }
+
+        return parent::extendClass($class, $fakeBaseClass);
     }
 }
 

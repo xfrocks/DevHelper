@@ -16,13 +16,13 @@ class AutoCheck extends Command
     public function checkBuildJson(AddOn $addOn, OutputInterface $output)
     {
         $result = 0;
-        $additionalFiles = $addOn->additional_files;
+        $additionalFiles = $addOn->offsetGet('additional_files');
         $filesJsPath = "js/{$addOn->getAddOnId()}";
         $filesStylesPath = "styles/default/{$addOn->getAddOnId()}";
 
         $includedJs = false;
         $includedStyles = false;
-        foreach ((array)$additionalFiles AS $additionalFile) {
+        foreach ((array)$additionalFiles as $additionalFile) {
             if ($additionalFile === $filesJsPath) {
                 $includedJs = true;
                 break;

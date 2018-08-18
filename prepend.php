@@ -79,13 +79,9 @@ function DevHelper_patchClass($class, $al)
 
 function DevHelper_autoload()
 {
-    $targetClasses = [
-        'XF\Extension',
-    ];
-
     $unregistered = false;
 
-    spl_autoload_register(function ($class) use ($targetClasses, &$unregistered) {
+    spl_autoload_register(function ($class) use (&$unregistered) {
         if (!class_exists('XF')) {
             return null;
         }
@@ -100,10 +96,8 @@ function DevHelper_autoload()
             $unregistered = true;
         }
 
-        if (in_array($class, $targetClasses, true)) {
-            if (DevHelper_patchClass($class, $al) === true) {
-                return true;
-            }
+        if ($class === 'XF\Extension' && DevHelper_patchClass($class, $al) === true) {
+            return true;
         }
 
         return $al->loadClass($class);

@@ -49,9 +49,15 @@ spl_autoload_register(function ($class) use ($app) {
     }
 
     $classWithoutPrefix = implode($parts);
-    /** @var \DevHelper\XF\Extension $extension */
-    $extension = $app->extension();
-    $classExtensions = $extension->getClassExtensionsForDevHelper();
+    static $classExtensions = null;
+    if ($classExtensions === null) {
+        /** @var \DevHelper\XF\Extension $extension */
+        $extension = $app->extension();
+        $reflection = new ReflectionClass($extension);
+        $property = $reflection->getProperty('classExtensions');
+        $property->setAccessible(true);
+        $classExtensions = $property->getValue($extension);
+    }
 
     foreach ($classExtensions as $base => $extensions) {
         foreach ($extensions as $extension) {

@@ -1,0 +1,14 @@
+{
+    "XF-AddOn-Manager_DevHelper-XF-AddOn-Manager.json": {
+        "hash": "e0f1377d34957ba5d55ec229db8b5c51"
+    },
+    "XF-DevelopmentOutput_DevHelper-XF-DevelopmentOutput.json": {
+        "hash": "513733893e24d900ae9250cf0b5c7a23"
+    },
+    "XF-Entity-ClassExtension_DevHelper-XF-Entity-ClassExtension.json": {
+        "hash": "c8931e2a04123ee3735d20a60e8ab606"
+    },
+    "XF-Mvc-Dispatcher_DevHelper-XF-Mvc-Dispatcher.json": {
+        "hash": "b2b9c0743c9822ce7caccd244c0b01a2"
+    }
+}
