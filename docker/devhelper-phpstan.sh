@@ -8,11 +8,18 @@ if [ -z "${_srcPath}" ]; then
   exit 1
 fi
 
+_neonPath='/var/www/html/src/addons/DevHelper/PHPStan/phpstan.neon'
+_srcNeonPath="${_srcPath}/_files/dev/phpstan.neon"
+if [ -f ${_srcNeonPath} ]; then
+  _neonPath=${_srcNeonPath}
+  echo "Using ${_neonPath}" >&2
+fi
+
 export "DEVHELPER_PHPSTAN_SRC_PATH=${_srcPath}"
 
 exec /etc/devhelper-composer-vendor/bin/phpstan analyse \
   --autoload-file=/var/www/html/src/addons/DevHelper/PHPStan/autoload.php \
   --level max \
   --memory-limit=-1 \
-  -c /var/www/html/src/addons/DevHelper/PHPStan/phpstan.neon \
-  "${_srcPath}"
+  -c ${_neonPath} \
+  ${_srcPath}

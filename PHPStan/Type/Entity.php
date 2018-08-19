@@ -82,28 +82,15 @@ class Entity implements PropertiesClassReflectionExtension
             return null;
         }
 
-        $structures[$className] = $structure = new Structure();
-        if (!$classReflection->isAbstract()) {
-            $classNameGetStructure = [$className, 'getStructure'];
-            if (is_callable($classNameGetStructure)) {
-                $structure = call_user_func($classNameGetStructure, $structure);
-            }
-        } else {
-            $srcPath = getenv('DEVHELPER_PHPSTAN_SRC_PATH');
-            if (!empty($srcPath)) {
-                $srcRelativePath = $srcPath;
-                $srcRelativePath = preg_replace('#^/var/www/html/src/addons#', '', $srcRelativePath);
-                $srcRelativePath = trim($srcRelativePath, '/');
-                $structureClassName = str_replace('/', '\\', $srcRelativePath)
-                    . '\\DevHelper\\PHPStan\\' . $className;
-                if (!class_exists($structureClassName)) {
-                    throw new \LogicException("Class {$structureClassName} does not exists");
-                }
-
-                $structureClassNameGetStructure = [$structureClassName, 'getStructure'];
-                if (is_callable($structureClassNameGetStructure)) {
-                    $structure = call_user_func($structureClassNameGetStructure, $structure);
-                }
+        $structure = null;
+        $classNameGetStructure = [$className, 'getStructure'];
+        if (is_callable($classNameGetStructure)) {
+            try {
+                $_structure = new Structure();
+                call_user_func($classNameGetStructure, $_structure);
+                $structures[$className] = $structure = $_structure;
+            } catch (\Exception $e) {
+                // ignore
             }
         }
 

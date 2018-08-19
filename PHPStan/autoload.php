@@ -13,23 +13,10 @@ if (empty($srcPath)) {
     echo("DEVHELPER_PHPSTAN_SRC_PATH is missing");
     die(1);
 }
-$autogenPath = $srcPath . '/DevHelper/autogen.json';
-if (file_exists($autogenPath)) {
-    $autogenJson = file_get_contents($autogenPath);
-    if (is_string($autogenJson)) {
-        $autogen = json_decode($autogenJson, true);
-        if (is_array($autogen) && !empty($autogen['phpstan'])) {
-            $autogenPhpstan = $autogen['phpstan'];
-            if (isset($autogenPhpstan['autoload'])) {
-                /** @noinspection PhpIncludeInspection */
-                require($autogenPhpstan['autoload']);
-            }
-
-            if (isset($autogenPhpstan['appClass'])) {
-                $appClass = $autogenPhpstan['appClass'];
-            }
-        }
-    }
+$srcAutoloadPath = "${srcPath}/_files/dev/phpstan.php";
+if (file_exists($srcAutoloadPath)) {
+    /** @noinspection PhpIncludeInspection */
+    require($srcAutoloadPath);
 }
 
 /** @noinspection PhpIncludeInspection */
