@@ -44,6 +44,7 @@ class AutogenContext
      * @var string[]
      */
     public $gitignoreAdds = [
+        '/DevHelper/autogen.json',
         '/_build/',
         '/_data/',
         '/_releases/',

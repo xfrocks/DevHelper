@@ -18,7 +18,7 @@ class AutoGen extends Command
 
     const MARKER_BEGINS = '// DevHelper/Autogen begins';
     const MARKER_ENDS = '// DevHelper/Autogen ends';
-    const VERSION_ID = 2018081901;
+    const VERSION_ID = 2018081902;
 
     protected $devHelperDirPath;
 
@@ -161,7 +161,9 @@ class AutoGen extends Command
             }
         }
 
-        $autoGen['.gitignore'] = $lineAdds;
+        if (isset($autoGen['.gitignore'])) {
+            unset($autoGen['.gitignore']);
+        }
     }
 
     protected function configure()
