@@ -18,10 +18,16 @@ class EntityGetterReflection implements PropertyReflection
      */
     protected $type;
 
-    public function __construct(ClassReflection $declaringClass, Type $type)
+    /**
+     * @var bool
+     */
+    protected $isWritable;
+
+    public function __construct(ClassReflection $declaringClass, Type $type, bool $isWritable)
     {
         $this->declaringClass = $declaringClass;
         $this->type = $type;
+        $this->isWritable = $isWritable;
     }
 
     public function getDeclaringClass(): ClassReflection
@@ -56,6 +62,6 @@ class EntityGetterReflection implements PropertyReflection
 
     public function isWritable(): bool
     {
-        return false;
+        return $this->isWritable;
     }
 }

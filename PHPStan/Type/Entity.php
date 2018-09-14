@@ -29,6 +29,13 @@ class Entity implements PropertiesClassReflectionExtension
             return true;
         }
 
+        if (substr($propertyName, -1) === '_') {
+            $propertyNameWithoutDash = substr($propertyName, 0, -1);
+            if (isset($structure->columns[$propertyNameWithoutDash])) {
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -45,7 +52,8 @@ class Entity implements PropertiesClassReflectionExtension
                 $method = $classReflection->getNativeMethod($methodName);
                 return new EntityGetterReflection(
                     $classReflection,
-                    $method->getVariants()[0]->getReturnType()
+                    $method->getVariants()[0]->getReturnType(),
+                    isset($structure->columns[$propertyName])
                 );
             }
         }
@@ -60,10 +68,12 @@ class Entity implements PropertiesClassReflectionExtension
             return new EntityRelationReflection($classReflection, $relation['type'], $relation['entity']);
         }
 
-        $propertyNameWithDash = $propertyName . '_';
-        if (isset($structure->columns[$propertyNameWithDash])) {
-            $column = $structure->columns[$propertyName];
-            return new EntityColumnReflection($classReflection, $column['type']);
+        if (substr($propertyName, -1) === '_') {
+            $propertyNameWithoutDash = substr($propertyName, 0, -1);
+            if (isset($structure->columns[$propertyNameWithoutDash])) {
+                $column = $structure->columns[$propertyNameWithoutDash];
+                return new EntityColumnReflection($classReflection, $column['type']);
+            }
         }
 
         throw new \PHPStan\ShouldNotHappenException();
