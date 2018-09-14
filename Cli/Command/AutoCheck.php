@@ -25,12 +25,12 @@ class AutoCheck extends Command
         foreach ((array)$additionalFiles as $additionalFile) {
             if ($additionalFile === $filesJsPath) {
                 $includedJs = true;
-                break;
+                continue;
             }
 
             if ($additionalFile === $filesStylesPath) {
                 $includedStyles = true;
-                break;
+                continue;
             }
         }
 
