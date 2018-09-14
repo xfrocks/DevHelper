@@ -27,6 +27,9 @@ if [ ! -z "$_phpcs" ]; then
 fi
 echo 'phpcs OK'
 
+# Silently enable the add-on because PHPStan has to resolve XFCP classes
+xf-addon--enable --no-interaction "${_addOnId}" >/dev/null 2>&1
+
 devhelper-phpstan.sh "${_addOnDir}"
 
 exec cmd-php.sh xf-dev:export --addon "${_addOnId}"
