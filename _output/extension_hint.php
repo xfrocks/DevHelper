@@ -23,3 +23,8 @@ namespace DevHelper\XF\Mvc
 {
 	class XFCP_Dispatcher extends \XF\Mvc\Dispatcher {}
 }
+
+namespace DevHelper\XF\Service\AddOn
+{
+	class XFCP_ReleaseBuilder extends \XF\Service\AddOn\ReleaseBuilder {}
+}

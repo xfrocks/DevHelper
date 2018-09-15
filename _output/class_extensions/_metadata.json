@@ -13,5 +13,8 @@
     },
     "XF-Mvc-Dispatcher_DevHelper-XF-Mvc-Dispatcher.json": {
         "hash": "b2b9c0743c9822ce7caccd244c0b01a2"
+    },
+    "XF-Service-AddOn-ReleaseBuilder_DevHelper-XF-Service-AddOn-ReleaseBuilder.json": {
+        "hash": "1d2909d7cd5967fd2f0a124f1d84ff0a"
     }
 }
