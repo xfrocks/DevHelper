@@ -15,6 +15,7 @@ namespace DevHelper\XF
 
 namespace DevHelper\XF\Entity
 {
+	class XFCP_AddOn extends \XF\Entity\AddOn {}
 	class XFCP_ClassExtension extends \XF\Entity\ClassExtension {}
 }
 
