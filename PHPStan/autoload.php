@@ -13,10 +13,15 @@ if (empty($srcPath)) {
     echo("DEVHELPER_PHPSTAN_SRC_PATH is missing");
     die(1);
 }
-$srcAutoloadPath = "${srcPath}/_files/dev/phpstan.php";
-if (file_exists($srcAutoloadPath)) {
-    /** @noinspection PhpIncludeInspection */
-    require($srcAutoloadPath);
+$srcAutoloadPaths = [
+    "${srcPath}/vendor/autoload.php",
+    "${srcPath}/_files/dev/phpstan.php",
+];
+foreach ($srcAutoloadPaths as $srcAutoloadPath) {
+    if (file_exists($srcAutoloadPath)) {
+        /** @noinspection PhpIncludeInspection */
+        require($srcAutoloadPath);
+    }
 }
 
 /** @noinspection PhpIncludeInspection */
