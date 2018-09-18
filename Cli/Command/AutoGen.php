@@ -30,7 +30,7 @@ class AutoGen extends Command
         $this->devHelperDirPath = dirname(dirname(__DIR__));
     }
 
-    public function assertDevHelperLatest()
+    public function assertDevHelperLatest(OutputInterface $output)
     {
         $devHelperAddOn = $this->checkInstalledAddOn('DevHelper');
         if (empty($devHelperAddOn)) {
@@ -40,6 +40,17 @@ class AutoGen extends Command
         $devHelperJsonVersionId = $devHelperAddOn->getJsonVersion()['version_id'];
         if ($devHelperInstalledVersionId !== $devHelperJsonVersionId) {
             throw new \LogicException("DevHelper add-on must be upgraded ({$devHelperInstalledVersionId} vs. {$devHelperJsonVersionId})");
+        }
+
+        $entity = $devHelperAddOn->getInstalledAddOn();
+        if ($entity === null) {
+            throw new \RuntimeException('Cannot get add-on entity');
+        }
+        if (!$entity->active) {
+            $entity->active = true;
+            $entity->save();
+
+            $output->writeln('<warning>Enabled DevHelper automatically</warning>');
         }
     }
 
@@ -255,7 +266,7 @@ class AutoGen extends Command
             return 1;
         }
 
-        $this->assertDevHelperLatest();
+        $this->assertDevHelperLatest($output);
         $autoGen = $this->autoGenLoad($addOn, $output);
         $autoGenBefore = md5(serialize($autoGen));
 
