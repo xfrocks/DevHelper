@@ -8,7 +8,7 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2018092101
+ * @version 2018092102
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -481,16 +481,10 @@ abstract class Entity extends AbstractController
     /**
      * @return array
      */
-    protected function entityListData()
+    final protected function entityListData()
     {
         $shortName = $this->getShortName();
         $finder = $this->finder($shortName);
-
-        $structure = $this->em()->getEntityStructure($shortName);
-        if (!empty($structure->columns['display_order'])) {
-            $finder->order('display_order');
-        }
-
         $filters = ['pageNavParams' => []];
 
         /** @var mixed $unknownFinder */
@@ -501,6 +495,16 @@ abstract class Entity extends AbstractController
             if (strlen($filter['text']) > 0) {
                 call_user_func($entityDoXfFilter, $filter['text'], $filter['prefix']);
                 $filters['_xfFilter'] = $filter['text'];
+            }
+        }
+
+        $entityDoListData = [$unknownFinder, 'entityDoListData'];
+        if (is_callable($entityDoListData)) {
+            $filters = call_user_func($entityDoListData, $this, $filters);
+        } else {
+            $structure = $this->em()->getEntityStructure($shortName);
+            if (!empty($structure->columns['display_order'])) {
+                $finder->setDefaultOrder('display_order');
             }
         }
 
