@@ -4,6 +4,7 @@ namespace DevHelper\Autogen\Admin\Controller;
 
 use XF\Admin\Controller\AbstractController;
 use XF\Mvc\Entity\Entity as MvcEntity;
+use XF\Mvc\Entity\Finder;
 use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
@@ -491,9 +492,15 @@ abstract class Entity extends AbstractController
             $finder->order('display_order');
         }
 
+        $this->setupFinderForList($finder);
+
         $filters = ['pageNavParams' => []];
 
         return [$finder, $filters];
+    }
+    
+    protected function setupFinderForList(Finder $finder)
+    {
     }
 
     /**
