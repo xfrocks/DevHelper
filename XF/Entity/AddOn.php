@@ -24,7 +24,6 @@ class AddOn extends XFCP_AddOn
                     }
                 }
             }
-
         }
     }
 }
