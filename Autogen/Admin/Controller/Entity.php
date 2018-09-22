@@ -9,7 +9,7 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2018080102
+ * @version 2018092102
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -482,25 +482,34 @@ abstract class Entity extends AbstractController
     /**
      * @return array
      */
-    protected function entityListData()
+    final protected function entityListData()
     {
         $shortName = $this->getShortName();
         $finder = $this->finder($shortName);
-
-        $structure = $this->em()->getEntityStructure($shortName);
-        if (!empty($structure->columns['display_order'])) {
-            $finder->order('display_order');
-        }
-
-        $this->setupFinderForList($finder);
-
         $filters = ['pageNavParams' => []];
 
+        /** @var mixed $unknownFinder */
+        $unknownFinder = $finder;
+        $entityDoXfFilter = [$unknownFinder, 'entityDoXfFilter'];
+        if (is_callable($entityDoXfFilter)) {
+            $filter = $this->filter('_xfFilter', ['text' => 'str', 'prefix' => 'bool']);
+            if (strlen($filter['text']) > 0) {
+                call_user_func($entityDoXfFilter, $filter['text'], $filter['prefix']);
+                $filters['_xfFilter'] = $filter['text'];
+            }
+        }
+
+        $entityDoListData = [$unknownFinder, 'entityDoListData'];
+        if (is_callable($entityDoListData)) {
+            $filters = call_user_func($entityDoListData, $this, $filters);
+        } else {
+            $structure = $this->em()->getEntityStructure($shortName);
+            if (!empty($structure->columns['display_order'])) {
+                $finder->setDefaultOrder('display_order');
+            }
+        }
+
         return [$finder, $filters];
-    }
-    
-    protected function setupFinderForList(Finder $finder)
-    {
     }
 
     /**
@@ -632,6 +641,10 @@ abstract class Entity extends AbstractController
             $links['view'] = sprintf('%s/view', $routePrefix);
         }
 
+        if ($this->supportsXfFilter()) {
+            $links['quickFilter'] = $routePrefix;
+        }
+
         return $links;
     }
 
@@ -702,6 +715,16 @@ abstract class Entity extends AbstractController
     protected function supportsViewing()
     {
         return false;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function supportsXfFilter()
+    {
+        /** @var mixed $unknownFinder */
+        $unknownFinder = $this->finder($this->getShortName());
+        return is_callable([$unknownFinder, 'entityDoXfFilter']);
     }
 
     /**

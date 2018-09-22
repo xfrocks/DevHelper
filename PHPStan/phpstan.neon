@@ -10,6 +10,7 @@ parameters:
 		- '#^Parameter \#1 \$categories of method XF\\Repository\\AbstractCategoryTree::createCategoryTree\(\) expects null#'
 		- '#^Parameter \#1 \$toSerialize of static method XF\\Util\\Php::safeSerialize\(\) expects string#'
 		- '#^Parameter \#2 \$keyedBy of method XF\\Mvc\\Entity\\Finder::pluckFrom\(\) expects null#'
+		- '#^Parameter \#2 \$type of method XF\\Mvc\\Controller::filter\(\) expects string|null#'
 		- '#^PHPDoc tag @property has invalid value#'
 		- '#^Undefined variable: \$escape$#'
 
