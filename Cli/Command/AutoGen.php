@@ -245,6 +245,32 @@ class AutoGen extends Command
         }
     }
 
+    public function doSetupTrait(array &$autoGen, AutogenContext $context)
+    {
+        $addOnId = $context->getAddOnId();
+        $addOnDir = $context->getAddOnDirectory();
+
+        $classNamePrefix = str_replace('/', '\\', $addOnId);
+        $baseNamespace = "{$classNamePrefix}\\DevHelper";
+
+        $basePathPartial = 'SetupTrait.php';
+
+        $basePathSource = "{$this->devHelperDirPath}/Autogen/{$basePathPartial}";
+        $basePathTarget = "{$addOnDir}/DevHelper/{$basePathPartial}";
+
+        $baseContents = file_get_contents($basePathSource);
+        if (!is_string($baseContents)) {
+            throw new \LogicException('Invalid content in: ' . $basePathSource);
+        }
+
+        $baseContents = preg_replace('/namespace .+;/', "namespace {$baseNamespace};", $baseContents);
+        $this->extractVersion($basePathPartial, $baseContents, $autoGen);
+
+        if (!File::writeFile($basePathTarget, $baseContents, false)) {
+            throw new \LogicException("Cannot copy {$basePathSource} -> {$basePathTarget}");
+        }
+    }
+
     protected function configure()
     {
         $this
@@ -272,6 +298,7 @@ class AutoGen extends Command
 
         $context = new AutogenContext($this, $input, $output, \XF::app(), $addOn);
         $this->doAdminControllerEntity($autoGen, $context);
+        $this->doSetupTrait($autoGen, $context);
         $this->doGitIgnore($autoGen, $context);
 
         $autoGen[__CLASS__]['version_id'] = self::VERSION_ID;
