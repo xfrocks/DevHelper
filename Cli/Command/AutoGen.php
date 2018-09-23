@@ -8,6 +8,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Truonglv\GroupWall\Entity\PostCategory;
 use XF\AddOn\AddOn;
 use XF\Cli\Command\AddOnActionTrait;
 use XF\Util\File;
@@ -245,7 +246,7 @@ class AutoGen extends Command
         }
     }
 
-    public function doSetupTrait(array &$autoGen, AutogenContext $context)
+    public function doSetupTrait(array &$autoGen, AutogenContext $context, AddOn $addOn)
     {
         $addOnId = $context->getAddOnId();
         $addOnDir = $context->getAddOnDirectory();
@@ -257,6 +258,31 @@ class AutoGen extends Command
 
         $basePathSource = "{$this->devHelperDirPath}/Autogen/{$basePathPartial}";
         $basePathTarget = "{$addOnDir}/DevHelper/{$basePathPartial}";
+
+        $addOnSetupPath = "{$addOnDir}/Setup.php";
+        if (!file_exists($addOnSetupPath)) {
+            return;
+        }
+
+        $setupClass = "{$classNamePrefix}\Setup";
+        $classUses = class_uses(new $setupClass($addOn, \XF::app()), false);
+        $classUses = array_values($classUses);
+
+        $useInstallUpgradeTraits = false;
+        foreach([
+            'XF\AddOn\StepRunnerInstallTrait',
+            'XF\AddOn\StepRunnerUpgradeTrait',
+            'XF\AddOn\StepRunnerUninstallTrait'
+        ] as $traitName) {
+            if (in_array($traitName, $classUses)) {
+                $useInstallUpgradeTraits = true;
+                break;
+            }
+        }
+
+        if (!$useInstallUpgradeTraits) {
+            return;
+        }
 
         $baseContents = file_get_contents($basePathSource);
         if (!is_string($baseContents)) {
@@ -298,7 +324,7 @@ class AutoGen extends Command
 
         $context = new AutogenContext($this, $input, $output, \XF::app(), $addOn);
         $this->doAdminControllerEntity($autoGen, $context);
-        $this->doSetupTrait($autoGen, $context);
+        $this->doSetupTrait($autoGen, $context, $addOn);
         $this->doGitIgnore($autoGen, $context);
 
         $autoGen[__CLASS__]['version_id'] = self::VERSION_ID;
