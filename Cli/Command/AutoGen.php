@@ -8,7 +8,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Truonglv\GroupWall\Entity\PostCategory;
 use XF\AddOn\AddOn;
 use XF\Cli\Command\AddOnActionTrait;
 use XF\Util\File;
