@@ -6,15 +6,14 @@
 namespace DevHelper\Autogen;
 
 /**
- * @version 2018092300
+ * @version 2018092301
  * @see \DevHelper\Autogen\SetupTrait
  */
 trait SetupTrait
 {
     protected function doCreateTables(array $tables)
     {
-        /** @var \XF\Db\SchemaManager $sm */
-        $sm = $this->schemeManager();
+        $sm = \XF::db()->getSchemaManager();
 
         foreach ($tables as $tableName => $apply) {
             $sm->createTable($tableName, $apply);
@@ -23,8 +22,7 @@ trait SetupTrait
 
     protected function doAlterTables(array $alters)
     {
-        /** @var \XF\Db\SchemaManager $sm */
-        $sm = $this->schemeManager();
+        $sm = \XF::db()->getSchemaManager();
         foreach ($alters as $tableName => $applies) {
             foreach ($applies as $apply) {
                 $sm->alterTable($tableName, $apply);
@@ -34,8 +32,7 @@ trait SetupTrait
 
     protected function doDropTables(array $tables)
     {
-        /** @var \XF\Db\SchemaManager $sm */
-        $sm = $this->schemeManager();
+        $sm = \XF::db()->getSchemaManager();
         foreach (array_keys($tables) as $tableName) {
             $sm->dropTable($tableName);
         }
@@ -43,8 +40,7 @@ trait SetupTrait
 
     protected function doDropColumns(array $alters)
     {
-        /** @var \XF\Db\SchemaManager $sm */
-        $sm = $this->schemeManager();
+        $sm = \XF::db()->getSchemaManager();
         foreach ($alters as $tableName => $applies) {
             $sm->alterTable( $tableName, function(\XF\Db\Schema\Alter $table) use($applies) {
                 $table->dropColumns(array_keys($applies));
