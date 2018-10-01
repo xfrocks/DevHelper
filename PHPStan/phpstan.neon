@@ -5,8 +5,6 @@ parameters:
 
 	ignoreErrors:
 		- '#^If condition is always false.$#'
-		# https://github.com/phpstan/phpstan/issues/1062
-		- '#^Offset .+ does not exist on#'
 		- '#^Parameter \#1 \$categories of method XF\\Repository\\AbstractCategoryTree::createCategoryTree\(\) expects null#'
 		- '#^Parameter \#1 \$toSerialize of static method XF\\Util\\Php::safeSerialize\(\) expects string#'
 		- '#^Parameter \#2 \$keyedBy of method XF\\Mvc\\Entity\\Finder::pluckFrom\(\) expects null#'

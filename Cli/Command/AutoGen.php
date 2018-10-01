@@ -19,7 +19,7 @@ class AutoGen extends Command
 
     const MARKER_BEGINS = '// DevHelper/Autogen begins';
     const MARKER_ENDS = '// DevHelper/Autogen ends';
-    const VERSION_ID = 2018092102;
+    const VERSION_ID = 2018100101;
 
     protected $devHelperDirPath;
 

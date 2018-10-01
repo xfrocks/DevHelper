@@ -6,8 +6,10 @@ use PHPStan\Reflection\ClassReflection;
 use PHPStan\Reflection\PropertyReflection;
 use PHPStan\Type\ArrayType;
 use PHPStan\Type\IntegerType;
+use PHPStan\Type\NullType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\Type;
+use PHPStan\Type\UnionType;
 use XF\Mvc\Entity\Entity;
 
 class EntityRelationReflection implements PropertyReflection
@@ -59,7 +61,7 @@ class EntityRelationReflection implements PropertyReflection
         $className = str_replace(':', '\Entity\\', $this->entity);
 
         if ($this->type === Entity::TO_ONE) {
-            return new ObjectType($className);
+            return new UnionType([new NullType(), new ObjectType($className)]);
         } else {
             return new ArrayType(new IntegerType(), new ObjectType($className));
         }
