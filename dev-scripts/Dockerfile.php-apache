@@ -1,4 +1,4 @@
-FROM xfrocks/xenforo:php-apache-7.2.7b
+FROM xfrocks/xenforo:php-apache-7.2.12b
 
 RUN apt-get update \
     && apt-get install -y gnupg \
@@ -7,7 +7,7 @@ RUN apt-get update \
     && npm install uglify-js -g \
     && rm -rf /var/lib/apt/lists/*
 
-ENV DEVHELPER_PHP_APACHE_VERSION_ID 2018062801
+ENV DEVHELPER_PHP_APACHE_VERSION_ID 2018120601
 
 COPY docker/* /usr/local/bin/
 RUN chmod +x /usr/local/bin/*.sh
