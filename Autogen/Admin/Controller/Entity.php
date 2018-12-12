@@ -369,7 +369,14 @@ abstract class Entity extends AbstractController
                     $choices = [];
                     foreach ($column['allowedValues'] as $allowedValue) {
                         $label = $allowedValue;
-                        if (is_object($columnLabel) && $columnLabel instanceof \XF\Phrase) {
+
+                        if (isset($column['getLabelCallback'])) {
+                            if (!is_callable($column['getLabelCallback'])) {
+                                throw new \InvalidArgumentException('`getLabelCallback` is not callable.');
+                            }
+
+                            $label = call_user_func($column['getLabelCallback'], $allowedValue);
+                        } elseif (is_object($columnLabel) && $columnLabel instanceof \XF\Phrase) {
                             $labelPhraseName = $columnLabel->getName() . '_' .
                                 preg_replace('/[^a-z]+/i', '_', $allowedValue);
                             $label = \XF::phraseDeferred($labelPhraseName);
