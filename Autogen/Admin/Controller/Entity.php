@@ -9,7 +9,7 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2018122100
+ * @version 2018122101
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -497,7 +497,7 @@ abstract class Entity extends AbstractController
 
         $doPrepareFinder = [$this, 'doPrepareFinderForList'];
         if (is_callable($doPrepareFinder)) {
-            call_user_func($doPrepareFinder);
+            call_user_func($doPrepareFinder, $finder);
         }
 
         /** @var mixed $unknownFinder */
