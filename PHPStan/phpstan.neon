@@ -11,6 +11,7 @@ parameters:
 		- '#^Parameter \#2 \$type of method XF\\Mvc\\Controller::filter\(\) expects string|null#'
 		- '#^PHPDoc tag @property has invalid value#'
 		- '#^Undefined variable: \$escape$#'
+		- '#^Access to an undefined property XF\\Api\\Result\\EntityResult::#'
 
 	reportUnmatchedIgnoredErrors: false
 
