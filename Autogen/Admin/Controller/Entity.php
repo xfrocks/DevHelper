@@ -9,7 +9,7 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2018092102
+ * @version 2018122100
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -494,6 +494,11 @@ abstract class Entity extends AbstractController
         $shortName = $this->getShortName();
         $finder = $this->finder($shortName);
         $filters = ['pageNavParams' => []];
+
+        $doPrepareFinder = [$this, 'doPrepareFinderForList'];
+        if (is_callable($doPrepareFinder)) {
+            call_user_func($doPrepareFinder);
+        }
 
         /** @var mixed $unknownFinder */
         $unknownFinder = $finder;
