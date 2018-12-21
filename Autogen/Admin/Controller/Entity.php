@@ -495,7 +495,9 @@ abstract class Entity extends AbstractController
         $finder = $this->finder($shortName);
         $filters = ['pageNavParams' => []];
 
-        $doPrepareFinder = [$this, 'doPrepareFinderForList'];
+        /** @var mixed $that */
+        $that = $this;
+        $doPrepareFinder = [$that, 'doPrepareFinderForList'];
         if (is_callable($doPrepareFinder)) {
             call_user_func($doPrepareFinder, $finder);
         }
