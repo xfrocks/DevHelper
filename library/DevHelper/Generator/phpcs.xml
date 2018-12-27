@@ -7,6 +7,7 @@
     <exclude-pattern>*/build/</exclude-pattern>
     <exclude-pattern>*/static/</exclude-pattern>
     <exclude-pattern>*/tests/</exclude-pattern>
+    <exclude-pattern>*/vendor/</exclude-pattern>
     <exclude-pattern>*.min.css</exclude-pattern>
     <exclude-pattern>*.min.js</exclude-pattern>
     <exclude-pattern>FileSums.php</exclude-pattern>

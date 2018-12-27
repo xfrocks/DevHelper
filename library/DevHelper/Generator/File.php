@@ -577,6 +577,7 @@ class {$fileSumsClassName}
                 || (in_array($ext, $options['extensions'])
                     && strpos(basename($entry), '.') !== 0)
                 || in_array(strtolower(basename($entry)), $options['filenames_lowercase'])
+                || strpos($relativePath, 'library/' . $options['addon_id'] . '/vendor') === 0
             ) {
                 if ($options['addon_id'] == 'devHelper') {
                     $isDevHelper = (strpos($entry, 'DevHelper/DevHelper') !== false);
