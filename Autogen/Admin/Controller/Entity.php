@@ -9,7 +9,7 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2018092102
+ * @version 2018122101
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -369,7 +369,14 @@ abstract class Entity extends AbstractController
                     $choices = [];
                     foreach ($column['allowedValues'] as $allowedValue) {
                         $label = $allowedValue;
-                        if (is_object($columnLabel) && $columnLabel instanceof \XF\Phrase) {
+
+                        if (isset($column['getLabelCallback'])) {
+                            if (!is_callable($column['getLabelCallback'])) {
+                                throw new \InvalidArgumentException('`getLabelCallback` is not callable.');
+                            }
+
+                            $label = call_user_func($column['getLabelCallback'], $allowedValue);
+                        } elseif (is_object($columnLabel) && $columnLabel instanceof \XF\Phrase) {
                             $labelPhraseName = $columnLabel->getName() . '_' .
                                 preg_replace('/[^a-z]+/i', '_', $allowedValue);
                             $label = \XF::phraseDeferred($labelPhraseName);
@@ -487,6 +494,13 @@ abstract class Entity extends AbstractController
         $shortName = $this->getShortName();
         $finder = $this->finder($shortName);
         $filters = ['pageNavParams' => []];
+
+        /** @var mixed $that */
+        $that = $this;
+        $doPrepareFinder = [$that, 'doPrepareFinderForList'];
+        if (is_callable($doPrepareFinder)) {
+            call_user_func($doPrepareFinder, $finder);
+        }
 
         /** @var mixed $unknownFinder */
         $unknownFinder = $finder;

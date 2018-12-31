@@ -12,6 +12,8 @@ parameters:
 		- '#^PHPDoc tag @property has invalid value#'
 		- '#^Undefined variable: \$escape$#'
 		- '#^Parameter \#1 \$profilePost of method XF\\Pub\\Controller\\ProfilePost::setupEdit\(\) expects#'
+		- '#^Access to an undefined property XF\\Api\\Result\\EntityResult::#'
+
 
 	reportUnmatchedIgnoredErrors: false
 
