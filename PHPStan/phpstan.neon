@@ -11,6 +11,7 @@ parameters:
 		- '#^Parameter \#2 \$type of method XF\\Mvc\\Controller::filter\(\) expects string|null#'
 		- '#^PHPDoc tag @property has invalid value#'
 		- '#^Undefined variable: \$escape$#'
+		- '#^Parameter \#1 \$profilePost of method XF\\Pub\\Controller\\ProfilePost::setupEdit\(\) expects#'
 
 	reportUnmatchedIgnoredErrors: false
 
