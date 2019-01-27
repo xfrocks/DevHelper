@@ -290,6 +290,7 @@ class DevHelper_Generator_File
         }
 
         $fileSumsClassName = self::getClassName($addOn['addon_id'], 'FileSums', $config);
+        ksort($hashes);
         $hashesExported = self::varExport($hashes, 2);
         $fileSumsContents = "<?php
 
