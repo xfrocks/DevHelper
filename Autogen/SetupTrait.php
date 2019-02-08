@@ -66,7 +66,7 @@ trait SetupTrait
     /**
      * @return array
      */
-    final protected function getTables()
+    protected function getTables()
     {
         $tables = [];
 
@@ -88,7 +88,7 @@ trait SetupTrait
     /**
      * @return array
      */
-    final protected function getAlters()
+    protected function getAlters()
     {
         $alters = [];
 
@@ -99,7 +99,7 @@ trait SetupTrait
                 break;
             }
 
-            $alters += call_user_func($callable);
+            $alters = array_merge_recursive($alters, call_user_func($callable));
             $index++;
         }
 
