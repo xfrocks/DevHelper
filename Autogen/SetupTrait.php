@@ -16,7 +16,7 @@ trait SetupTrait
     {
         $sm = \XF::db()->getSchemaManager();
 
-        foreach($tables as $tableName => $apply) {
+        foreach ($tables as $tableName => $apply) {
             $sm->createTable($tableName, $apply);
         }
     }
@@ -24,7 +24,7 @@ trait SetupTrait
     protected function doAlterTables(array $alters)
     {
         $sm = \XF::db()->getSchemaManager();
-        foreach($alters as $tableName => $applies) {
+        foreach ($alters as $tableName => $applies) {
             if (!$sm->tableExists($tableName)) {
                 \XF::logException(
                     new \Exception(sprintf('Table (%s) does not exists. So cannot be altered', $tableName)),
@@ -35,7 +35,7 @@ trait SetupTrait
                 continue;
             }
 
-            foreach($applies as $apply) {
+            foreach ($applies as $apply) {
                 $sm->alterTable($tableName, $apply);
             }
         }
@@ -44,7 +44,7 @@ trait SetupTrait
     protected function doDropTables(array $tables)
     {
         $sm = \XF::db()->getSchemaManager();
-        foreach(array_keys($tables) as $tableName) {
+        foreach (array_keys($tables) as $tableName) {
             $sm->dropTable($tableName);
         }
     }
@@ -52,12 +52,12 @@ trait SetupTrait
     protected function doDropColumns(array $alters)
     {
         $sm = \XF::db()->getSchemaManager();
-        foreach($alters as $tableName => $applies) {
+        foreach ($alters as $tableName => $applies) {
             if (!$sm->tableExists($tableName)) {
                 continue;
             }
 
-            $sm->alterTable($tableName, function(\XF\Db\Schema\Alter $table) use($applies) {
+            $sm->alterTable($tableName, function (\XF\Db\Schema\Alter $table) use ($applies) {
                 $table->dropColumns(array_keys($applies));
             });
         }
@@ -71,7 +71,7 @@ trait SetupTrait
         $tables = [];
 
         $index = 1;
-        while(true) {
+        while (true) {
             $callable = [$this, 'getTables' . $index];
             if (!is_callable($callable)) {
                 break;
@@ -93,7 +93,7 @@ trait SetupTrait
         $alters = [];
 
         $index = 1;
-        while(true) {
+        while (true) {
             $callable = [$this, 'getAlters' . $index];
             if (!is_callable($callable)) {
                 break;
