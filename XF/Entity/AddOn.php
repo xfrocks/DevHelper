@@ -10,7 +10,7 @@ class AddOn extends XFCP_AddOn
     {
         parent::_preSave();
 
-        if ($this->isChanged('active') && $this->active) {
+        if ($this->isUpdate() && $this->isChanged('active') && $this->active) {
             /** @var Manager $addOnManager */
             $addOnManager = $this->app()->addOnManager();
             $config = $addOnManager->getDevHelperConfig($addOnManager->getById($this->addon_id));
