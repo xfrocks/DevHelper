@@ -1,6 +1,7 @@
 parameters:
 	excludes_analyse:
 		- */_output/*
+		- */_releases/*
 		- */vendor/*
 
 	ignoreErrors:
@@ -20,6 +21,10 @@ parameters:
 		- XF\Payment\CallbackState
 
 services:
+	-
+		class: DevHelper\PHPStan\PhpDoc\DumbUnionTypeNodeResolver
+		tags:
+			- phpstan.phpDoc.typeNodeResolverExtension
 	-
 		class: DevHelper\PHPStan\Type\Entity
 		tags:

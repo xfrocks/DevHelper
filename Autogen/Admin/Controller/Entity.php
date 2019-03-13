@@ -808,13 +808,14 @@ abstract class Entity extends AbstractController
         );
     }
 
-    protected function devHelperGetImplementHints(\XF\Mvc\Entity\Entity $entity)
+    protected function devHelperGetImplementHints(MvcEntity $entity)
     {
         $implementHints = [];
         $docComments = [];
         $methods = [];
 
         $entityClass = get_class($entity);
+        /** @var \ReflectionClass|null $rc */
         $rc = new \ReflectionClass($entityClass);
         while (true) {
             $parent = $rc->getParentClass();

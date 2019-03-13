@@ -16,7 +16,10 @@ class ReleaseBuilder extends XFCP_ReleaseBuilder
         if (!empty($this->zipArchiveToDir)) {
             $ds = DIRECTORY_SEPARATOR;
             $dir = $this->addOn->getReleasesDirectory() . $ds . ltrim($this->zipArchiveToDir, $ds);
-            $this->zipArchive = new ZipArchiveToDir($dir);
+
+            /** @var \ZipArchive $zipArchiveToDir */
+            $zipArchiveToDir = new ZipArchiveToDir($dir);
+            $this->zipArchive = $zipArchiveToDir;
         }
     }
 

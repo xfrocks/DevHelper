@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace DevHelper\PHPStan\Reflection;
 
@@ -22,11 +22,11 @@ class EntityColumnReflection implements PropertyReflection
     protected $declaringClass;
 
     /**
-     * @var string
+     * @var int
      */
     protected $type;
 
-    public function __construct(ClassReflection $declaringClass, string $type)
+    public function __construct(ClassReflection $declaringClass, int $type)
     {
         $this->declaringClass = $declaringClass;
         $this->type = $type;
