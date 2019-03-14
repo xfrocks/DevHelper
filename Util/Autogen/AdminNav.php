@@ -19,11 +19,11 @@ class AdminNav
      */
     public static function autogen($context, $navId, $link = '')
     {
-        /** @var AdminNavigation $existing */
+        /** @var AdminNavigation|null $existing */
         $existing = $context->finder('XF:AdminNavigation')
             ->where('navigation_id', $navId)
             ->fetchOne();
-        if (!empty($existing)) {
+        if ($existing !== null) {
             $context->writeln(
                 "<info>Admin navigation {$existing->navigation_id} OK</info>",
                 OutputInterface::VERBOSITY_VERY_VERBOSE

@@ -8,8 +8,8 @@ foreach (glob('/var/www/html/src/addons/DevHelper/PHPStan/**/*.php') as $file) {
 $dir = '/var/www/html';
 $appClass = 'XF\Pub\App';
 
-$srcPath = getenv('DEVHELPER_PHPSTAN_SRC_PATH');
-if (empty($srcPath)) {
+$srcPath = strval(getenv('DEVHELPER_PHPSTAN_SRC_PATH'));
+if (strlen($srcPath) === 0) {
     echo("DEVHELPER_PHPSTAN_SRC_PATH is missing");
     die(1);
 }

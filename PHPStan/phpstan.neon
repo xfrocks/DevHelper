@@ -1,3 +1,6 @@
+includes:
+    - /etc/devhelper-composer-vendor/phpstan/phpstan-strict-rules/rules.neon
+
 parameters:
 	excludes_analyse:
 		- */_output/*

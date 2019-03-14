@@ -4,6 +4,10 @@ namespace DevHelper\Util\Autogen;
 
 class GitIgnore
 {
+    /**
+     * @param array $lines
+     * @return bool
+     */
     public static function sort(array &$lines)
     {
         return usort($lines, function ($line1, $line2) {

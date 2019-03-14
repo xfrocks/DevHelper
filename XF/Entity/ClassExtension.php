@@ -4,18 +4,25 @@ namespace DevHelper\XF\Entity;
 
 class ClassExtension extends XFCP_ClassExtension
 {
+    /**
+     * @return void
+     */
     protected function _preSave()
     {
         parent::_preSave();
 
         if ($this->to_class === '') {
             $newClass = $this->generateToClassFileAutomatically();
-            if (!empty($newClass)) {
+            if ($newClass !== '') {
                 $this->to_class = $newClass;
             }
         }
     }
 
+    /**
+     * @param mixed $class
+     * @return bool
+     */
     protected function verifyToClass(&$class)
     {
         if ($class === '') {
@@ -25,12 +32,15 @@ class ClassExtension extends XFCP_ClassExtension
         return parent::verifyToClass($class);
     }
 
+    /**
+     * @return string
+     */
     protected function generateToClassFileAutomatically()
     {
         $newClass = str_replace('/', '\\', $this->addon_id) . '\\' . $this->from_class;
 
         $addOn = $this->app()->addOnManager()->getById($this->addon_id);
-        if (empty($addOn)) {
+        if ($addOn === null) {
             return '';
         }
 

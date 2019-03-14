@@ -2,6 +2,9 @@
 
 // phpcs:ignoreFile
 
+/**
+ * @return void
+ */
 function DevHelper_verifyPhpApacheVersionId()
 {
     $expected = '2019031301';

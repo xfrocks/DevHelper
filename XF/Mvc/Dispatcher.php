@@ -4,6 +4,10 @@ namespace DevHelper\XF\Mvc;
 
 class Dispatcher extends XFCP_Dispatcher
 {
+    /**
+     * @param mixed $routePath
+     * @return \XF\Mvc\RouteMatch
+     */
     public function route($routePath)
     {
         $prefix = 'styles/default/';
