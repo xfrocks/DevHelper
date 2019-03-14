@@ -4,6 +4,7 @@
     <exclude-pattern>*/_data/</exclude-pattern>
     <exclude-pattern>*/_no_upload/</exclude-pattern>
     <exclude-pattern>*/_output/</exclude-pattern>
+    <exclude-pattern>*/_releases/</exclude-pattern>
     <exclude-pattern>*/node_modules/</exclude-pattern>
     <exclude-pattern>*/vendor/</exclude-pattern>
     <exclude-pattern>*.min.js</exclude-pattern>

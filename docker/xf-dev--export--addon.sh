@@ -11,6 +11,7 @@ fi
 devhelper-autogen.sh "${_addOnId}"
 devhelper-autocheck.sh "${_addOnId}"
 
+echo 'Running phpcs, it may take a while...'
 _addOnDir="/var/www/html/src/addons/${_addOnId}"
 _phpcs=$( devhelper-phpcs.sh "${_addOnDir}" 2>&1 || true )
 if [ ! -z "$_phpcs" ]; then
