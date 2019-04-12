@@ -17,7 +17,7 @@ class AdminTemplate
      */
     public static function autogen($context, $titleSource, $titleTarget)
     {
-        $context->gitignoreAdds[] = sprintf('/_output/templates/admin/%s.html', $titleTarget);
+        $context->gitignoreDeletes[] = sprintf('/_output/templates/admin/%s.html', $titleTarget);
 
         /** @var Template|null $templateSource */
         $templateSource = $context->finder('XF:Template')

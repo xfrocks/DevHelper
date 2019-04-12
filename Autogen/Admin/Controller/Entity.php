@@ -8,7 +8,7 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2019031401
+ * @version 2019041201
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -770,7 +770,7 @@ abstract class Entity extends AbstractController
      */
     public function devHelperAutogen($context)
     {
-        $context->gitignoreAdds[] = '/DevHelper/Admin/Controller/Entity.php';
+        $context->gitignoreDeletes[] = '/DevHelper/Admin/Controller/Entity.php';
 
         $entity = $this->createEntity();
 

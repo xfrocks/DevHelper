@@ -19,7 +19,7 @@ class AutoGen extends Command
 
     const MARKER_BEGINS = '// DevHelper/Autogen begins';
     const MARKER_ENDS = '// DevHelper/Autogen ends';
-    const VERSION_ID = 2019031401;
+    const VERSION_ID = 2019041201;
 
     /**
      * @var string
@@ -75,7 +75,7 @@ class AutoGen extends Command
             if (file_exists($autoGenPath)) {
                 throw new \LogicException("{$autoGenLegacyPath} must be moved to {$autoGenPath} manually");
             } else {
-                \XF\Util\File::writeFile($autoGenPath, file_get_contents($autoGenLegacyPath), false);
+                File::writeFile($autoGenPath, file_get_contents($autoGenLegacyPath), false);
                 unlink($autoGenLegacyPath);
                 $output->writeln("<warning>{$autoGenLegacyPath} has been moved to {$autoGenPath} automatically</warning>");
             }
@@ -249,7 +249,7 @@ class AutoGen extends Command
             } else {
                 $context->writeln(
                     "<info>{$gitignorePath} OK</info>",
-                    \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_VERY_VERBOSE
+                    OutputInterface::VERBOSITY_VERY_VERBOSE
                 );
             }
         }
