@@ -30,6 +30,10 @@ trait SetupTrait
             }
 
             foreach($columns as $applies) {
+                if (!is_array($applies)) {
+                    $applies = [$applies];
+                }
+
                 foreach ($applies as $apply) {
                     $sm->alterTable($tableName, $apply);
                 }
