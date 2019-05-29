@@ -16,7 +16,11 @@ class DevelopmentOutput extends XFCP_DevelopmentOutput
     {
         if ($this->returnEnabledInsteadOfAvailableAddOnIds > 0) {
             $addOns = \XF::app()->container('addon.cache');
-            return array_keys($addOns);
+            $addOnIds = array_keys($addOns);
+            $addOnIds = array_filter($addOnIds, function ($id) {
+                return $id !== 'XF';
+            });
+            return $addOnIds;
         }
 
         return parent::getAvailableAddOnIds();
