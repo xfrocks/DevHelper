@@ -34,7 +34,8 @@
                     <xf:macro name="entity_list"
 							  arg-controller="{$controller}"
 							  arg-entities="{$entities}"
-							  arg-links="{$links}" />
+							  arg-links="{$links}"
+							  arg-templateEntityListItemPopup="{$macroTemplateEntityListItemPopup}" />
 					
 					<xf:if is="$filters._xfFilter && $total > $perPage">
 						<xf:datarow rowclass="dataList-row--note dataList-row--noHover js-filterForceShow">
@@ -56,13 +57,14 @@
     <div class="blockMessage">{{ phrase('no_items_have_been_created_yet') }}</div>
 </xf:if>
 
-<xf:macro name="entity_list" arg-controller="!" arg-entities="!" arg-links="!">
+<xf:macro name="entity_list" arg-controller="!" arg-entities="!" arg-links="!"
+	arg-templateEntityListItemPopup="{{ null }}">
 	<xf:foreach loop="{$entities}" value="$entity">
 		<xf:set var="$editLink" value="{{ $links.edit ? link($links.edit, $entity) : '' }}"/>
 		<xf:set var="$viewLink" value="{{ (empty($editLink) && $links.view) ? link($links.view, $entity) : '' }}"/>
 		<xf:set var="$popup">
-			<xf:if is="$macroTemplateEntityListItemPopup">
-				<xf:macro template="{$macroTemplateEntityListItemPopup}"
+			<xf:if is="$templateEntityListItemPopup">
+				<xf:macro template="{$templateEntityListItemPopup}"
 						  name="entity_list_item_popup"
 						  arg-controller="{$controller}"
 						  arg-entity="{$entity}"/>
