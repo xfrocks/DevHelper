@@ -1,6 +1,10 @@
+includes:
+    - /etc/devhelper-composer-vendor/phpstan/phpstan-strict-rules/rules.neon
+
 parameters:
 	excludes_analyse:
 		- */_output/*
+		- */_releases/*
 		- */vendor/*
 
 	ignoreErrors:
@@ -11,9 +15,10 @@ parameters:
 		- '#^Parameter \#2 \$type of method XF\\Mvc\\Controller::filter\(\) expects string|null#'
 		- '#^PHPDoc tag @property has invalid value#'
 		- '#^Undefined variable: \$escape$#'
-		- '#^Parameter \#1 \$profilePost of method XF\\Pub\\Controller\\ProfilePost::setupEdit\(\) expects#'
-		- '#^Access to an undefined property XF\\Api\\Result\\EntityResult::#'
-
+		- '#\\Controller\\.+::action.+ has no return typehint specified.#'
+		- '#::installStep\d+\(\) has no return typehint specified.#'
+		- '#::uninstallStep\d+\(\) has no return typehint specified.#'
+		- '#::upgrade\d+Step\d+\(\) has no return typehint specified.#'
 
 	reportUnmatchedIgnoredErrors: false
 
@@ -23,6 +28,10 @@ parameters:
 		- XF\Payment\CallbackState
 
 services:
+	-
+		class: DevHelper\PHPStan\PhpDoc\DumbUnionTypeNodeResolver
+		tags:
+			- phpstan.phpDoc.typeNodeResolverExtension
 	-
 		class: DevHelper\PHPStan\Type\Entity
 		tags:

@@ -18,13 +18,13 @@ class Phrase
      */
     public static function autogen($context, $title)
     {
-        /** @var EntityPhrase $existing */
+        /** @var EntityPhrase|null $existing */
         $existing = $context->finder('XF:Phrase')
             ->where('language_id', 0)
             ->where('addon_id', $context->getAddOnId())
             ->where('title', $title)
             ->fetchOne();
-        if (!empty($existing)) {
+        if ($existing !== null) {
             $context->writeln(
                 "<info>Phrase #{$existing->phrase_id} {$existing->title} = {$existing->phrase_text} OK</info>",
                 OutputInterface::VERBOSITY_VERY_VERBOSE

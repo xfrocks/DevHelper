@@ -13,6 +13,11 @@ class AutoCheck extends Command
 {
     use AddOnActionTrait;
 
+    /**
+     * @param AddOn $addOn
+     * @param OutputInterface $output
+     * @return int
+     */
     public function checkBuildJson(AddOn $addOn, OutputInterface $output)
     {
         $result = 0;
@@ -53,6 +58,11 @@ class AutoCheck extends Command
         return $result;
     }
 
+    /**
+     * @param AddOn $addOn
+     * @param OutputInterface $output
+     * @return int
+     */
     public function checkPurchasables(AddOn $addOn, OutputInterface $output)
     {
         $result = 0;
@@ -81,6 +91,9 @@ class AutoCheck extends Command
         return $result;
     }
 
+    /**
+     * @return void
+     */
     protected function configure()
     {
         $this

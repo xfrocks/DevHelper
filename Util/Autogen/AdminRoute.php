@@ -20,13 +20,13 @@ class AdminRoute
      */
     public static function autogen($context, $routePrefix, $primaryKey, $controller)
     {
-        /** @var Route $existing */
+        /** @var Route|null $existing */
         $existing = $context->finder('XF:Route')
             ->where('route_type', 'admin')
             ->where('route_prefix', $routePrefix)
             ->where('addon_id', $context->getAddOnId())
             ->fetchOne();
-        if (!empty($existing)) {
+        if ($existing !== null) {
             $context->writeln(
                 "<info>Route #{$existing->route_id} {$existing->route_type}/{$existing->route_prefix} OK</info>",
                 OutputInterface::VERBOSITY_VERY_VERBOSE

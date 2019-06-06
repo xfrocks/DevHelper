@@ -19,8 +19,11 @@ class AutoGen extends Command
 
     const MARKER_BEGINS = '// DevHelper/Autogen begins';
     const MARKER_ENDS = '// DevHelper/Autogen ends';
-    const VERSION_ID = 2018100101;
+    const VERSION_ID = 2019041201;
 
+    /**
+     * @var string
+     */
     protected $devHelperDirPath;
 
     public function __construct($name = null)
@@ -30,10 +33,15 @@ class AutoGen extends Command
         $this->devHelperDirPath = dirname(dirname(__DIR__));
     }
 
+    /**
+     * @param OutputInterface $output
+     * @return void
+     * @throws \XF\PrintableException
+     */
     public function assertDevHelperLatest(OutputInterface $output)
     {
         $devHelperAddOn = $this->checkInstalledAddOn('DevHelper');
-        if (empty($devHelperAddOn)) {
+        if ($devHelperAddOn === null) {
             throw new \LogicException('DevHelper add-on must be installed');
         }
         $devHelperInstalledVersionId = $devHelperAddOn->getInstalledAddOn()->version_id;
@@ -67,7 +75,7 @@ class AutoGen extends Command
             if (file_exists($autoGenPath)) {
                 throw new \LogicException("{$autoGenLegacyPath} must be moved to {$autoGenPath} manually");
             } else {
-                \XF\Util\File::writeFile($autoGenPath, file_get_contents($autoGenLegacyPath), false);
+                File::writeFile($autoGenPath, file_get_contents($autoGenLegacyPath), false);
                 unlink($autoGenLegacyPath);
                 $output->writeln("<warning>{$autoGenLegacyPath} has been moved to {$autoGenPath} automatically</warning>");
             }
@@ -111,6 +119,7 @@ class AutoGen extends Command
     /**
      * @param array $autoGen
      * @param AutogenContext $context
+     * @return void
      * @throws \ReflectionException
      */
     public function doAdminControllerEntity(array &$autoGen, AutogenContext $context)
@@ -187,6 +196,11 @@ class AutoGen extends Command
         }
     }
 
+    /**
+     * @param array $autoGen
+     * @param AutogenContext $context
+     * @return void
+     */
     public function doGitIgnore(array &$autoGen, AutogenContext $context)
     {
         $lineAdds = $context->gitignoreAdds;
@@ -235,7 +249,7 @@ class AutoGen extends Command
             } else {
                 $context->writeln(
                     "<info>{$gitignorePath} OK</info>",
-                    \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_VERY_VERBOSE
+                    OutputInterface::VERBOSITY_VERY_VERBOSE
                 );
             }
         }
@@ -296,6 +310,9 @@ class AutoGen extends Command
         }
     }
 
+    /**
+     * @return void
+     */
     protected function configure()
     {
         $this
@@ -353,10 +370,11 @@ class AutoGen extends Command
      * @param string $path
      * @param string $contents
      * @param array $autoGen
+     * @return void
      */
     private function extractVersion($path, $contents, array &$autoGen)
     {
-        if (!preg_match('#\n \* @version (\d+)\n#', $contents, $versionMatches)) {
+        if (preg_match('#\n \* @version (\d+)\n#', $contents, $versionMatches) !== 1) {
             throw new \LogicException("Cannot extract autogen version from {$path}");
         }
         $autoGen[$path] = intval($versionMatches[1]);

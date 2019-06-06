@@ -9,7 +9,7 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2018122101
+ * @version 2019041201
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -108,7 +108,7 @@ abstract class Entity extends AbstractController
         $this->assertPostOnly();
 
         $entityId = $this->filter('entity_id', 'str');
-        if (!empty($entityId)) {
+        if ($entityId !== '') {
             $entity = $this->assertEntityExists($entityId);
         } else {
             $entity = $this->createEntity();
@@ -122,7 +122,7 @@ abstract class Entity extends AbstractController
     /**
      * @param MvcEntity $entity
      * @param string $columnName
-     * @return mixed
+     * @return string|object|null
      */
     public function getEntityColumnLabel($entity, $columnName)
     {
@@ -153,7 +153,7 @@ abstract class Entity extends AbstractController
     public function getEntityHint($entity)
     {
         $structure = $entity->structure();
-        if (!empty($structure->columns['display_order'])) {
+        if (isset($structure->columns['display_order'])) {
             return sprintf('%s: %d', \XF::phrase('display_order'), $entity->get('display_order'));
         }
 
@@ -211,15 +211,15 @@ abstract class Entity extends AbstractController
         $viewParams['columns'] = $this->entityGetMetadataForColumns($entity);
 
         foreach ($structure->relations as $relationKey => $relation) {
-            if (empty($relation['entity']) ||
-                empty($relation['type']) ||
+            if (!isset($relation['entity']) ||
+                !isset($relation['type']) ||
                 $relation['type'] !== MvcEntity::TO_ONE ||
-                empty($relation['primary']) ||
-                empty($relation['conditions'])) {
+                !isset($relation['primary']) ||
+                !isset($relation['conditions'])) {
                 continue;
             }
 
-            $columnName = null;
+            $columnName = '';
             $relationConditions = $relation['conditions'];
             if (is_string($relationConditions)) {
                 $columnName = $relationConditions;
@@ -228,12 +228,13 @@ abstract class Entity extends AbstractController
                     $relationCondition = reset($relationConditions);
                     if (count($relationCondition) === 3 &&
                         $relationCondition[1] === '=' &&
-                        preg_match('/\$(.+)$/', $relationCondition[2], $matches)) {
+                        preg_match('/\$(.+)$/', $relationCondition[2], $matches) === 1
+                    ) {
                         $columnName = $matches[1];
                     }
                 }
             }
-            if (empty($columnName) || !isset($viewParams['columns'][$columnName])) {
+            if ($columnName === '' || !isset($viewParams['columns'][$columnName])) {
                 continue;
             }
             $columnViewParamRef = &$viewParams['columns'][$columnName];
@@ -281,11 +282,11 @@ abstract class Entity extends AbstractController
                 if (strpos($relation['entity'], $this->getPrefixForClasses()) === 0) {
                     $choices = [];
 
-                    /** @var MvcEntity $entity */
-                    foreach ($this->finder($relation['entity'])->fetch() as $entity) {
+                    /** @var MvcEntity $relationEntity */
+                    foreach ($this->finder($relation['entity'])->fetch() as $relationEntity) {
                         $choices[] = [
-                            'value' => $entity->getEntityId(),
-                            'label' => $this->getEntityLabel($entity)
+                            'value' => $relationEntity->getEntityId(),
+                            'label' => $this->getEntityLabel($relationEntity)
                         ];
                     }
 
@@ -295,7 +296,9 @@ abstract class Entity extends AbstractController
         }
 
         if ($tag === 'select') {
-            if (isset($tagOptions['choices']) && empty($column['required'])) {
+            if (isset($tagOptions['choices']) &&
+                (!isset($column['required']) || $column['required'] === false)
+            ) {
                 array_unshift($tagOptions['choices'], [
                     'value' => 0,
                     'label' => '',
@@ -321,26 +324,26 @@ abstract class Entity extends AbstractController
         $requiresLabel = true;
 
         if (!$entity->exists()) {
-            if (!empty($column['default'])) {
+            if (isset($column['default'])) {
                 $entity->set($columnName, $column['default']);
             }
 
             if ($this->request->exists($columnName)) {
                 $input = $this->filter(['filters' => [$columnName => 'str']]);
-                if (!empty($input['filters'][$columnName])) {
+                if ($input['filters'][$columnName] !== '') {
                     $entity->set($columnName, $this->filter($columnName, $input['filters'][$columnName]));
                     $requiresLabel = false;
                 }
             }
         } else {
-            if (!empty($column['writeOnce'])) {
+            if (isset($column['writeOnce']) && $column['writeOnce'] === true) {
                 // do not render row for write once column, new value won't be accepted anyway
                 return null;
             }
         }
 
         $columnLabel = $this->getEntityColumnLabel($entity, $columnName);
-        if ($requiresLabel && empty($columnLabel)) {
+        if ($requiresLabel && $columnLabel === null) {
             return null;
         }
 
@@ -365,7 +368,7 @@ abstract class Entity extends AbstractController
                 $columnFilter = 'uint';
                 break;
             case MvcEntity::STR:
-                if (!empty($column['allowedValues'])) {
+                if (isset($column['allowedValues'])) {
                     $choices = [];
                     foreach ($column['allowedValues'] as $allowedValue) {
                         $label = $allowedValue;
@@ -390,7 +393,7 @@ abstract class Entity extends AbstractController
 
                     $columnTag = 'select';
                     $columnTagOptions = ['choices' => $choices];
-                } elseif (!empty($column['maxLength']) && $column['maxLength'] <= 255) {
+                } elseif (isset($column['maxLength']) && $column['maxLength'] <= 255) {
                     $columnTag = 'text-box';
                 } else {
                     $columnTag = 'text-area';
@@ -400,7 +403,7 @@ abstract class Entity extends AbstractController
         }
 
         if ($columnTag === null || $columnFilter === null) {
-            if (!empty($column['inputFilter']) && !empty($column['macroTemplate'])) {
+            if (isset($column['inputFilter']) && isset($column['macroTemplate'])) {
                 $columnTag = 'custom';
                 $columnFilter = $column['inputFilter'];
             }
@@ -451,7 +454,7 @@ abstract class Entity extends AbstractController
             }
 
             $columnLabel = $this->getEntityColumnLabel($entity, $getterKey);
-            if (empty($columnLabel)) {
+            if ($columnLabel === null) {
                 continue;
             }
 
@@ -518,7 +521,7 @@ abstract class Entity extends AbstractController
             $filters = call_user_func($entityDoListData, $this, $filters);
         } else {
             $structure = $this->em()->getEntityStructure($shortName);
-            if (!empty($structure->columns['display_order'])) {
+            if (isset($structure->columns['display_order'])) {
                 $finder->setDefaultOrder('display_order');
             }
         }
@@ -536,7 +539,9 @@ abstract class Entity extends AbstractController
         $filters = [];
         $columns = $this->entityGetMetadataForColumns($entity);
         foreach ($columns as $columnName => $metadata) {
-            if (!empty($metadata['_structureData']['isNotValue'])) {
+            if (isset($metadata['_structureData']['isNotValue'])
+                && $metadata['_structureData']['isNotValue'] === true
+            ) {
                 continue;
             }
 
@@ -555,10 +560,10 @@ abstract class Entity extends AbstractController
             ]);
 
             foreach ($input['hidden_columns'] as $columnName) {
-                if (empty($input['hidden_values'][$columnName])) {
-                    continue;
-                }
-                $entity->set($columnName, $input['hidden_values'][$columnName]);
+                $entity->set(
+                    $columnName,
+                    isset($input['hidden_values'][$columnName]) ? $input['hidden_values'][$columnName] : ''
+                );
             }
 
             foreach ($columns as $columnName => $metadata) {
@@ -566,7 +571,9 @@ abstract class Entity extends AbstractController
                     continue;
                 }
 
-                if (!empty($metadata['_structureData']['isPhrase'])) {
+                if (isset($metadata['_structureData']['isPhrase']) &&
+                    $metadata['_structureData']['isPhrase'] === true
+                ) {
                     /** @var mixed $unknownEntity */
                     $unknownEntity = $entity;
                     $callable = [$unknownEntity, 'getMasterPhrase'];
@@ -588,11 +595,13 @@ abstract class Entity extends AbstractController
 
             foreach ($input['username_columns'] as $columnName) {
                 $userId = 0;
-                if (!empty($input['username_values'][$columnName])) {
+
+                if (isset($input['username_values'][$columnName])) {
                     /** @var \XF\Repository\User $userRepo */
                     $userRepo = $this->repository('XF:User');
+                    /** @var \XF\Entity\User|null $user */
                     $user = $userRepo->getUserByNameOrEmail($input['username_values'][$columnName]);
-                    if (empty($user)) {
+                    if ($user === null) {
                         $form->logError(\XF::phrase('requested_user_not_found'));
                     } else {
                         $userId = $user->user_id;
@@ -770,11 +779,13 @@ abstract class Entity extends AbstractController
 
     /**
      * @param \DevHelper\Util\AutogenContext $context
+     * @return void
      * @throws \XF\PrintableException
+     * @throws \ReflectionException
      */
     public function devHelperAutogen($context)
     {
-        $context->gitignoreAdds[] = '/DevHelper/Admin/Controller/Entity.php';
+        $context->gitignoreDeletes[] = '/DevHelper/Admin/Controller/Entity.php';
 
         $entity = $this->createEntity();
 
@@ -823,17 +834,23 @@ abstract class Entity extends AbstractController
         );
     }
 
-    protected function devHelperGetImplementHints(\XF\Mvc\Entity\Entity $entity)
+    /**
+     * @param MvcEntity $entity
+     * @return array
+     * @throws \ReflectionException
+     */
+    protected function devHelperGetImplementHints(MvcEntity $entity)
     {
         $implementHints = [];
         $docComments = [];
         $methods = [];
 
         $entityClass = get_class($entity);
+        /** @var \ReflectionClass|null $rc */
         $rc = new \ReflectionClass($entityClass);
         while (true) {
             $parent = $rc->getParentClass();
-            if (!$parent || $parent->getName() === 'XF\Mvc\Entity\Entity' || $parent->isAbstract()) {
+            if ($parent === false || $parent->getName() === 'XF\Mvc\Entity\Entity' || $parent->isAbstract()) {
                 break;
             }
 
@@ -844,7 +861,7 @@ abstract class Entity extends AbstractController
             throw new \LogicException('$rc has gone away');
         }
         $rcDocComment = $rc->getDocComment();
-        if (empty($rcDocComment)) {
+        if ($rcDocComment === false) {
             $entityClassAsArg = $entityClass;
             $entityClassAsArg = str_replace('\\Entity\\', ':', $entityClassAsArg);
             $entityClassAsArg = str_replace('\\', '\\\\', $entityClassAsArg);

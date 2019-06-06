@@ -149,6 +149,7 @@ class AutogenContext
     /**
      * @param string|array $messages
      * @param int $options
+     * @return void
      */
     public function writeln($messages, $options = 0)
     {

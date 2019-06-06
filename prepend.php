@@ -2,9 +2,12 @@
 
 // phpcs:ignoreFile
 
+/**
+ * @return void
+ */
 function DevHelper_verifyPhpApacheVersionId()
 {
-    $expected = '2018082301';
+    $expected = '2019031301';
     $actual = getenv('DEVHELPER_PHP_APACHE_VERSION_ID');
     if ($actual === $expected) {
         return;
