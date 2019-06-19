@@ -178,6 +178,15 @@ abstract class Entity extends AbstractController
     }
 
     /**
+     * @param MvcEntity $entity
+     * @return string
+     */
+    public function getEntityRowClass($entity)
+    {
+        return '';
+    }
+
+    /**
      * @param int $entityId
      * @return MvcEntity
      * @throws \XF\Mvc\Reply\Exception

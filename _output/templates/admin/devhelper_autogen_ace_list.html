@@ -75,6 +75,7 @@
 					hint="{$controller.getEntityHint($entity)}"
 					href="{{ $editLink ?: $viewLink }}"
 					label="{$controller.getEntityLabel($entity)}"
+					rowclass="{$controller.getEntityRowClass($entity)}"
 					overlay="{{ !!$viewLink }}">
 			<xf:if is="trim($popup)">
 				<xf:popup label="&#8226;&#8226;&#8226;">
