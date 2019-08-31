@@ -74,10 +74,10 @@ class DevHelper_Generator_Code_Common
             }
         }
 
-        $output .= "\n";
+        $output = rtrim($output);
 
         // class ClassName {
-        $output .= "}\n";
+        $output .= "\n}\n";
 
         return $output;
     }

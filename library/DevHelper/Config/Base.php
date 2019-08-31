@@ -398,6 +398,7 @@ class $className extends DevHelper_Config_Base
         */
     }
 }
+
 EOF;
 
         return $contents;

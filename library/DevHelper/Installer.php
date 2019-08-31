@@ -25,7 +25,7 @@ if (!class_exists('XenForo_Application')) {
 
 class DevHelper_Installer
 {
-    /* Start auto-generated lines of code. Change made will be overwriten... */
+    /* Start auto-generated lines of code. Change made will be overwritten... */
 
     protected static $_tables = array();
     protected static $_patches = array();

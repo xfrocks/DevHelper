@@ -194,7 +194,7 @@ return \$this->getModelFromCache('$modelClassName');
 
         ");
 
-        $this->_addMethod(" _get{$this->_dataClass['camelCase']}DataWriter", 'protected', array(), "
+        $this->_addMethod("_get{$this->_dataClass['camelCase']}DataWriter", 'protected', array(), "
 
 return XenForo_DataWriter::create('$dataWriterClassName');
 

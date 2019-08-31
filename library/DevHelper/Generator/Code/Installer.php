@@ -115,7 +115,6 @@ class $className
     {
         // customized uninstall script goes here
     }
-
 }
 
 EOF;

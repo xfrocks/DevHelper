@@ -2,7 +2,7 @@
 
 class DevHelper_Generator_File
 {
-    const COMMENT_AUTO_GENERATED_START = '/* Start auto-generated lines of code. Change made will be overwriten... */';
+    const COMMENT_AUTO_GENERATED_START = '/* Start auto-generated lines of code. Change made will be overwritten... */';
     const COMMENT_AUTO_GENERATED_END = '/* End auto-generated lines of code. Feel free to make changes below */';
 
     public static function calcHash($path)
@@ -669,7 +669,7 @@ class {$fileSumsClassName}
         if (is_array($var)) {
             $arrayVars = array();
             $multiLine = false;
-            $keyValueLength = 0;
+            $keyValueLength = strlen($linePrefix) * $level;
             $allKeysAreInt = true;
             foreach ($var as $key => $value) {
                 $arrayVars[$key] = self::varExport($value, $level + 1, $linePrefix);
@@ -680,18 +680,16 @@ class {$fileSumsClassName}
                     $multiLine = true;
                 }
 
+                $keyValueLength += 1;//quote before key
                 $keyValueLength += strlen($key);
-                if (is_array($value)) {
-                    $keyValueLength += strlen(var_export($value, true));
-                } else {
-                    $keyValueLength += strlen($value);
-                }
+                $keyValueLength += 1 + 4;//quote after key and ` => `
+                $keyValueLength += strlen($arrayVars[$key]);
 
                 if (!is_int($key)) {
                     $allKeysAreInt = false;
                 }
             }
-            if ($keyValueLength > 100) {
+            if ($keyValueLength > 80) {
                 $multiLine = true;
             }
             if ($allKeysAreInt) {

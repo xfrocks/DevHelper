@@ -142,8 +142,7 @@ return \$db->fetchCol(\$db->limit('
         \$joinOptions[joinTables]
     WHERE \$whereConditions
         \$orderClause
-    \", \$limitOptions['limit'], \$limitOptions['offset']
-)" . (!empty($idField) ? ", '{$idField}'" : "") . ");
+\", \$limitOptions['limit'], \$limitOptions['offset'])" . (!empty($idField) ? ", '{$idField}'" : "") . ");
 
         ", '001');
 
@@ -164,10 +163,7 @@ return \${$variableNamePlural};
         ), "
 
 \$whereConditions = \$this->prepare{$this->_dataClass['camelCase']}Conditions(\$conditions, \$fetchOptions);
-
-\$orderClause = \$this->prepare{$this->_dataClass['camelCase']}OrderOptions(\$fetchOptions);
 \$joinOptions = \$this->prepare{$this->_dataClass['camelCase']}FetchOptions(\$fetchOptions);
-\$limitOptions = \$this->prepareLimitFetchOptions(\$fetchOptions);
 
 return \$this->_getDb()->fetchOne(\"
     SELECT COUNT(*)
