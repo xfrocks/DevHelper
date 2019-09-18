@@ -22,7 +22,10 @@ a2enmod env rewrite
 
 echo 'export "PATH=$PATH:/var/www/html/src/addons/DevHelper/docker"' >> /root/.bashrc
 
-echo 'auto_prepend_file=/var/www/html/src/addons/DevHelper/prepend.php' > /usr/local/etc/php/conf.d/DevHelper.ini
+{ \
+  echo 'auto_prepend_file=/var/www/html/src/addons/DevHelper/prepend.php'; \
+  echo 'max_execution_time=-1'; \
+} > /usr/local/etc/php/conf.d/DevHelper.ini
 
 for _verb in build-release \
   bump-version \
