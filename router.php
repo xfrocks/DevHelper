@@ -1,7 +1,7 @@
 <?php
 
 if (isset($_SERVER['DEVHELPER_PHP_APACHE_VERSION_ID'])) {
-    $versionExpected = '2019053101';
+    $versionExpected = '2019121101';
     $versionActual = $_SERVER['DEVHELPER_PHP_APACHE_VERSION_ID'];
     if ($versionActual !== $versionExpected) {
         die(sprintf('Please rebuild Docker image. Expected %s, actual %s', $versionExpected, $versionActual));
