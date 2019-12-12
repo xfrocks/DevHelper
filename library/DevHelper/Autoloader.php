@@ -121,7 +121,7 @@ class DevHelper_Autoloader
             if (file_exists($classFile)) {
                 $classContents = file_get_contents($classFile);
 
-                $classVersionId = DevHelper_Helper_ShippableHelper::getVersionId($class, $classFile, $classContents);
+                $classVersionId = DevHelper_Helper_ShippableHelper::getVersionId($class, $classContents);
                 if ($classVersionId === false) {
                     die('Add-on class version could not be detected: ' . $classFile);
                 }
@@ -133,7 +133,7 @@ class DevHelper_Autoloader
             if (file_exists($oursFile)) {
                 $oursContents = file_get_contents($oursFile);
 
-                $oursVersionId = DevHelper_Helper_ShippableHelper::getVersionId($oursClass, $oursFile, $oursContents);
+                $oursVersionId = DevHelper_Helper_ShippableHelper::getVersionId($oursClass, $oursContents);
                 if ($oursVersionId === false) {
                     die('DevHelper class version could not be detected: ' . $oursFile);
                 }

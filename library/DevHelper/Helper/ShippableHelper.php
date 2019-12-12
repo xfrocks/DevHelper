@@ -2,14 +2,10 @@
 
 class DevHelper_Helper_ShippableHelper
 {
-    public static function getVersionId($class, $path, $contents)
+    public static function getVersionId($class, $contents)
     {
         if (empty($contents)) {
             return 0;
-        }
-
-        if (XenForo_Application::debugMode()) {
-            return filemtime($path);
         }
 
         if (preg_match(
