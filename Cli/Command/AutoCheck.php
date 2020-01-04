@@ -67,8 +67,6 @@ class AutoCheck extends Command
     {
         $result = 0;
         $app = \XF::app();
-        /** @var \XF\Finder\Template $templateFinder */
-        $templateFinder = $app->finder('XF:Template');
 
         $purchasables = $app->finder('XF:Purchasable')
             ->where('addon_id', $addOn->getAddOnId())
@@ -76,6 +74,9 @@ class AutoCheck extends Command
 
         /** @var \XF\Entity\Purchasable $purchasable */
         foreach ($purchasables as $purchasable) {
+            /** @var \XF\Finder\Template $templateFinder */
+            $templateFinder = $app->finder('XF:Template');
+
             $emailTemplateTitle = 'payment_received_receipt_' . $purchasable->purchasable_type_id;
             $emailTemplateCount = $templateFinder->fromAddOn($addOn->getAddOnId())
                 ->where('type', 'email')
