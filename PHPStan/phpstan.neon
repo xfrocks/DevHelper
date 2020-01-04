@@ -19,6 +19,9 @@ parameters:
 		- '#::installStep\d+\(\) has no return typehint specified.#'
 		- '#::uninstallStep\d+\(\) has no return typehint specified.#'
 		- '#::upgrade\d+Step\d+\(\) has no return typehint specified.#'
+		- '#\\Entity\\.+::(_postDelete|_postSave|_preDelete|_preSave)\(\) has no return typehint specified.#'
+		- '#::(getPurchaseFromRequest|getPurchaseFromExtraData)\(\) should be covariant with return type \(XF\\Purchasable\\Purchase\)#'
+		- '#Access to an undefined property XF\\Api\\Result\\EntityResult::.+#'
 
 	reportUnmatchedIgnoredErrors: false
 
