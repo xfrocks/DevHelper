@@ -77,7 +77,8 @@ class AutoCheck extends Command
         /** @var \XF\Entity\Purchasable $purchasable */
         foreach ($purchasables as $purchasable) {
             $emailTemplateTitle = 'payment_received_receipt_' . $purchasable->purchasable_type_id;
-            $emailTemplateCount = $templateFinder->fromAddOn($addOn->getAddOnId())
+            $emailTemplateCount = $templateFinder->resetWhere()
+                ->fromAddOn($addOn->getAddOnId())
                 ->where('type', 'email')
                 ->where('title', $emailTemplateTitle)
                 ->total();
