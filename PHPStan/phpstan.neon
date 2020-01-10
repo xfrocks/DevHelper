@@ -16,6 +16,7 @@ parameters:
 		- '#^PHPDoc tag @property has invalid value#'
 		- '#^Undefined variable: \$escape$#'
 		- '#\\Controller\\.+::action.+ has no return typehint specified.#'
+		- '#\\Entity\\.+::_(post|pre)Save\(\)+ has no return typehint specified.#'
 		- '#::installStep\d+\(\) has no return typehint specified.#'
 		- '#::uninstallStep\d+\(\) has no return typehint specified.#'
 		- '#::upgrade\d+Step\d+\(\) has no return typehint specified.#'
