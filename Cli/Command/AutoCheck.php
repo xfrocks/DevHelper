@@ -78,8 +78,7 @@ class AutoCheck extends Command
             $templateFinder = $app->finder('XF:Template');
 
             $emailTemplateTitle = 'payment_received_receipt_' . $purchasable->purchasable_type_id;
-            $emailTemplateCount = $templateFinder->resetWhere()
-                ->fromAddOn($addOn->getAddOnId())
+            $emailTemplateCount = $templateFinder->fromAddOn($addOn->getAddOnId())
                 ->where('type', 'email')
                 ->where('title', $emailTemplateTitle)
                 ->total();
