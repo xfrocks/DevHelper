@@ -430,6 +430,7 @@ class {$fileSumsClassName}
                 'htm',
                 'html',
                 'js',
+                'json',
                 'css',
                 'jpg',
                 'jpeg',
