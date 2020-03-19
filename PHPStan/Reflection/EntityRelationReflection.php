@@ -4,6 +4,7 @@ namespace DevHelper\PHPStan\Reflection;
 
 use PHPStan\Reflection\ClassReflection;
 use PHPStan\Reflection\PropertyReflection;
+use PHPStan\TrinaryLogic;
 use PHPStan\Type\ArrayType;
 use PHPStan\Type\IntegerType;
 use PHPStan\Type\MixedType;
@@ -38,14 +39,50 @@ class EntityRelationReflection implements PropertyReflection
         $this->entity = $entity;
     }
 
+    public function canChangeTypeAfterAssignment(): bool
+    {
+        return true;
+    }
+
     public function getDeclaringClass(): ClassReflection
     {
         return $this->declaringClass;
     }
 
-    public function isStatic(): bool
+    public function getDeprecatedDescription(): ?string
     {
-        return false;
+        return null;
+    }
+
+    public function getDocComment(): ?string
+    {
+        return null;
+    }
+
+    public function getReadableType(): Type
+    {
+        $className = str_replace(':', '\Entity\\', $this->entity);
+
+        if ($this->type === Entity::TO_ONE) {
+            return TypeCombinator::addNull(new ObjectType($className));
+        } else {
+            return new ArrayType(new MixedType(), new ObjectType($className));
+        }
+    }
+
+    public function getWritableType(): Type
+    {
+        return $this->getReadableType();
+    }
+
+    public function isDeprecated(): TrinaryLogic
+    {
+        return TrinaryLogic::createNo();
+    }
+
+    public function isInternal(): TrinaryLogic
+    {
+        return TrinaryLogic::createNo();
     }
 
     public function isPrivate(): bool
@@ -58,20 +95,14 @@ class EntityRelationReflection implements PropertyReflection
         return true;
     }
 
-    public function getType(): Type
-    {
-        $className = str_replace(':', '\Entity\\', $this->entity);
-
-        if ($this->type === Entity::TO_ONE) {
-            return TypeCombinator::addNull(new ObjectType($className));
-        } else {
-            return new ArrayType(new MixedType(), new ObjectType($className));
-        }
-    }
-
     public function isReadable(): bool
     {
         return true;
+    }
+
+    public function isStatic(): bool
+    {
+        return false;
     }
 
     public function isWritable(): bool

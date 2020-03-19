@@ -30,6 +30,8 @@ XF::start($dir);
 
 $app = XF::setupApp($appClass);
 
+stream_wrapper_restore('phar');
+
 spl_autoload_register(function ($class) use ($app) {
     if (strpos($class, 'XFCP_') === false) {
         return null;

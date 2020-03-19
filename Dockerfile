@@ -1,14 +1,14 @@
 # https://hub.docker.com/r/xfrocks/xenforo/tags/
-FROM xfrocks/xenforo:php-apache-7.3.7
+FROM xfrocks/xenforo:php-apache-7.3.12c
 
 # https://packagist.org/packages/phpstan/phpstan
 # https://packagist.org/packages/phpstan/phpstan-strict-rules
 RUN composer global require \
-        phpstan/phpstan:0.11.16 \
-        phpstan/phpstan-strict-rules:0.11.1 \
+        phpstan/phpstan:0.12.17 \
+        phpstan/phpstan-strict-rules:0.12.2 \
     && mv /tmp/vendor /etc/devhelper-composer-vendor
 
-ENV DEVHELPER_PHP_APACHE_VERSION_ID 2019091801
+ENV DEVHELPER_PHP_APACHE_VERSION_ID 2020031901
 
 COPY docker/build.sh /tmp/build.sh
 RUN chmod +x /tmp/build.sh && /tmp/build.sh
