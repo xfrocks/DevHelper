@@ -172,4 +172,11 @@ class DevHelper_Listener
     {
         $hashes += DevHelper_FileSums::getHashes();
     }
+
+    public static function load_class_XenForo_Model_CodeEvent($class, array &$extend)
+    {
+        if ($class === 'XenForo_Model_CodeEvent') {
+            $extend[] = 'DevHelper_XenForo_Model_CodeEvent';
+        }
+    }
 }
