@@ -26,5 +26,6 @@ namespace DevHelper\XF\Mvc
 
 namespace DevHelper\XF\Service\AddOn
 {
+	class XFCP_JsMinifier extends \XF\Service\AddOn\JsMinifier {}
 	class XFCP_ReleaseBuilder extends \XF\Service\AddOn\ReleaseBuilder {}
 }
