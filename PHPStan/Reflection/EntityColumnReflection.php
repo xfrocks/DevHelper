@@ -4,6 +4,7 @@ namespace DevHelper\PHPStan\Reflection;
 
 use PHPStan\Reflection\ClassReflection;
 use PHPStan\Reflection\PropertyReflection;
+use PHPStan\TrinaryLogic;
 use PHPStan\Type\ArrayType;
 use PHPStan\Type\BooleanType;
 use PHPStan\Type\FloatType;
@@ -32,27 +33,31 @@ class EntityColumnReflection implements PropertyReflection
         $this->type = $type;
     }
 
+    public function canChangeTypeAfterAssignment(): bool
+    {
+        return true;
+    }
+
     public function getDeclaringClass(): ClassReflection
     {
         return $this->declaringClass;
     }
 
-    public function isStatic(): bool
+    public function getDeprecatedDescription(): ?string
     {
-        return false;
+        return null;
     }
 
-    public function isPrivate(): bool
+    public function getDocComment(): ?string
     {
-        return false;
+        return null;
     }
 
-    public function isPublic(): bool
-    {
-        return true;
-    }
-
-    public function getType(): Type
+    /**
+     * @return Type
+     * @throws \PHPStan\ShouldNotHappenException
+     */
+    public function getReadableType(): Type
     {
         switch ($this->type) {
             case Entity::INT:
@@ -78,9 +83,43 @@ class EntityColumnReflection implements PropertyReflection
         throw new \PHPStan\ShouldNotHappenException();
     }
 
+    /**
+     * @return Type
+     * @throws \PHPStan\ShouldNotHappenException
+     */
+    public function getWritableType(): Type
+    {
+        return $this->getReadableType();
+    }
+
+    public function isDeprecated(): TrinaryLogic
+    {
+        return TrinaryLogic::createNo();
+    }
+
+    public function isInternal(): TrinaryLogic
+    {
+        return TrinaryLogic::createNo();
+    }
+
+    public function isPrivate(): bool
+    {
+        return false;
+    }
+
+    public function isPublic(): bool
+    {
+        return true;
+    }
+
     public function isReadable(): bool
     {
         return true;
+    }
+
+    public function isStatic(): bool
+    {
+        return false;
     }
 
     public function isWritable(): bool
