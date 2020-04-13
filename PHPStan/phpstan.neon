@@ -25,8 +25,9 @@ parameters:
 		- '#\\Entity\\.+::(_postDelete|_postSave|_preDelete|_preSave)\(\) has no return typehint specified.#'
 		- '#::(getPurchaseFromRequest|getPurchaseFromExtraData)\(\) should be covariant with return type \(XF\\Purchasable\\Purchase\)#'
 		- '#Access to an undefined property XF\\Api\\Result\\EntityResult::.+#'
-		- '#Anonymous function should have native return typehint "void".#'
+		- '#Anonymous function should have native return typehint#'
 		- '#Parameter \#2 \$indexName of method XF\\Db\\Schema\\AbstractDdl::addUniqueKey\(\) expects null#'
+		- '#Parameter \#2 \$with of method XF\\Repository\\AbstractCategoryTree::findCategoryList\(\) expects null#'
 
 	reportUnmatchedIgnoredErrors: false
 
