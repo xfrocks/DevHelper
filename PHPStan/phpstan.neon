@@ -3,6 +3,7 @@ includes:
 
 parameters:
 	checkMissingIterableValueType: false
+	checkGenericClassInNonGenericObjectType: false
 
 	excludes_analyse:
 		- */_output/*
