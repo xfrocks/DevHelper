@@ -29,6 +29,7 @@ parameters:
 		- '#Anonymous function should have native return typehint#'
 		- '#Parameter \#2 \$indexName of method XF\\Db\\Schema\\AbstractDdl::(addUniqueKey|addKey)\(\) expects null#'
 		- '#Parameter \#2 \$with of method XF\\Repository\\AbstractCategoryTree::findCategoryList\(\) expects null#'
+		- '#Parameter \#2 $height of method XF\\Image\\AbstractDriver::resize\(\) expects null#'
 
 	reportUnmatchedIgnoredErrors: false
 
