@@ -9,14 +9,22 @@ class JsMinifier extends XFCP_JsMinifier
     protected function request($getErrors = false)
     {
         if (\is_executable('/usr/local/bin/uglifyjs')) {
+            $minifier = '/usr/local/bin/uglifyjs';
+        } elseif (\is_executable('/usr/bin/uglifyjs')) {
+            $minifier = '/usr/bin/uglifyjs';
+        } else {
+            $minifier = null;
+        }
+
+        if ($minifier !== null) {
             $jsContents = $this->options['js_code'];
             $tempFile = File::getTempFile();
             \file_put_contents($tempFile, $jsContents);
             $output = File::getTempFile();
 
-            $cmd = '/usr/local/bin/uglifyjs '
-                . escapeshellarg($tempFile)
-                . ' -o ' . escapeshellarg($output)
+            $cmd = $minifier . ' '
+                . \escapeshellarg($tempFile)
+                . ' -o ' . \escapeshellarg($output)
                 . ' -c -m';
             \exec($cmd);
 
