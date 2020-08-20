@@ -47,7 +47,11 @@ class Entity implements PropertiesClassReflectionExtension
         }
 
         if (isset($structure->getters[$propertyName])) {
-            $methodName = 'get' . str_replace(' ', '', ucwords(str_replace('_', ' ', $propertyName)));
+            if (isset($structure->getters[$propertyName]['getter'])) {
+                $methodName = $structure->getters[$propertyName]['getter'];
+            } else {
+                $methodName = 'get' . str_replace(' ', '', ucwords(str_replace('_', ' ', $propertyName)));
+            }
             if ($classReflection->hasNativeMethod($methodName)) {
                 $method = $classReflection->getNativeMethod($methodName);
                 return new EntityGetterReflection(
