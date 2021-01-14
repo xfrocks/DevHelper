@@ -1,4 +1,4 @@
-FROM xfrocks/xenforo:php-apache-7.3.12
+FROM xfrocks/xenforo:php-apache-7.4.12
 
 RUN apt-get update \
     && apt-get install -y gnupg \
