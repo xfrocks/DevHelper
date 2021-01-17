@@ -1,4 +1,4 @@
-FROM xfrocks/xenforo:php-apache-7.3.12
+FROM xfrocks/xenforo:php-apache-7.4.12
 
 RUN apt-get update \
     && apt-get install -y gnupg \
@@ -19,5 +19,7 @@ RUN useradd --uid 1000 uid1000 \
 
 RUN echo 'PassEnv DEVHELPER_PHP_APACHE_VERSION_ID' >> /etc/apache2/mods-available/env.conf; \
     a2enmod env rewrite
+
+RUN echo 'max_execution_time=0' >> /usr/local/etc/php/conf.d/custom-php-ext.ini
 
 CMD ["/usr/local/bin/cmd.sh"]
