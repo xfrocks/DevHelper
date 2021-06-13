@@ -331,8 +331,16 @@ EOF;
                 break;
         }
 
-        return $dbType . (!empty($field['required']) ? ' NOT NULL' : '') .
-            (isset($field['default']) ? " DEFAULT '{$field['default']}'" : '') .
+        $default = '';
+        if (array_key_exists('default', $field)) {
+            if ($field['default'] !== null) {
+                $default = " DEFAULT '{$field['default']}'";
+            } else {
+                $default = " DEFAULT NULL";
+            }
+        }
+
+        return $dbType . (!empty($field['required']) ? ' NOT NULL' : '') . $default .
             (!empty($field['autoIncrement']) ? ' AUTO_INCREMENT' : '');
     }
 
