@@ -8,13 +8,13 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2020052301
+ * @version 2021062602
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
 {
     /**
-     * @return \XF\Mvc\Reply\View
+     * @return \XF\Mvc\Reply\AbstractReply
      */
     public function actionIndex()
     {
@@ -39,7 +39,7 @@ abstract class Entity extends AbstractController
     }
 
     /**
-     * @return \XF\Mvc\Reply\View
+     * @return \XF\Mvc\Reply\AbstractReply
      * @throws \Exception
      */
     public function actionAdd()
@@ -53,7 +53,7 @@ abstract class Entity extends AbstractController
 
     /**
      * @param ParameterBag $params
-     * @return \XF\Mvc\Reply\View|\XF\Mvc\Reply\Redirect
+     * @return \XF\Mvc\Reply\AbstractReply
      * @throws \XF\Mvc\Reply\Exception
      * @throws \XF\PrintableException
      */
@@ -82,8 +82,9 @@ abstract class Entity extends AbstractController
 
     /**
      * @param ParameterBag $params
-     * @return \XF\Mvc\Reply\View
+     * @return \XF\Mvc\Reply\AbstractReply
      * @throws \XF\Mvc\Reply\Exception
+     * @throws \Exception
      */
     public function actionEdit(ParameterBag $params)
     {
@@ -97,7 +98,7 @@ abstract class Entity extends AbstractController
     }
 
     /**
-     * @return \XF\Mvc\Reply\Error|\XF\Mvc\Reply\Redirect
+     * @return \XF\Mvc\Reply\AbstractReply
      * @throws \Exception
      * @throws \XF\Mvc\Reply\Exception
      * @throws \XF\PrintableException
@@ -196,7 +197,7 @@ abstract class Entity extends AbstractController
 
     /**
      * @param MvcEntity $entity
-     * @return \XF\Mvc\Reply\View
+     * @return \XF\Mvc\Reply\AbstractReply
      * @throws \Exception
      */
     protected function entityAddEdit($entity)
@@ -309,7 +310,7 @@ abstract class Entity extends AbstractController
     }
 
     /**
-     * @param \XF\Mvc\Entity\Entity $entity
+     * @param MvcEntity $entity
      * @param string $columnName
      * @param array $column
      * @return array|null
@@ -430,7 +431,7 @@ abstract class Entity extends AbstractController
     }
 
     /**
-     * @param \XF\Mvc\Entity\Entity $entity
+     * @param MvcEntity $entity
      * @return array
      * @throws \Exception
      */
@@ -515,7 +516,7 @@ abstract class Entity extends AbstractController
     }
 
     /**
-     * @param \XF\Mvc\Entity\Entity $entity
+     * @param MvcEntity $entity
      * @return FormAction
      * @throws \Exception
      */
@@ -841,9 +842,6 @@ abstract class Entity extends AbstractController
 
             $rc = $parent;
             $entityClass = $rc->getName();
-        }
-        if (!$rc) {
-            throw new \LogicException('$rc has gone away');
         }
         $rcDocComment = $rc->getDocComment();
         if ($rcDocComment === false) {
