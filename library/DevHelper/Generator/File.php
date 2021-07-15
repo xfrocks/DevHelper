@@ -729,7 +729,7 @@ class {$fileSumsClassName}
         } elseif (is_object($var) && $var instanceof _DevHelper_Generator_File_Constant) {
             $output .= strval($var);
         } else {
-            $tmp = var_export($var, true);
+            $tmp = is_null($var) ? 'null' : var_export($var, true);
             if (strpos($tmp, "\n") !== false) {
                 $tmp = str_replace("\n", "\n" . str_repeat($linePrefix, $level), $tmp);
             }
